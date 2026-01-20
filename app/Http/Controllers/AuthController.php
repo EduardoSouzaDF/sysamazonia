@@ -99,6 +99,8 @@ class AuthController extends Controller
      */
     public function dashboard()
     {
+
+        dump('sadf');
         return view('dashboard', [
             'user' => Auth::user(),
         ]);

@@ -13,7 +13,7 @@
         <div class="w-full max-w-md space-y-8">
             <div>
                 <h2 class="mt-6 text-center text-3xl font-bold tracking-tight text-gray-900">
-                    Criar nova conta
+                    Criar nova conta asdf222
                 </h2>
             </div>
 

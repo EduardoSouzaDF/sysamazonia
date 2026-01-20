@@ -13,7 +13,7 @@
         <div class="w-full max-w-md space-y-8">
             <div>
                 <h2 class="mt-6 text-center text-3xl font-bold tracking-tight text-gray-900">
-                    Entrar na sua conta
+                    Entrar na sua conta 2
                 </h2>
             </div>
 
