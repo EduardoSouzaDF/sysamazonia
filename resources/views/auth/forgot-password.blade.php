@@ -1,90 +1,88 @@
-<!DOCTYPE html>
-<html lang="pt-BR">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Recuperar Senha - SysAmazonia</title>
-    @vite(['resources/css/app.css', 'resources/js/app.js'])
-</head>
-<body class="bg-gray-50">
-    <div class="min-h-screen flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8">
-        <div class="w-full max-w-md space-y-8">
-            <div>
-                <h2 class="mt-6 text-center text-3xl font-bold tracking-tight text-gray-900">
-                    Recuperar senha
-                </h2>
-                <p class="mt-2 text-center text-sm text-gray-600">
-                    Digite seu email para receber um link de recuperação
-                </p>
+@extends('layout.app')
+@section('title', ' - Recuperação de senha')
+@push('styles')
+    <style>
+        .page-bg {
+            background-image: url('{{ asset('images/bg-10.png') }}');
+        }
+    </style>
+@endpush
+@section('body_class', 'antialiased flex h-full text-base text-foreground bg-background ')
+
+@section('content')
+
+    @if (!session('status'))
+        <div class="flex items-center justify-center grow bg-center bg-no-repeat page-bg">
+            <div class="kt-card max-w-[370px] w-full">
+                <form action="{{ route('password.email') }}" method="POST" class="kt-card-content flex flex-col gap-5 p-10"
+                    method="post">
+                    @csrf
+                    <div class="text-center">
+                        <h3 class="text-lg font-medium text-mono">
+                            Seu Email
+                        </h3>
+                        <span class="text-sm text-secondary-foreground">
+                            Digite seu email para receber um link de recuperação
+                        </span>
+                    </div>
+                    <div class="flex flex-col gap-1">
+                        <label class="kt-form-label font-normal text-mono">
+                            Email
+                        </label>
+                        <input class="kt-input" name="email" type="email" autocomplete="email" required
+                            placeholder="email@email.com" type="text" value="{{ old('email') }}" />
+                    </div>
+
+                    <x-messages.error :iterator="'email'" />
+
+                    <div class="flex row  w-full  justify-between gap-5">
+                        <a class="kt-btn kt-btn-destructive flex   w-3/10 " href="{{ route('login') }}">
+                            Voltar
+                            <i class="ki-filled ki-black-left"></i>
+                        </a>
+                        <button type="submit" class="kt-btn kt-btn-primary flex  w-6/10 ">
+                            Recuperar
+                            <i class="ki-filled ki-black-right"></i>
+                        </button>
+                    </div>
+
+                </form>
             </div>
-
-            @if (session('status'))
-                <div class="rounded-md bg-green-50 p-4">
-                    <div class="flex">
-                        <div class="ml-3">
-                            <h3 class="text-sm font-medium text-green-800">
-                                {{ session('status') }}
-                            </h3>
-                        </div>
-                    </div>
-                </div>
-            @endif
-
-            @if ($errors->any())
-                <div class="rounded-md bg-red-50 p-4">
-                    <div class="flex">
-                        <div class="ml-3">
-                            <h3 class="text-sm font-medium text-red-800">
-                                Erro ao enviar email
-                            </h3>
-                            <ul class="mt-2 list-inside list-disc space-y-1 text-sm text-red-700">
-                                @foreach ($errors->all() as $error)
-                                    <li>{{ $error }}</li>
-                                @endforeach
-                            </ul>
-                        </div>
-                    </div>
-                </div>
-            @endif
-
-            <form class="mt-8 space-y-6" action="{{ route('password.email') }}" method="POST">
-                @csrf
-
-                <div>
-                    <label for="email" class="block text-sm font-medium text-gray-700">
-                        Email
-                    </label>
-                    <input
-                        id="email"
-                        name="email"
-                        type="email"
-                        autocomplete="email"
-                        required
-                        class="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2 text-gray-900 placeholder-gray-500 focus:border-blue-500 focus:outline-none focus:ring-blue-500 sm:text-sm"
-                        placeholder="seu@email.com"
-                        value="{{ old('email') }}"
-                    >
-                    @error('email')
-                        <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
-                    @enderror
-                </div>
-
-                <div>
-                    <button
-                        type="submit"
-                        class="group relative flex w-full justify-center rounded-md border border-transparent bg-blue-600 py-2 px-4 text-sm font-medium text-white hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
-                    >
-                        Enviar link de recuperação
-                    </button>
-                </div>
-
-                <p class="text-center text-sm text-gray-600">
-                    <a href="{{ route('login') }}" class="font-medium text-blue-600 hover:text-blue-500">
-                        Voltar ao login
-                    </a>
-                </p>
-            </form>
         </div>
-    </div>
-</body>
-</html>
+    @else
+        <div class="flex items-center justify-center grow bg-center bg-no-repeat page-bg">
+            <div class="kt-card max-w-[440px] w-full">
+                <div action="#" class="kt-card-content p-10" id="check_email_form" method="post">
+                    <div class="flex justify-center py-10">
+                        <img alt="image" class="dark:hidden max-h-[130px]"
+                            src="{{ asset('images/illustrations/30.svg') }}" />
+                    </div>
+                    <h3 class="text-lg font-medium text-mono text-center mb-3">
+                        Verifique seu email
+                    </h3>
+                    <div class="text-sm text-center text-secondary-foreground mb-7.5">
+                        Por favor clique no link enviado para o email informado e verifique sua conta. Obrigado !
+                    </div>
+                    <div class="flex justify-center mb-5">
+                        <a class="kt-btn kt-btn-primary flex justify-center" href="{{ route('login') }}">
+                            Voltar
+                        </a>
+                    </div>
+                    <div class="flex items-center justify-center gap-1 text-2sm">
+                        <span class="text-secondary-foreground">
+                            Não recebeu email?
+                        </span>
+                        <a class="font-medium kt-link" href="{{ route('password.request') }}">
+                            Reenviar
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    @endif
+
+
+@endsection
+@push('scripts')
+    <script></script>
+@endpush

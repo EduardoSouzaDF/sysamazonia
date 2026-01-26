@@ -1,89 +1,101 @@
-<!DOCTYPE html>
-<html lang="pt-BR">
+@extends('layout.app')
+@section('title', ' - Autenticação')
 
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Login - SysAmazonia</title>
-    @vite(['resources/css/app.css', 'resources/js/app.js'])
-</head>
+@push('styles')
+    <style>
+        .page-bg {
+            background-image: url('{{ asset('images/bg-10.png') }}');
 
-<body class="bg-gray-50">
-    <div class="min-h-screen flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8">
-        <div class="w-full max-w-md space-y-8">
-            <div>
-                <h2 class="mt-6 text-center text-3xl font-bold tracking-tight text-gray-900">
-                    Entrar na sua conta 2
-                </h2>
-            </div>
+        }
+    </style>
+@endpush
+@section('body_class', 'antialiased flex h-full text-base text-foreground bg-background ')
 
-            @if ($errors->any())
-                <div class="rounded-md bg-red-50 p-4">
-                    <div class="flex">
-                        <div class="ml-3">
-                            <h3 class="text-sm font-medium text-red-800">
-                                Erro ao fazer login
-                            </h3>
-                            <ul class="mt-2 list-inside list-disc space-y-1 text-sm text-red-700">
-                                @foreach ($errors->all() as $error)
-                                    <li>{{ $error }}</li>
-                                @endforeach
-                            </ul>
-                        </div>
-                    </div>
-                </div>
-            @endif
+@section('content')
 
-            <form class="mt-8 space-y-6" action="{{ route('login.store') }}" method="POST">
+    <div class="flex items-center justify-center grow bg-center bg-no-repeat page-bg">
+        <div class="kt-card max-w-[370px] w-full">
+            <form action="{{ route('login') }}" class="kt-card-content flex flex-col gap-5 p-10" method="post">
                 @csrf
-
-                <div class="-space-y-px rounded-md shadow-sm">
-                    <div>
-                        <label for="email" class="sr-only">Email</label>
-                        <input id="email" name="email" type="email" autocomplete="email" required
-                            class="relative block w-full appearance-none rounded-none rounded-t-md border border-gray-300 px-3 py-2 text-gray-900 placeholder-gray-500 focus:z-10 focus:border-blue-500 focus:outline-none focus:ring-blue-500 sm:text-sm"
-                            placeholder="Email" value="{{ old('email') }}">
-                    </div>
-                    <div>
-                        <label for="password" class="sr-only">Senha</label>
-                        <input id="password" name="password" type="password" autocomplete="current-password" required
-                            class="relative block w-full appearance-none rounded-none rounded-b-md border border-gray-300 px-3 py-2 text-gray-900 placeholder-gray-500 focus:z-10 focus:border-blue-500 focus:outline-none focus:ring-blue-500 sm:text-sm"
-                            placeholder="Senha">
-                    </div>
+                <div class="text-center mb-2.5">
+                    <h3 class="text-lg font-medium text-mono leading-none mb-2.5">
+                        Autenticação
+                    </h3>
                 </div>
 
-                <div class="flex items-center justify-between">
-                    <div class="flex items-center">
-                        <input id="remember-me" name="remember" type="checkbox"
-                            class="h-4 w-4 rounded border-gray-300 text-blue-600 focus:ring-blue-500">
-                        <label for="remember-me" class="ml-2 block text-sm text-gray-900">
-                            Lembrar-me
-                        </label>
-                    </div>
+                <div class="flex flex-col gap-1">
+                    <label class="kt-form-label font-normal text-mono">
+                        Email
+                    </label>
 
-                    <div class="text-sm">
-                        <a href="{{ route('password.request') }}" class="font-medium text-blue-600 hover:text-blue-500">
-                            Esqueceu a senha?
+
+                    <input class="kt-input " aria-invalid="{{ $errors->has('email') ? 'true' : 'false' }}" name="email"
+                        placeholder="Informe seu email" type="text" value="{{ old('email') }}" />
+                </div>
+                <x-messages.error :iterator="'email'" />
+                <div class="flex flex-col gap-1">
+                    <div class="flex items-center justify-between gap-1">
+                        <label class="kt-form-label font-normal text-mono">
+                            Senha
+                        </label>
+                        <a href="{{ route('password.request') }}" class="text-sm kt-link shrink-0">
+                            Esqueceu a senha ?
                         </a>
                     </div>
-                </div>
+                    <div class="kt-input" data-kt-toggle-password="true">
+                        <input name="password" placeholder="Senha" type="password" value="" />
+                        <button class="kt-btn kt-btn-sm kt-btn-ghost kt-btn-icon bg-transparent! -me-1.5"
+                            data-kt-toggle-password-trigger="true" type="button">
+                            <span class="kt-toggle-password-active:hidden">
+                                <i class="ki-filled ki-eye text-muted-foreground">
+                                </i>
+                            </span>
+                            <span class="hidden kt-toggle-password-active:block">
+                                <i class="ki-filled ki-eye-slash text-muted-foreground">
+                                </i>
+                            </span>
+                        </button>
 
-                <div>
-                    <button type="submit"
-                        class="group relative flex w-full justify-center rounded-md border border-transparent bg-blue-600 py-2 px-4 text-sm font-medium text-white hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2">
-                        Entrar
-                    </button>
-                </div>
 
-                <p class="text-center text-sm text-gray-600">
-                    Não tem conta?
-                    <a href="{{ route('register') }}" class="font-medium text-blue-600 hover:text-blue-500">
-                        Criar conta
-                    </a>
-                </p>
+                    </div>
+                    <x-messages.error :iterator="'password'" />
+                </div>
+                <button class="kt-btn kt-btn-primary flex justify-center grow">
+                    Entrar
+                </button>
+                <x-messages.error :iterator="'login'" />
+
+                @if (session('error'))
+                    <div class="kt-alert" role="alert" aria-labelledby="alert_heading" aria-describedby="alert_message"
+                        id="alert">
+                        <div class="kt-alert-icon">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"
+                                fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                                stroke-linejoin="round" class="lucide lucide-triangle-alert size-6 text-destructive"
+                                aria-hidden="true">
+                                <path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3"></path>
+                                <path d="M12 9v4"></path>
+                                <path d="M12 17h.01"></path>
+                            </svg>
+                        </div>
+                        <div class="kt-alert-title flex items-center gap-1.5" id="alert_heading">
+                            <span class="font-semibold">{{ $session('error') }}</span>
+                        </div>
+                        <button class="kt-alert-close" data-kt-dismiss="#alert" aria-label="Close alert">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"
+                                fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                                stroke-linejoin="round" class="lucide lucide-x" aria-hidden="true">
+                                <path d="M18 6 6 18"></path>
+                                <path d="m6 6 12 12"></path>
+                            </svg>
+                        </button>
+                    </div>
+                @endif
+
             </form>
         </div>
     </div>
-</body>
-
-</html>
+@endsection
+@push('scripts')
+    <script></script>
+@endpush

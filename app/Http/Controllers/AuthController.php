@@ -33,42 +33,43 @@ class AuthController extends Controller
             $request->session()->regenerate();
             return redirect()->intended('dashboard')->with('success', 'Login realizado com sucesso!');
         }
+        // ed89b3b6c8676aea612ee68dd1d3316c
 
         return back()->withErrors([
-            'email' => 'As credenciais fornecidas não correspondem aos nossos registros.',
+            'login' => 'As credenciais fornecidas não correspondem aos nossos registros.',
         ])->onlyInput('email');
     }
 
-    /**
-     * Mostrar formulário de registro
-     */
-    public function showRegister()
-    {
-        return view('auth.register');
-    }
+    // /**
+    //  * Mostrar formulário de registro
+    //  */
+    // public function showRegister()
+    // {
+    //     return view('auth.register');
+    // }
 
-    /**
-     * Processar registro
-     */
-    public function register(Request $request)
-    {
-        $validated = $request->validate([
-            'name' => 'required|string|max:255',
-            'email' => 'required|email|unique:users',
-            'password' => ['required', 'confirmed', PasswordRule::min(8)],
-        ]);
+    // /**
+    //  * Processar registro
+    //  */
+    // public function register(Request $request)
+    // {
+    //     $validated = $request->validate([
+    //         'name' => 'required|string|max:255',
+    //         'email' => 'required|email|unique:users',
+    //         'password' => ['required', 'confirmed', PasswordRule::min(8)],
+    //     ]);
 
-        $user = User::create([
-            'name' => $validated['name'],
-            'email' => $validated['email'],
-            'password' => Hash::make($validated['password']),
-        ]);
+    //     $user = User::create([
+    //         'name' => $validated['name'],
+    //         'email' => $validated['email'],
+    //         'password' => Hash::make($validated['password']),
+    //     ]);
 
-        Auth::login($user);
-        $request->session()->regenerate();
+    //     Auth::login($user);
+    //     $request->session()->regenerate();
 
-        return redirect()->intended('dashboard')->with('success', 'Conta criada com sucesso!');
-    }
+    //     return redirect()->intended('dashboard')->with('success', 'Conta criada com sucesso!');
+    // }
 
     /**
      * Mostrar formulário de recuperação de senha
@@ -84,6 +85,8 @@ class AuthController extends Controller
     public function sendReset(Request $request)
     {
         $request->validate(['email' => 'required|email']);
+
+
 
         $status = Password::sendResetLink(
             $request->only('email')
@@ -116,5 +119,39 @@ class AuthController extends Controller
         $request->session()->regenerateToken();
 
         return redirect('/')->with('success', 'Logout realizado com sucesso!');
+    }
+
+    public function showReset($token, Request $request)
+    {
+
+        // return back()->withErrors([
+        //     'login' => 'Token inválido ou expirado !',
+        // ])->onlyInput('login');
+        return view('auth.reset-password', ['token' => $token, 'email' => $request->email]);
+    }
+
+    public function reset(Request $request)
+    {
+        $request->validate([
+            'token' => 'required',
+            'email' => 'required|email',
+            'password' => 'required|confirmed',
+        ]);
+        $status = Password::reset(
+            $request->only('email', 'password', 'password_confirmation', 'token'),
+            function (User $user, string $password) {
+                $user->forceFill([
+                    'password' => Hash::make($password)
+                ])->setRememberToken(Str::random(60));
+
+                $user->save();
+
+                event(new PasswordReset($user));
+            }
+        );
+
+        return $status === Password::PasswordReset
+            ? redirect()->route('login')->with('status', __($status))
+            : back()->withErrors(['email' => [__($status)]]);
     }
 }
