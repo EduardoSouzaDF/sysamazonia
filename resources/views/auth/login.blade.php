@@ -18,9 +18,7 @@
             <form action="{{ route('login') }}" class="kt-card-content flex flex-col gap-5 p-10" method="post">
                 @csrf
                 <div class="text-center mb-2.5">
-                    <h3 class="text-lg font-medium text-mono leading-none mb-2.5">
-                        Autenticação
-                    </h3>
+                    <img alt="image" class="dark:hidden max-h-[130px]" src="{{ asset('images/logo.png') }}" />
                 </div>
 
                 <div class="flex flex-col gap-1">
@@ -64,6 +62,8 @@
                     Entrar
                 </button>
                 <x-messages.error :iterator="'login'" />
+
+                <x-messages.error :iterator="'xxx'" :message="session('status')" />
 
                 @if (session('error'))
                     <div class="kt-alert" role="alert" aria-labelledby="alert_heading" aria-describedby="alert_message"

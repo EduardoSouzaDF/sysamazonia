@@ -18,9 +18,9 @@
                     method="post">
                     @csrf
                     <div class="text-center">
-                        <h3 class="text-lg font-medium text-mono">
-                            Seu Email
-                        </h3>
+                        <div class="text-center mb-2.5">
+                            <img alt="image" class="dark:hidden max-h-[130px]" src="{{ asset('images/logo.png') }}" />
+                        </div>
                         <span class="text-sm text-secondary-foreground">
                             Digite seu email para receber um link de recuperação
                         </span>
@@ -53,13 +53,17 @@
         <div class="flex items-center justify-center grow bg-center bg-no-repeat page-bg">
             <div class="kt-card max-w-[440px] w-full">
                 <div action="#" class="kt-card-content p-10" id="check_email_form" method="post">
+                    <div class="text-center">
+                        <div class="text-center mb-2.5">
+                            <img alt="image" class="dark:hidden max-h-[130px]" src="{{ asset('images/logo.png') }}" />
+                        </div>
+
+                    </div>
                     <div class="flex justify-center py-10">
-                        <img alt="image" class="dark:hidden max-h-[130px]"
+                        <img alt="image" class="dark:hidden max-h-[100px]"
                             src="{{ asset('images/illustrations/30.svg') }}" />
                     </div>
-                    <h3 class="text-lg font-medium text-mono text-center mb-3">
-                        Verifique seu email
-                    </h3>
+
                     <div class="text-sm text-center text-secondary-foreground mb-7.5">
                         Por favor clique no link enviado para o email informado e verifique sua conta. Obrigado !
                     </div>

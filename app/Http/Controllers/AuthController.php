@@ -2,11 +2,14 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Controllers\Controller;
 use App\Models\User;
+use Illuminate\Auth\Events\PasswordReset;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Password;
+use Illuminate\Support\Str;
 use Illuminate\Validation\Rules\Password as PasswordRule;
 
 class AuthController extends Controller
@@ -86,8 +89,6 @@ class AuthController extends Controller
     {
         $request->validate(['email' => 'required|email']);
 
-
-
         $status = Password::sendResetLink(
             $request->only('email')
         );
@@ -102,8 +103,6 @@ class AuthController extends Controller
      */
     public function dashboard()
     {
-
-        dump('sadf');
         return view('dashboard', [
             'user' => Auth::user(),
         ]);
@@ -123,10 +122,6 @@ class AuthController extends Controller
 
     public function showReset($token, Request $request)
     {
-
-        // return back()->withErrors([
-        //     'login' => 'Token inválido ou expirado !',
-        // ])->onlyInput('login');
         return view('auth.reset-password', ['token' => $token, 'email' => $request->email]);
     }
 

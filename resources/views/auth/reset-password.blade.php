@@ -15,14 +15,16 @@
 
     <div class="flex items-center justify-center grow bg-center bg-no-repeat page-bg">
         <div class="kt-card max-w-[370px] w-full">
-            <form action="{{ route('reset', $token) }}" class="kt-card-content flex flex-col gap-5 p-10" method="post">
+            <form action="{{ route('password.reset', $token) }}" class="kt-card-content flex flex-col gap-5 p-10"
+                method="post">
                 @csrf
                 <input type="hidden" name="token" value="{{ $token }}">
                 <input type="hidden" name="email" value="{{ $email }}">
-                <div class="text-center mb-2.5">
-                    <h3 class="text-lg font-medium text-mono leading-none mb-2.5">
-                        Autenticação
-                    </h3>
+                <div class="text-center   ">
+                    <div class="text-center  ">
+                        <img alt="image" class="dark:hidden max-h-[130px]" src="{{ asset('images/logo.png') }}" />
+                    </div>
+
                 </div>
 
                 <div class="flex flex-col gap-1">

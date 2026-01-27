@@ -16,8 +16,10 @@ Route::middleware('guest')->group(function () {
     Route::get('/forgot-password', [AuthController::class, 'showForgot'])->name('password.request');
     Route::post('/forgot-password', [AuthController::class, 'sendReset'])->name('password.email');
 
-    Route::get('/reset-password/{token}', [AuthController::class, 'showReset'])->name('reset.password');
-    Route::post('/reset', [AuthController::class, 'reset'])->name('reset');
+
+    //password.reset
+    Route::get('/reset-password/{token}', [AuthController::class, 'showReset'])->name('password.reset');
+    Route::post('/reset-password/{token}', [AuthController::class, 'reset'])->name('password.reset');
 });
 
 // Rotas autenticadas
