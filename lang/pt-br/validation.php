@@ -108,4 +108,9 @@ return [
     'unique' => 'Já existe um registro com esse valor.',
     'uploaded' => 'Falha ao fazer upload do arquivo.',
     'url' => 'Não é uma URL válida.',
+    'Regards,' => 'Atenciosamente,',
+    "If you're having trouble clicking the \":actionText\" button, copy and paste the URL below\n" => 'Se estiver tendo problema ao clicar no botão \":actionText\", copie e cole a url abaixo:\n ',
+    "into your web browser:" => 'no seu navegador: ',
+
+
 ];
