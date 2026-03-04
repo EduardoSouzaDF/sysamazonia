@@ -1,8 +1,10 @@
 <?php
 
-use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\AuthController;
-
+use App\Http\Controllers\UserController;
+use App\Http\Middleware\CheckAdmin;
+use App\Http\Middleware\IsAdmin;
+use Illuminate\Support\Facades\Route;
 // Rotas públicas
 // Route::get('/', function () {
 //     return view('welcome');
@@ -26,5 +28,21 @@ Route::middleware('guest')->group(function () {
 Route::middleware('auth')->group(function () {
     Route::get('/', [AuthController::class, 'dashboard'])->name('dashboard');
     Route::get('/dashboard', [AuthController::class, 'dashboard'])->name('dashboard');
-    Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
+    Route::get('/logout', [AuthController::class, 'logout'])->name('logout');
+
+     Route::prefix('admin')->group(function () {
+        $middleware = ['auth',CheckAdmin::class.':admin'];
+
+        Route::resource('users', UserController::class)->middleware($middleware)->names([
+            'index' => 'admin.users.index',
+            'create' => 'admin.users.create',
+            'store' => 'admin.users.store',
+            'show' => 'admin.users.show',
+            'edit' => 'admin.users.edit',
+            'update' => 'admin.users.update',
+            'destroy' => 'admin.users.destroy',
+        ]);
+
+
+    });
 });

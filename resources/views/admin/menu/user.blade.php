@@ -1,0 +1,48 @@
+  <!-- User -->
+       <div class="shrink-0" data-kt-dropdown="true" data-kt-dropdown-offset="10px, 10px" data-kt-dropdown-offset-rtl="-20px, 10px" data-kt-dropdown-placement="bottom-end" data-kt-dropdown-placement-rtl="bottom-start" data-kt-dropdown-trigger="click">
+        <div class="cursor-pointer shrink-0" data-kt-dropdown-toggle="true">
+         <img alt="" class="size-9 rounded-full border-2 border-green-500 shrink-0" src="{{asset('images/blank.png')}}"/>
+        </div>
+        <div class="kt-dropdown-menu w-[250px]" data-kt-dropdown-menu="true">
+         <div class="flex items-center justify-between px-2.5 py-1.5 gap-1.5">
+          <div class="flex items-center gap-2">
+           <img alt="" class="size-9 shrink-0 rounded-full border-2 border-green-500" src="{{asset('images/blank.png')}}"/>
+           <div class="flex flex-col gap-1.5">
+            <span class="text-sm text-foreground font-semibold leading-none">
+             Cody Fisher
+            </span>
+            <a class="text-xs text-secondary-foreground hover:text-primary font-medium leading-none" href="html/demo1/account/home/get-started.html">
+             c.fisher@gmail.com
+            </a>
+           </div>
+          </div>
+          <span class="kt-badge kt-badge-primary kt-badge-outline">
+           Admin  
+          </span>
+
+       
+         </div>
+         <ul class="kt-dropdown-menu-sub">
+          <li>
+           <div class="kt-dropdown-menu-separator">
+           </div>
+          </li>
+           
+          <li>
+           <a class="kt-dropdown-menu-link" href="html/demo1/account/home/user-profile.html">
+            <i class="ki-filled ki-profile-circle">
+            </i>
+            My Profile
+           </a>
+          </li>
+           
+         </ul>
+         <div class="px-2.5 pt-1.5 mb-2.5 flex flex-col gap-3.5">
+         
+          <a class="kt-btn kt-btn-outline justify-center w-full" href="html/demo1/authentication/classic/sign-in.html">
+           Log out
+          </a>
+         </div>
+        </div>
+       </div>
+       <!-- End of User -->
