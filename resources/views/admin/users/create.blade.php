@@ -16,8 +16,7 @@
                         <div class="kt-tabs kt-tabs-line" data-kt-tabs="true">
                             <button class="kt-tab-toggle active" data-kt-tab-toggle="#tab_1_1">
                                 Informações Pessoais</button>
-                            <button class="kt-tab-toggle hidden" id='tab_1_2_button' data-kt-tab-toggle="#tab_1_2">Dados
-                                da instituição</button>
+                            <button class="kt-tab-toggle hidden" id='tab_1_2_button' data-kt-tab-toggle="#tab_1_2">Dados   da Comissão</button>
                         </div>
 
                         @csrf
@@ -29,9 +28,9 @@
                                 ])
                             </div>
                             <div class="hidden" id="tab_1_2">
-                                Tab
-                                <!-- -->2<!-- -->
-                                content.
+                                @include('admin.users.partial.form-comission', [
+                                    'errors' => $errors->getMessages(),
+                                ])
                             </div>
 
                         </div>
@@ -50,18 +49,20 @@
 @push('scripts')
     <script>
         $(document).ready(function() {
-            $('#roles').on('change', function() {
-                var selectedRoles = $(this).val();
+            checktabs = function() {
 
-                if (selectedRoles.includes('4')) {
+                var selectedRoles = $('#roles').val();
+                if (selectedRoles.includes('2')) {
                     $('#tab_1_2_button').removeClass('hidden');
                 } else {
                     $('#tab_1_2_button').addClass('hidden');
                 }
-
-
-
+            }
+            $('#roles').on('change', function() {
+                checktabs();
             });
+
+            checktabs();
         });
     </script>
 @endpush

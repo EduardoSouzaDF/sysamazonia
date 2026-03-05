@@ -1,5 +1,5 @@
 @extends('layout.app')
- 
+
 @push('styles')
    <style>
         .page-bg {
@@ -13,7 +13,7 @@
     'resources/css/styles.css',
      ])
 @section('body_class', 'antialiased flex h-full text-base text-foreground bg-background demo1 kt-sidebar-fixed kt-header-fixed')
-@section('content') 
+@section('content')
 <div class="flex grow">
     @include('admin.sidebar')
    <div class="kt-wrapper flex grow flex-col">
@@ -23,11 +23,11 @@
       <div class="flex items-stretch" id="megaMenuContainer">
       </div>
       <div class="flex items-center gap-2.5">
-   
+
       @include('admin.menu.chat-menu')
       @include('admin.menu.user')
-   
-     
+
+
       </div>
       <!-- End of Topbar -->
      </div>
@@ -35,7 +35,7 @@
     </header>
     <!-- End of Header -->
     <!-- Content -->
-    <main class="grow pt-5" id="content" role="content">
+    <main class="grow pt-1" id="content" role="content">
     @yield('maincontent')
 
     </main>
@@ -47,7 +47,7 @@
    <!-- End of Wrapper -->
   </div>
   <!-- End of Main -->
-  
- 
+
+
 @endsection
 

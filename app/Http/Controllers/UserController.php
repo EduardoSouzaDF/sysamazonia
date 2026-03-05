@@ -2,15 +2,16 @@
 
 namespace App\Http\Controllers;
 
-use Illuminate\Support\Facades\Mail;
+use App\Enum\RolesEnum;
 use App\Models\Role;
 use App\Models\User;
+use App\Models\UserInstitution;
+use App\Notifications\CustomResetPassword;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Password;
 use Illuminate\Support\Str;
-use App\Notifications\CustomResetPassword;
-use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
 
 class UserController extends Controller
 {
@@ -20,11 +21,22 @@ class UserController extends Controller
      *
      * @return \Illuminate\Http\Response
      */
-    public function index()
+    public function index(Request $request)
     {
+        $query = User::with('roles');
+        $search = $request->input('search');
 
-        $users = User::all();
-        $users->load('roles');
+        if ($search) {
+            $query->where(function ($query) use ($search) {
+                $query->where('name', 'like', '%' . $search . '%')
+                    ->orWhere('email', 'like', '%' . $search . '%');
+                $query->orWhereHas('roles', function ($query) use ($search) {
+                    $query->where('name', 'like', '%' . $search . '%');
+                });
+            });
+        }
+
+        $users = $query->paginate(15);
         return view('admin.users.index', compact('users'));
     }
 
@@ -58,10 +70,15 @@ class UserController extends Controller
             'email' => 'required|email|unique:users',
             'roles' => 'required|array'
         ], $messages);
-        $request['password'] = Hash::make(Str::random(10));
 
+
+
+
+        $request['password'] = Hash::make(Str::random(10));
         $user = User::create($request->all());
         $user->roles()->attach($request->roles);
+
+
 
         // Enviar email de boas-vindas e recuperação de senha
         $token = Password::createToken($user);
@@ -75,6 +92,9 @@ class UserController extends Controller
 
         return redirect()->route('admin.users.index')->with('success', 'Usuário criado ou atualizado com sucesso.');
     }
+
+
+
 
     /**
      * Display the specified resource.

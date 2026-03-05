@@ -31,7 +31,7 @@ $roles = $roles
 
     </div>
     <div class="w-1/2">
-        <x-form-select label="Tipo de Usuário" name="roles[]" id="roles" multiple="{{ true }}"
-            required="true" maxSelections="99" :options="$roles" />
+        <x-form-select label="Tipo de Usuário" nameOld="roles" name="roles[]" id="roles" multiple="{{ true }}"
+            required="true" maxSelections="99"   :options="$roles" />
     </div>
 </div>

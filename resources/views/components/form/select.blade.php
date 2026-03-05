@@ -11,6 +11,7 @@
     'multiple' => true,
     'maxSelections' => 1,
     'required' => true,
+    'nameOld' => '',
 ])
 
 <div class="kt-form-item {{ $class }}">
@@ -31,9 +32,16 @@
         data-kt-select-config='{
 			"optionsClass": "kt-scrollable overflow-auto max-h-[250px]"
 		}'
-        name="{{ $name }}" id="{{ $id }}">
+
+        name="{{ $name }}"
+        id="{{ $id }}">
         @foreach ($options as $key => $option)
-            <option value="{{ $key }}">{{ $option }}</option>
+            @if($multiple)
+                <option @selected( in_array($key, old($nameOld, []))) value="{{ $key }}">{{ $option }}</option>
+            @else
+                <option @selected(  old($nameOld, null) === $key) value="{{ $key }}">{{ $option }}</option>
+            @endif
+
         @endforeach
 
 
