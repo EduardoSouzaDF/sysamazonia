@@ -10,6 +10,7 @@
     'name' => '',
     'id' => '',
     'required' => true,
+    'value' => null,
 ])
 
 <div class="kt-form-item {{ $class }}">
@@ -17,7 +18,7 @@
     <div class="kt-form-control">
         <input
             type="{{ $type }}"
-            value="{{ old($name) }}"
+            value="{{ !is_null($value) ? $value : old($name) }}"
             name="{{ $name }}"
             id="{{ $id }}"
             aria-invalid="{{ $errors->has($name) ? 'true' : 'false' }}"
@@ -27,7 +28,7 @@
 
     @if ($errors->has($name))
         @foreach ($errors->get($name) as $key => $value)
-            <div class="kt-form-message text-danger">{{ $value }}</div>
+            <x-messages.alert message="{{ $value }}" />
         @endforeach
     @endif
 

@@ -4,6 +4,7 @@ namespace App\Http\Middleware;
 
 use Closure;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 use Symfony\Component\HttpFoundation\Response;
 
 class CheckAdmin
@@ -15,8 +16,9 @@ class CheckAdmin
      */
     public function handle(Request $request, Closure $next, $role = 'admin'): Response
     {
+            $user = Auth::user();
 
-         if (!$request->user()->hasRole($role)) {
+         if (!$user->hasRole($role)) {
             abort(403, 'Acesso negado. Você não tem permissão para acessar esta página.');
         }
         return $next($request);

@@ -34,12 +34,14 @@ class User extends Authenticatable
     {
         return $this->belongsToMany(Role::class, 'user_role')
                     ->withTimestamps()
-                    ->using(UserRole::class);
+                    ->using(UserRole::class)
+                    ->where('roles.active', true); 
     }
 
     // Métodos auxiliares
     public function hasRole($role)
     {
+        
         if (is_string($role)) {
             return $this->roles->contains('name', $role);
         }

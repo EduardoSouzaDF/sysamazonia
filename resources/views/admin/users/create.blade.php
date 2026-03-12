@@ -1,61 +1,47 @@
 @php
     use App\Enum\RolesEnum;
+    $tabs = [
+        [
+            'buttonId' => 'inf_btn',
+            'tabId' => 'tab_inf',
+            'titulo' => 'Informações Pessoais',
+            'active' => true,
+            'include' => 'admin.users.partial.form-personal',
+            'includeData' => [
+                'roles' => $roles,
+                'errors' => $errors->getMessages(),
+            ],
+        ],
+        [
+            'buttonId' => 'comission_btn',
+            'tabId' => 'tab_comission',
+            'titulo' => 'Dados da Comissão',
+            'active' => false,
+            'hidden' => true,
+            'include' => 'admin.users.partial.form-comission',
+            'includeData' => [
+                'errors' => $errors->getMessages(),
+            ],
+        ],
+    ];
 @endphp
+
 @extends('admin.content')
 @section('maincontent')
-    <div class="kt-container-fixed">
-        <div class="kt-card min-w-full">
-            <div class="kt-card-header">
-                <h3 class="kt-card-title">
-                    Criação de Usuário
-                </h3>
-            </div>
-            <form method="post" action="{{ route('admin.users.store') }}" class="kt-form">
-                <div class="kt-card-content" data-kt-tabs-hidden-class="hidden" data-kt-tabs-active-class="active">
-                    <div class="space-y-3">
-                        <div class="kt-tabs kt-tabs-line" data-kt-tabs="true">
-                            <button class="kt-tab-toggle active" data-kt-tab-toggle="#tab_1_1">
-                                Informações Pessoais</button>
-                            <button class="kt-tab-toggle hidden" id='tab_1_2_button' data-kt-tab-toggle="#tab_1_2">Dados   da Comissão</button>
-                        </div>
-
-                        @csrf
-                        <div class="text-sm">
-                            <div class="" id="tab_1_1">
-                                @include('admin.users.partial.form-personal', [
-                                    'roles' => $roles,
-                                    'errors' => $errors->getMessages(),
-                                ])
-                            </div>
-                            <div class="hidden" id="tab_1_2">
-                                @include('admin.users.partial.form-comission', [
-                                    'errors' => $errors->getMessages(),
-                                ])
-                            </div>
-
-                        </div>
-
-                    </div>
-                </div>
-                <div class="kt-card-footer justify-end gap-4">
-                    <a href="{{ route('admin.users.index') }}" class="kt-btn kt-btn-outline">Cancelar</a>
-                    <button type="submit" class="kt-btn">Salvar</button>
-                </div>
-            </form>
-        </div>
-    </div>
+    <x-pages.crud.create titulo='Criação de Usuário' form-action="{{ route('admin.users.store') }}" use-tabs=true
+        btn-cancel-title='Cancelar' btn-cancel-route="{{ route('admin.users.index') }}" btn-submit-title="Salvar"
+        :tabs="$tabs" />
 @endsection
 
 @push('scripts')
     <script>
         $(document).ready(function() {
             checktabs = function() {
-
                 var selectedRoles = $('#roles').val();
                 if (selectedRoles.includes('2')) {
-                    $('#tab_1_2_button').removeClass('hidden');
+                    $('#comission_btn').removeClass('hidden');
                 } else {
-                    $('#tab_1_2_button').addClass('hidden');
+                    $('#comission_btn').addClass('hidden');
                 }
             }
             $('#roles').on('change', function() {

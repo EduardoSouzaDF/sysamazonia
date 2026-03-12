@@ -15,9 +15,7 @@ class MenuBuilder
             $menus = array_merge($menus, self::getAdminMenu());
         }
 
-        if ($user->hasRole(Role::JURADO)) {
-            $menus = array_merge($menus, self::getJuradoMenu());
-        }
+
 
         return $menus;
     }
@@ -47,11 +45,18 @@ class MenuBuilder
             [
                 'heading' => 'Administração',
             ],
+             [
+                 'title' => 'Edições',
+                 'icon' => 'ki-archive',
+                 'route' => 'admin.editions.index',
+             ],
             [
                 'title' => 'Usuários',
                 'icon' => 'ki-profile-circle',
                 'route' => 'admin.users.index',
             ],
+
+
         ];
     }
 }

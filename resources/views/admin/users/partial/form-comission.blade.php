@@ -1,7 +1,7 @@
 @props([
     'errors' => [],
 ])
-{{--
+
 <div class="flex w-full gap-4">
     <div class="w-1/2">
         <x-form.input type="text" class="mb-4" label="Link do Site" placeholder="Link do Site" name="linksite"
@@ -20,6 +20,6 @@
         <x-form.input type="text" class="mb-4" label="Responsável pela Instituição" placeholder="Responsável pela Instituição" name="responsavel"
             required="true" description="Informe o responsável pela instituição." />
 
-</div> --}}
+</div>
 
 
