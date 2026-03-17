@@ -13,7 +13,6 @@ $columns = [
 $actions = [
     'Logar Como' => '/', // ou route('impersonate', $user)
     'Editar' => fn($user) => route('admin.users.edit', ['user' => $user['id']]),
-    'Deletar' => fn($user) => route('admin.users.destroy', ['user' => $user['id']]),
 ];
 
 $formattedData = array_map(function ($user) {
@@ -23,9 +22,14 @@ $formattedData = array_map(function ($user) {
         'created_at' => $user['created_at'] ? Carbon::parse($user['created_at'])->format('d/m/Y') : '',
         'email_verified_at' => $user['email_verified_at'] ? Carbon::parse($user['email_verified_at'])->format('d/m/Y') : '',
         'id' => $user['id'],
-        'roles' =>new HtmlString( implode(' ', array_map(function ($role) {
-            return '<span class="kt-badge kt-badge-outline kt-badge-warning">' . e($role['name']) . '</span>';
-        }, $user['roles'] ?? []))),
+        'roles' => new HtmlString(
+            implode(
+                ' ',
+                array_map(function ($role) {
+                    return '<span class="kt-badge kt-badge-outline kt-badge-warning">' . e($role['name']) . '</span>';
+                }, $user['roles'] ?? []),
+            ),
+        ),
     ];
 }, $users->toArray()['data']);
 ?>

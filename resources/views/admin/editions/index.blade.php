@@ -13,7 +13,6 @@ $columns = [
 
 $actions = [
     'Editar' => fn($edition) => route('admin.editions.edit', ['edition' => $edition['id']]),
-    'Deletar' => fn($edition) => route('admin.editions.destroy', ['edition' => $edition['id']]),
 ];
 
 $formattedData = array_map(function ($edition) {

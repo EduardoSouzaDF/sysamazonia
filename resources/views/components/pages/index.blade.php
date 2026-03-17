@@ -118,7 +118,7 @@
                                                                                 @break
 
                                                                                 @case('Editar')
-                                                                                    <i class="ki-filled ki-user-edit"></i>
+                                                                                    <i class="ki-filled ki-setting-4"></i>
                                                                                 @break
 
                                                                                 @case('Deletar')

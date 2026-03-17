@@ -1,4 +1,5 @@
 <?php
+
 namespace App\Services;
 
 use App\Models\Role;
@@ -14,8 +15,6 @@ class MenuBuilder
         if ($user->hasRole(Role::ADMIN)) {
             $menus = array_merge($menus, self::getAdminMenu());
         }
-
-
 
         return $menus;
     }
@@ -45,17 +44,26 @@ class MenuBuilder
             [
                 'heading' => 'Administração',
             ],
-             [
-                 'title' => 'Edições',
-                 'icon' => 'ki-archive',
-                 'route' => 'admin.editions.index',
-             ],
+            [
+                'title' => 'Edições',
+                'icon' => 'ki-archive',
+                'route' => 'admin.editions.index',
+            ],
+            [
+                'title' => 'Modalidades',
+                'icon' => 'ki-binance',
+                'route' => 'admin.modalities.index',
+            ],
+            [
+                'title' => 'Categorias',
+                'icon' => 'ki-category',
+                'route' => 'admin.categories.index',
+            ],
             [
                 'title' => 'Usuários',
                 'icon' => 'ki-profile-circle',
                 'route' => 'admin.users.index',
             ],
-
 
         ];
     }
