@@ -8,22 +8,24 @@
 @endpush
 @php
     use Carbon\Carbon;
-
-    $titulo = isset($edition) ? 'Gerenciamento de Edição' : 'Criação de Edição';
-    $route = isset($edition) ? route('admin.editions.update', $edition->id) : route('admin.editions.store');
-    $titleBtn = isset($edition) ? 'Salvar Alterações' : 'Criar Edição';
+    $object = $edition ?? null;
+    $titulo = isset($object) ? 'Gerenciamento de Edição' : 'Criação de Edição';
+    $route = isset($object) ? route('admin.editions.update', $object->id) : route('admin.editions.store');
+    $titleBtn = isset($object) ? 'Salvar Alterações' : 'Criar Edição';
+    $deleteRoute = isset($object) ? route('admin.editions.destroy', ['edition' => $object->id]) : '';
+    $checked = isset($object) ? $object->is_registration_active : false;
 @endphp
 
 @extends('admin.content')
 @section('maincontent')
-    <x-pages.crud.create titulo={{ $titulo }} form-id='create-edition-form' form-action="{{ $route }}"
+    <x-pages.crud.create :titulo="$titulo" form-id='create-edition-form' form-action="{{ $route }}"
         space={{ false }} btn-cancel-title='Cancelar' btn-cancel-route="{{ route('admin.editions.index') }}"
-        btn-submit-title={{ $titleBtn }} btn-delete={{isset($edition)}}  
-        btn-delete-route="{{ route('admin.editions.destroy', ['edition' => $edition->id]) }}" >
+        :btn-submit-title="$titleBtn" :btn-delete=isset($object) btn-delete-route="{{ $deleteRoute }}" :put="isset($edition)"
+        btn-delete-id='btnDeleteEdition'>
 
         <div class="w-full">
             <x-form.input type="text" class="mb-4" label="Título" placeholder="Ex: Edição 2025" name="title"
-                :value="isset($edition) ? $edition->title : null" required="true" description="Informe o link do site da instituição" />
+                :value="isset($object) ? $object->title : null" required="true" description="Informe o link do site da instituição" />
         </div>
         <div class="w-full">
 
@@ -31,7 +33,7 @@
                 <label class="kt-form-label">Regulamento *</label>
 
                 <div class="kt-form-control">
-                    <input type="hidden" value="{{ isset($edition) ? $edition->regulation : old('regulation') }}"
+                    <input type="hidden" value="{{ isset($object) ? $object->regulation : old('regulation') }}"
                         name="regulation" />
                     <div id="editor" class="kt-input kt-input-textarea" style="height: 300px;">
                         {!! old('regulation') !!}
@@ -57,9 +59,9 @@
                     <div class="kt-form-control">
                         <input type="file" name="regulation_file" class="kt-input" accept=".pdf" />
 
-                        @if (isset($edition) && $edition->regulation_file_path)
+                        @if (isset($object) && $object->regulation_file_path)
                             @php
-                                $fileName = basename($edition->regulation_file_path);
+                                $fileName = basename($object->regulation_file_path);
                             @endphp
                             <a target="_blank" href="{{ route('editions.regulations.show', ['file' => $fileName]) }}"
                                 class="kt-btn kt-btn-outline">
@@ -82,15 +84,15 @@
         <div class="flex w-full gap-4 mt-4">
             <div class="w-1/2">
                 <!-- Data de outorga -->
-                <x-form.input type="date" :value="isset($edition) && $edition->grant_date
-                    ? \Carbon\Carbon::parse($edition->grant_date)->format('Y-m-d')
+                <x-form.input type="date" :value="isset($object) && $object->grant_date
+                    ? \Carbon\Carbon::parse($object->grant_date)->format('Y-m-d')
                     : old('grant_date')" name="grant_date" label="Data de Outorga"
                     :required="true" />
             </div>
             <div class="w-1/2">
                 <!-- Data de julgamento -->
-                <x-form.input type="date" :value="isset($edition) && $edition->judgment_date
-                    ? \Carbon\Carbon::parse($edition->judgment_date)->format('Y-m-d')
+                <x-form.input type="date" :value="isset($object) && $object->judgment_date
+                    ? \Carbon\Carbon::parse($object->judgment_date)->format('Y-m-d')
                     : old('judgment_date')" name="judgment_date" label="Data de Julgamento"
                     :required="true" />
             </div>
@@ -99,15 +101,15 @@
         <div class="flex w-full gap-4 mt-4">
             <div class="w-1/2">
                 <!-- Data de início de inscrição -->
-                <x-form.input :value="isset($edition) && $edition->registration_start
-                    ? \Carbon\Carbon::parse($edition->registration_start)->format('Y-m-d')
+                <x-form.input :value="isset($object) && $object->registration_start
+                    ? \Carbon\Carbon::parse($object->registration_start)->format('Y-m-d')
                     : old('registration_start')" type="date" placeholder="__/__/____" name="registration_start"
                     label="Início das Inscrições" :required="true" />
             </div>
             <div class="w-1/2">
                 <!-- Data de término de inscrição -->
-                <x-form.input :value="isset($edition) && $edition->registration_end
-                    ? \Carbon\Carbon::parse($edition->registration_end)->format('Y-m-d')
+                <x-form.input :value="isset($object) && $object->registration_end
+                    ? \Carbon\Carbon::parse($object->registration_end)->format('Y-m-d')
                     : old('registration_end')" type="date" name="registration_end" label="Término das Inscrições"
                     :required="true" />
             </div>
@@ -117,15 +119,16 @@
         <div class="flex w-full gap-4 mt-4">
             <div class="w-1/2">
                 <x-form.input
-                    value="{{ isset($edition) ? $edition->applications_per_candidate : old('applications_per_candidate') }}"
+                    value="{{ isset($object) ? $object->applications_per_candidate : old('applications_per_candidate') }}"
                     type="number" name="applications_per_candidate" label="Máximo de Inscrições por Candidato"
                     placeholder="Ex: 3" :required="false" min="1" />
             </div>
             <div class="w-1/2">
                 <div class="kt-form-group">
                     <div class="flex items-center gap-2">
-                        <input type="hidden" name="is_registration_active">
-                        <input class="kt-switch" type="checkbox" id="switch">
+
+                        <input type="checkbox" value='1' name="is_registration_active" @checked(isset($object) && $object->is_registration_active)
+                            id="switch">
                         <label class="kt-label" for="switch">
                             Inscrições Ativas
                         </label>
@@ -135,11 +138,29 @@
                     </div>
 
                 </div>
+
             </div>
 
         </div>
 
+        <sl-alert class="hidden w-full alter-success" variant="success" open>
+            <sl-icon slot="icon" name="check2-circle"></sl-icon>
+            <strong>Operação realizada.</strong><br />
+            Edição Excluída
+        </sl-alert>
+
     </x-pages.crud.create>
+    <meta name="csrf-token" content="{{ csrf_token() }}">
+    <sl-dialog label="Antenção!" class="dialog-overview">
+        Deseja realmente excluir a edição ?
+        <div slot="footer" class="flex flex-row gap-4 justify-end">
+            <sl-button class="btn-close-modal" variant="primary">Cancelar</sl-button>
+            <sl-button class="btn-confirm-modal" variant="danger">Confirmar</sl-button>
+        </div>
+
+    </sl-dialog>
+
+
 @endsection
 
 
@@ -171,7 +192,49 @@
             $('#create-edition-form').on('submit', function() {
                 var markupStr = $('#editor').summernote('code');
                 $('input[name="regulation"]').val(markupStr);
-                console.log(markupStr);
+            });
+
+            const dialog = document.querySelector('.dialog-overview');
+
+
+            $('.btn-close-modal').on('click', function(e) {
+                e.preventDefault();
+                dialog.hide()
+            });
+
+            $('.btn-confirm-modal').on('click', function(e) {
+                e.preventDefault();
+                const deleteRoute = "{{ $deleteRoute }}";
+                $.ajaxSetup({
+                    headers: {
+                        'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
+                    }
+                });
+
+                $.ajax({
+                    url: deleteRoute,
+                    type: 'DELETE',
+                    success: function(result) {
+                        // Fechar o modal
+                        dialog.hide();
+                        $('.alter-success').removeClass('hidden');
+                        setTimeout(function() {
+                            window.location =
+                                "{{ route('admin.editions.index') }}";
+
+                        }, 2000); // 2000ms = 2 segundos
+                    },
+                    error: function(xhr) {
+                        // Fechar o modal
+                        dialog.hide();
+                        alert('Erro ao excluir a edição. Por favor, tente novamente.');
+                    }
+                });
+
+            });
+            $('#btnDeleteEdition').on('click', function() {
+                dialog.show();
+
             });
         });
     </script>

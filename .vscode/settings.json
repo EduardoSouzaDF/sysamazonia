@@ -12,5 +12,11 @@
         "statusBar.noFolderBackground": "#411569",
         "statusBar.noFolderForeground": "#FBF9FE"
     },
-    "postman.settings.dotenv-detection-notification-visibility": false
+    "postman.settings.dotenv-detection-notification-visibility": false,
+     "[blade]": {
+    "editor.formatOnSave": true,
+    "editor.defaultFormatter": "shufo.vscode-blade-formatter"
+  },
+  "bladeFormatter.breakAttributes": true,
+  "bladeFormatter.wrapLineLength": 80
 }

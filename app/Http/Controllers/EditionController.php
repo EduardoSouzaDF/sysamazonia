@@ -2,12 +2,11 @@
 
 namespace App\Http\Controllers;
 
-use Illuminate\Http\Request;
 use App\Models\Edition;
-use Illuminate\Http\UploadedFile;
-use Carbon\Carbon;
-use Illuminate\Support\Facades\Storage;
 use Illuminate\Filesystem\FilesystemAdapter;
+use Illuminate\Http\Request;
+use Illuminate\Http\UploadedFile;
+use Illuminate\Support\Facades\Storage;
 
 class EditionController extends Controller
 {
@@ -16,13 +15,14 @@ class EditionController extends Controller
      */
     public function index(Request $request)
     {
+
         $query = Edition::orderBy('grant_date', 'desc'); // or 'created_at'
         $search = $request->input('search');
         $active = $request->input('active');
 
         if ($search) {
             $query->where(function ($q) use ($search, $active) {
-                $q->where('title', 'like', '%' . $search . '%');
+                $q->where('title', 'like', '%'.$search.'%');
                 if ($active) {
                     $q->orWhere('is_registration_active', $active === 'active' ? 1 : ($active === 'inactive' ? 0 : null));
                 }
@@ -30,6 +30,7 @@ class EditionController extends Controller
         }
 
         $editions = $query->paginate(15)->withQueryString();
+
         return view('admin.editions.index', compact('editions'));
     }
 
@@ -58,7 +59,6 @@ class EditionController extends Controller
             'regulation_file.max' => 'O arquivo deve ter no máximo 5MB.',
         ];
 
-
         $request->validate([
             'title' => 'required|string|max:255',
             'regulation' => 'required|filled|string',
@@ -81,8 +81,6 @@ class EditionController extends Controller
             'is_registration_active',
             'applications_per_candidate',
         ]);
-
-
 
         // Handle file upload if present
         if ($request->hasFile('regulation_file')) {
@@ -107,14 +105,15 @@ class EditionController extends Controller
     public function show(string $id)
     {
         $edition = Edition::with('modalities')->findOrFail($id);
+
         return view('admin.editions.show', compact('edition'));
     }
 
     public function showRegulation($file)
     {
-        $path = 'editions/regulations/' . $file;
+        $path = 'editions/regulations/'.$file;
 
-        if (!Storage::disk('public')->exists($path)) {
+        if (! Storage::disk('public')->exists($path)) {
             abort(404);
         }
 
@@ -130,9 +129,10 @@ class EditionController extends Controller
     public function edit(string $id)
     {
         $edition = Edition::with('modalities')->findOrFail($id);
-    
+
         return view('admin.editions.create', compact('edition'));
     }
+
     /**
      * Update the specified resource in storage.
      */
@@ -140,7 +140,7 @@ class EditionController extends Controller
     {
         $edition = Edition::findOrFail($id);
 
-           $messages = [
+        $messages = [
             'title.required' => 'O título é obrigatório.',
             'registration_start.required' => 'A data de início de inscrição é obrigatória.',
             'registration_end.required' => 'A data de término de inscrição é obrigatória.',
@@ -150,7 +150,6 @@ class EditionController extends Controller
             'regulation_file.mimes' => 'O arquivo deve ser PDF.',
             'regulation_file.max' => 'O arquivo deve ter no máximo 5MB.',
         ];
-
 
         $request->validate([
             'title' => 'required|string|max:255',
@@ -175,7 +174,6 @@ class EditionController extends Controller
             'applications_per_candidate',
         ]);
 
-       
         // Replace file only if new one uploaded
         if ($request->hasFile('regulation_file')) {
             // Delete old file (optional)
@@ -186,12 +184,13 @@ class EditionController extends Controller
             $data['regulation_file_path'] = $path;
         }
 
-        $data['is_registration_active'] = $request->boolean('is_registration_active');
+        $data['is_registration_active'] = isset($data['is_registration_active']);
 
         $edition->update($data);
 
         return redirect()->route('admin.editions.index')
             ->with('success', 'Edição atualizada com sucesso.');
+
     }
 
     /**
@@ -200,7 +199,6 @@ class EditionController extends Controller
     public function destroy(string $id)
     {
         $edition = Edition::findOrFail($id);
-        dd($edition);
 
         // Delete regulation file if exists
         if ($edition->regulation_file_path && Storage::disk('public')->exists($edition->regulation_file_path)) {
@@ -211,6 +209,10 @@ class EditionController extends Controller
         // Edition::find($id)->modalities()->delete();
 
         $edition->delete();
+
+        if (request()->ajax()) {
+            return response()->json(['message' => 'Edição removida com sucesso.'], 201);
+        }
 
         return redirect()->route('admin.editions.index')
             ->with('success', 'Edição removida com sucesso.');
