@@ -5,10 +5,17 @@ use App\Http\Controllers\UserController;
 use App\Http\Middleware\CheckAdmin;
 use App\Http\Middleware\IsAdmin;
 use Illuminate\Support\Facades\Route;
+use App\Http\Controllers\EditionController;
 // Rotas públicas
 // Route::get('/', function () {
 //     return view('welcome');
 // })->name('home');
+
+
+
+//Rotas publicas
+Route::get('/editions/regulations/{file}', [EditionController::class, 'showRegulation'])
+        ->name('editions.regulations.show');
 
 // Rotas de autenticação
 Route::middleware('guest')->group(function () {
@@ -22,6 +29,7 @@ Route::middleware('guest')->group(function () {
     //password.reset
     Route::get('/reset-password/{token}', [AuthController::class, 'showReset'])->name('password.reset');
     Route::post('/reset-password/{token}', [AuthController::class, 'reset'])->name('password.reset');
+
 });
 
 // Rotas autenticadas
@@ -30,8 +38,10 @@ Route::middleware('auth')->group(function () {
     Route::get('/dashboard', [AuthController::class, 'dashboard'])->name('dashboard');
     Route::get('/logout', [AuthController::class, 'logout'])->name('logout');
 
-     Route::prefix('admin')->group(function () {
-        $middleware = ['auth',CheckAdmin::class.':admin'];
+    Route::prefix('admin')->group(function () {
+        $middleware = ['auth', CheckAdmin::class . ':admin'];
+
+
 
         Route::resource('users', UserController::class)->middleware($middleware)->names([
             'index' => 'admin.users.index',
@@ -44,5 +54,18 @@ Route::middleware('auth')->group(function () {
         ]);
 
 
+        Route::resource('editions', EditionController::class)->middleware($middleware)->names([
+            'index' => 'admin.editions.index',
+            'create' => 'admin.editions.create',
+            'store' => 'admin.editions.store',
+            'show' => 'admin.editions.show',
+            'edit' => 'admin.editions.edit',
+            'update' => 'admin.editions.update',
+            'destroy' => 'admin.editions.destroy',
+        ]);
+
+       
     });
+
+     
 });

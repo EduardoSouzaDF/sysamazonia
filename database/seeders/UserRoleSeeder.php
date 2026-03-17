@@ -23,7 +23,7 @@ class UserRoleSeeder extends Seeder
 
         // Obter roles
         $adminRole = Role::where('name', 'admin')->first();
-        $editorRole = Role::where('name', 'editor')->first();
+        $comission = Role::where('name', 'comission')->first();
         $userRole = Role::where('name', 'user')->first();
 
         // Associar roles aos usuários
@@ -35,7 +35,7 @@ class UserRoleSeeder extends Seeder
                     break;
                 case 1:
                     // Segundo usuário como editor
-                    $user->roles()->sync([$editorRole->id]);
+                    $user->roles()->sync([$comission->id]);
                     break;
                 default:
                     // Demais usuários como user comum
