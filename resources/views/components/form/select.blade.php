@@ -12,47 +12,42 @@
     'maxSelections' => 1,
     'required' => true,
     'nameOld' => '',
+    'value' => '',
 ])
+@php
 
+    $value = $value !== '' ? $value : old($nameOld);
+@endphp
 <div class="kt-form-item {{ $class }}">
     @if ($label)
         <label class="kt-form-label">{{ $label }} {{ $required ? '*' : '' }}</label>
     @endif
 
-    <select class="kt-select {{ $class }}"
-        aria-invalid="{{ $errors->has($name) ? 'true' : 'false' }}"
-        multiple="{{ $multiple ? 'true' : 'false' }}"
-        data-kt-select="true"
-        data-kt-select-multiple="{{ $multiple ? 'true' : 'false' }}" data-kt-select-max-selections="{{ $maxSelections }}"
-        data-kt-select-config='{
-			"displaySeparator": " | "
-		}'
-        data-kt-select-enable-search="{{ $search ? 'true' : 'false' }}"
-        data-kt-select-search-placeholder="{{ $placeholder }} ..." data-kt-select-placeholder="{{ $placeholder }}"
-        data-kt-select-config='{
-			"optionsClass": "kt-scrollable overflow-auto max-h-[250px]"
-		}'
-
-        name="{{ $name }}"
-        id="{{ $id }}">
+    <sl-select name="{{ $name }}" value="{{ $value }}" @if ($value) filled @endif
+        @if ($multiple) multiple clearable @endif>
         @foreach ($options as $key => $option)
-            @if($multiple)
-                <option @selected( in_array($key, old($nameOld, []))) value="{{ $key }}">{{ $option }}</option>
-            @else
-                <option @selected(  old($nameOld, null) === $key) value="{{ $key }}">{{ $option }}</option>
-            @endif
-
+            <sl-option value="{{ $key }}">{{ $option }}</sl-option>
         @endforeach
+    </sl-select>
 
 
-    </select>
-
-    @if($errors->has($name))
+    @if ($errors->has($name))
         @foreach ($errors->get($name) as $key => $value)
-            <div class="kt-form-message text-danger">{{ $value }}</div>
+            <x-messages.alert message="{{ $value }}" />
         @endforeach
-     @endif
-
-
+    @endif
 </div>
 
+@push('scripts')
+    <script type="text/javascript">
+        $('document').ready(function() {
+            const selectElement = document.getElementById('{{ $id }}');
+            const instance = KTSelect.getInstance(selectElement) ?? KTSelect.getOrCreateInstance(selectElement);
+            if (value !== '') {
+                const options = ['9'].map((v) => selectElement.querySelector(`option[value="${v}"]`)).filter(
+                    Boolean);
+                instance.setSelectedOptions([9]);
+            }
+        });
+    </script>
+@endpush

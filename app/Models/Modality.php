@@ -2,8 +2,6 @@
 
 namespace App\Models;
 
-use App\Models\Category;
-use App\Models\Edition;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -24,6 +22,11 @@ class Modality extends Model
         'candidacy_limit_per_modality' => 'integer',
         'is_active' => 'boolean',
     ];
+
+    public function scopeActive($query)
+    {
+        return $query->where('is_active', true);
+    }
 
     // RELATIONSHIPS
     public function edition(): BelongsTo

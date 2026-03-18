@@ -14,6 +14,7 @@
     $titleBtn = isset($object) ? 'Salvar Alterações' : 'Criar Edição';
     $deleteRoute = isset($object) ? route('admin.editions.destroy', ['edition' => $object->id]) : '';
     $checked = isset($object) ? $object->is_registration_active : false;
+
 @endphp
 
 @extends('admin.content')
