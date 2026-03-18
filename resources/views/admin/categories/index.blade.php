@@ -3,25 +3,27 @@ use Carbon\Carbon;
 use Illuminate\Support\HtmlString;
 
 $columns = [
-    'Nome' => 'title',
+    'Edição' => 'edition',
     'Modalidade' => 'modality_id',
+    'Nome' => 'title',
     'Sigla' => 'acronym',
     'Hoonorífica ?' => 'is_honorific',
     'Aberta para Parecer ?' => 'is_open_for_submissions',
 ];
 
 $actions = [
-    'Editar' => fn($modality) => route('admin.categories.edit', ['category' => $category['id']]),
+    'Editar' => fn($category) => route('admin.categories.edit', ['category' => $category['id']]),
 ];
 
 $formattedData = array_map(function ($category) {
     return [
+        'edition' => $category['modality']['edition']['title'],
         'title' => $category['title'],
         'modality_id' => $category['modality']['title'],
         'acronym' => $category['acronym'],
-        'is_honorific' => $modality['is_active'] ? 'Sim' : 'Não',
-        'is_open_for_submissions' => $modality['is_active'] ? 'Sim' : 'Não',
-        'id' => $modality['id'],
+        'is_honorific' => $category['is_honorific'] ? 'Sim' : 'Não',
+        'is_open_for_submissions' => $category['is_open_for_submissions'] ? 'Sim' : 'Não',
+        'id' => $category['id'],
     ];
 }, $categories->toArray()['data']);
 

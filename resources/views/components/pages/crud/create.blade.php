@@ -37,6 +37,13 @@
             <div class="space-y-3">
                 @if ($useTabs)
                     <x-elements.tabs :tabs="$tabs" />
+                    @if ($errors->any())
+                        <sl-alert variant="danger" class="mt-4" open>
+                            <sl-icon slot="icon" name="exclamation-octagon"></sl-icon>
+                            <strong>Formulário Contém erros</strong><br />
+                            Favor verificar
+                        </sl-alert>
+                    @endif
                 @endif
                 {{ $slot }}
             </div>

@@ -37,7 +37,7 @@ class ModalityController extends Controller
      */
     public function create()
     {
-        $editions = Edition::all();
+        $editions = Edition::active()->get();
 
         return view('admin.modalities.create', compact('editions'));
     }
@@ -125,6 +125,6 @@ class ModalityController extends Controller
         }
 
         return redirect()->route('admin.modalities.index')
-            ->with('success', 'EdModalidade removida com sucesso.');
+            ->with('success', 'Modalidade removida com sucesso.');
     }
 }

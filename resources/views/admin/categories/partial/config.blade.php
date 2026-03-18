@@ -7,7 +7,7 @@
 <div class="w-full mt-4">
     <div class="kt-form-group">
         <div class="flex items-center gap-2">
-            <sl-switch @checked((isset($object) && $object->is_honorific) || old('is_honorific')) name="is_honorific"> É honorífica ?</sl-switch>
+            <sl-switch value="1" @checked((isset($object) && $object->is_honorific) || old('is_honorific')) name="is_honorific"> É honorífica ?</sl-switch>
         </div>
         <div class="kt-form-description mt-2">
             Categoria realiza nomeação de pessoa
@@ -19,27 +19,27 @@
 
     <div class="w-4/12">
         <x-form.input value="{{ isset($object) ? $object->nominations_count : old('nominations_count') }}" type="number"
-            name="nominations_count" label="Quantidade de nomeações" placeholder="Ex: 3" :required="true"
-            min="1" />
+            name="nominations_count" label="Quantidade de nomeações" placeholder="Ex: 3" :required="true" />
     </div>
 
     <div class="w-4/12">
         <x-form.input value="{{ isset($object) ? $object->evaluations_count : old('evaluations_count') }}"
             type="number" name="evaluations_count" label="Quantidade de avaliações Técnicas" placeholder="Ex: 3"
-            :required="true" min="1" />
+            :required="true" />
     </div>
 
     <div class="w-4/12">
         <x-form.input value="{{ isset($object) ? $object->recipients_count : old('recipients_count') }}" type="number"
-            name="recipients_count" label="Quantidade de Agracidados" placeholder="Ex: 3" :required="true"
-            min="1" />
+            name="recipients_count" label="Quantidade de Agracidados" placeholder="Ex: 3" :required="true" />
     </div>
+
 
     <div class="w-4/12">
         <x-form.input
-            value="{{ isset($object) ? $object->submmission_per_candidate : old('submmission_per_candidate') }}"
-            type="number" name="submmission_per_candidate" label="Inscrições por candidato" placeholder="Ex: 3"
-            :required="true" min="1" />
+
+            value="{{ isset($object) ? $object->submissions_per_candidate : old('submissions_per_candidate') }}"
+            type="number" name="submissions_per_candidate" label="Inscrições por candidato" placeholder="Ex: 3"
+            :required="true" />
     </div>
 </div>
 
@@ -62,15 +62,11 @@
     <div class="w-1/2">
         <div class="kt-form-group">
             <div class="flex items-center gap-2">
-                <sl-switch @checked((isset($object) && $object->is_open_for_submissions) || old('is_open_for_submissions')) name="is_open_for_submissions">
+                <sl-switch value="1" @checked((isset($object) && $object->is_open_for_submissions) || old('is_open_for_submissions')) name="is_open_for_submissions">
                     Ativa para inscrições ?
                 </sl-switch>
             </div>
 
         </div>
-    </div>
-
-    <div class="w-1/2">
-
     </div>
 </div>

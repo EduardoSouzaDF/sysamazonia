@@ -39,6 +39,6 @@ class Edition extends Model
 
     public function scopeActive($query)
     {
-        return $query->where('active', true);
+        return $query->where('is_registration_active', true);
     }
 }
