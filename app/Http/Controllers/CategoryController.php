@@ -61,10 +61,10 @@ class CategoryController extends Controller
             'judging_end.after' => 'Deve ser uma data posterior a Início do Julgamento.',
         ];
 
-        $request->validate([
+        $rules = [
             'modality_id' => 'required|string',
             'title' => 'required|string|max:255',
-            'acronym' => 'required|string|max:10',
+            'acronym' => 'required|string|max:10|unique:categories,acronym',
             'description' => 'required|filled|string',
             'nominations_count' => 'integer',
             'evaluations_count' => 'integer',
@@ -73,7 +73,14 @@ class CategoryController extends Controller
             'judging_start' => 'required|date',
             'judging_end' => 'required|date|after:judging_start',
             'is_open_for_submissions' => 'nullable|boolean',
-        ], $messages);
+        ];
+
+        if ($request->isMethod('PUT') || $request->isMethod('PATCH')) {
+            $categoryId = $request->route('id'); // ou $request->route()->parameter('id'), dependendo da sua versão do Laravel
+            $rules['acronym'] .= ','.$categoryId; // Ignora o ID atual na verificação única
+        }
+
+        $request->validate($rules, $messages);
 
     }
 

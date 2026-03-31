@@ -3,6 +3,7 @@
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\CategoryController;
 use App\Http\Controllers\EditionController;
+use App\Http\Controllers\EvaluationCriterionController;
 use App\Http\Controllers\ModalityController;
 use App\Http\Controllers\UserController;
 use App\Http\Middleware\CheckAdmin;
@@ -78,6 +79,16 @@ Route::middleware('auth')->group(function () {
             'edit' => 'admin.categories.edit',
             'update' => 'admin.categories.update',
             'destroy' => 'admin.categories.destroy',
+        ]);
+
+        Route::resource('criteria', EvaluationCriterionController::class)->middleware($middleware)->names([
+            'index' => 'admin.criteria.index',
+            'create' => 'admin.criteria.create',
+            'store' => 'admin.criteria.store',
+            // 'show' => 'admin.editions.show',
+            'edit' => 'admin.criteria.edit',
+            'update' => 'admin.criteria.update',
+            'destroy' => 'admin.criteria.destroy',
         ]);
 
     });

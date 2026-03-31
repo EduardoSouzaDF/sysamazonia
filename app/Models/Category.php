@@ -2,7 +2,6 @@
 
 namespace App\Models;
 
-use App\Models\Commission;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -47,5 +46,20 @@ class Category extends Model
     public function commissions(): HasMany
     {
         return $this->hasMany(Commission::class);
+    }
+
+    public function evaluationCriteria()
+    {
+        return $this->hasMany(EvaluationCriterion::class);
+    }
+
+    public function indicators()
+    {
+        return $this->belongsToMany(User::class, 'indicators');
+    }
+
+    public function evaluators()
+    {
+        return $this->belongsToMany(User::class, 'evaluators');
     }
 }
