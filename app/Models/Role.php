@@ -10,6 +10,7 @@ class Role extends Model
     use HasFactory;
      const ADMIN = 'admin';
      const JURADO = 'jurado';
+     const LEITOR = 'leitor';
 
 
     protected $fillable = [

@@ -20,7 +20,7 @@
 @endphp
 <div class="kt-form-item {{ $class }}">
     @if ($label)
-        <label class="kt-form-label">{{ $label }} {{ $required ? '*' : '' }}</label>
+        <label class="kt-form-label">{{ $label }} {{ $required == 'true' ? '*' : '' }}</label>
     @endif
 
     <sl-select name="{{ $name }}" value="{{ $value }}" @if ($value) filled @endif
@@ -39,15 +39,4 @@
 </div>
 
 @push('scripts')
-    <script type="text/javascript">
-        $('document').ready(function() {
-            const selectElement = document.getElementById('{{ $id }}');
-            const instance = KTSelect.getInstance(selectElement) ?? KTSelect.getOrCreateInstance(selectElement);
-            if (value !== '') {
-                const options = ['9'].map((v) => selectElement.querySelector(`option[value="${v}"]`)).filter(
-                    Boolean);
-                instance.setSelectedOptions([9]);
-            }
-        });
-    </script>
 @endpush

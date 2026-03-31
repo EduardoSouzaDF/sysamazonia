@@ -54,7 +54,7 @@ class ModalityController extends Controller
             'edition_id' => 'required|string',
             'title' => 'required|string|max:255',
             'is_active' => 'nullable|boolean',
-            'candidacy_limit_per_modality' => 'required|integer|min:1',
+            'candidacy_limit_per_modality' => 'required|integer',
         ], $messages);
 
     }

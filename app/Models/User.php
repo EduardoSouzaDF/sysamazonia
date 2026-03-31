@@ -6,7 +6,7 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
-use App\Models\UserRole;
+
 class User extends Authenticatable
 {
     use HasFactory, Notifiable;
@@ -16,8 +16,9 @@ class User extends Authenticatable
         'email',
         'telefone',
         'password',
+        'is_judge',
+        'is_organizer',
     ];
-
 
     protected $hidden = [
         'password',
@@ -33,20 +34,20 @@ class User extends Authenticatable
     public function roles()
     {
         return $this->belongsToMany(Role::class, 'user_role')
-                    ->withTimestamps()
-                    ->using(UserRole::class)
-                    ->where('roles.active', true); 
+            ->withTimestamps()
+            ->using(UserRole::class)
+            ->where('roles.active', true);
     }
 
     // Métodos auxiliares
     public function hasRole($role)
     {
-        
+
         if (is_string($role)) {
             return $this->roles->contains('name', $role);
         }
 
-        return !!$role->intersect($this->roles)->count();
+        return (bool) $role->intersect($this->roles)->count();
     }
 
     public function assignRole($role)
@@ -75,14 +76,46 @@ class User extends Authenticatable
     public function hasAllRoles($roles)
     {
         foreach ($roles as $role) {
-            if (!$this->hasRole($role)) {
+            if (! $this->hasRole($role)) {
                 return false;
             }
         }
+
         return true;
     }
 
+    public function extraData()
+    {
+        return $this->hasOne(UserExtraData::class);
+    }
 
+    public function isJudge(): bool
+    {
+        return $this->is_judge;
+    }
 
+    public function isOrganizer(): bool
+    {
+        return $this->is_organizer;
+    }
 
+    public function indicatorCategories()
+    {
+        return $this->belongsToMany(Category::class, 'indicators');
+    }
+
+    public function isIndicator()
+    {
+        return $this->indicatorCategories()->exists();
+    }
+
+    public function evaluatorCategories()
+    {
+        return $this->belongsToMany(Category::class, 'evaluators');
+    }
+
+    public function isEvaluator()
+    {
+        return $this->evaluatorCategories()->exists();
+    }
 }

@@ -11,7 +11,7 @@ $columns = [
 ];
 
 $actions = [
-    'Logar Como' => '/', // ou route('impersonate', $user)
+    'Logar Como' => fn($user) => route('admin.users.login-as', ['user' => $user['id']]),
     'Editar' => fn($user) => route('admin.users.edit', ['user' => $user['id']]),
 ];
 

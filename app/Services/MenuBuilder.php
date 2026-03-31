@@ -9,11 +9,20 @@ class MenuBuilder
 {
     public static function getMenuStructure(): array
     {
-        $user = Auth::user()->with('roles')->get()->first();
+        $user = Auth::user();
+        if(!$user){
+            return [];
+        }
+
+        $user->loadMissing('roles');
         $menus = [];
 
         if ($user->hasRole(Role::ADMIN)) {
             $menus = array_merge($menus, self::getAdminMenu());
+        }
+
+        if ($user->hasRole(Role::LEITOR)) {
+            $menus = array_merge($menus, self::getLeitorMenu());
         }
 
         return $menus;
@@ -37,12 +46,15 @@ class MenuBuilder
     {
         return [
             [
+                'heading' => 'Relatórios',
+            ],
+            [
                 'title' => 'Dashboard',
                 'icon' => 'ki-abstract-45',
                 'route' => 'dashboard',
             ],
             [
-                'heading' => 'Administração',
+                'heading' => 'Administração Prêmios',
             ],
             [
                 'title' => 'Edições',
@@ -60,10 +72,52 @@ class MenuBuilder
                 'route' => 'admin.categories.index',
             ],
             [
+                'title' => 'Critérios de Avaliação',
+                // 'icon' => 'ki-abstract-26',
+                'icon' => 'ki-square-brackets',
+                'route' => 'admin.criteria.index',
+            ],
+            [
+                'heading' => 'Tarefas Sincronizadas',
+            ],
+            [
+                'title' => 'Agente IA',
+                'icon' => 'ki-abstract-45',
+                'route' => 'dashboard',
+            ],
+            [
+                'heading' => 'Cache Sistema',
+            ],
+            [
+                'title' => 'Monitoramento',
+                'icon' => 'ki-abstract-45',
+                'route' => 'dashboard',
+            ],
+            [
+                'heading' => 'Administração Sitema',
+            ],
+
+            [
                 'title' => 'Usuários',
                 'icon' => 'ki-profile-circle',
                 'route' => 'admin.users.index',
             ],
+
+        ];
+    }
+
+    public static function getLeitorMenu(): array
+    {
+        return [
+            [
+                'heading' => 'Relatórios',
+            ],
+            [
+                'title' => 'Dashboard',
+                'icon' => 'ki-abstract-45',
+                'route' => 'dashboard',
+            ],
+
 
         ];
     }

@@ -82,7 +82,6 @@
     <script type="text/javascript">
         $('document').ready(function() {
             var oldRegulation = $("input[name='description']").val();
-            console.log(oldRegulation);
 
             $('#editor').summernote({
                 tabsize: 2,

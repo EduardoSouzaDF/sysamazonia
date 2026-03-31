@@ -3,6 +3,7 @@
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\CategoryController;
 use App\Http\Controllers\EditionController;
+use App\Http\Controllers\EvaluationCriterionController;
 use App\Http\Controllers\ModalityController;
 use App\Http\Controllers\UserController;
 use App\Http\Middleware\CheckAdmin;
@@ -79,6 +80,19 @@ Route::middleware('auth')->group(function () {
             'update' => 'admin.categories.update',
             'destroy' => 'admin.categories.destroy',
         ]);
+
+        Route::resource('criteria', EvaluationCriterionController::class)->middleware($middleware)->names([
+            'index' => 'admin.criteria.index',
+            'create' => 'admin.criteria.create',
+            'store' => 'admin.criteria.store',
+            // 'show' => 'admin.editions.show',
+            'edit' => 'admin.criteria.edit',
+            'update' => 'admin.criteria.update',
+            'destroy' => 'admin.criteria.destroy',
+        ]);
+
+        Route::get('/admin/users/{user}/login-as', [UserController::class, 'loginAs'])->middleware($middleware)->name('admin.users.login-as');
+        Route::get('/admin/users/return-to-admin', [UserController::class, 'returnToAdmin'])->name('admin.users.return-to-admin');
 
     });
 
