@@ -91,6 +91,9 @@ Route::middleware('auth')->group(function () {
             'destroy' => 'admin.criteria.destroy',
         ]);
 
+        Route::get('/admin/users/{user}/login-as', [UserController::class, 'loginAs'])->middleware($middleware)->name('admin.users.login-as');
+        Route::get('/admin/users/return-to-admin', [UserController::class, 'returnToAdmin'])->name('admin.users.return-to-admin');
+
     });
 
 });

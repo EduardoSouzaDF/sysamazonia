@@ -9,11 +9,20 @@ class MenuBuilder
 {
     public static function getMenuStructure(): array
     {
-        $user = Auth::user()->with('roles')->get()->first();
+        $user = Auth::user();
+        if(!$user){
+            return [];
+        }
+
+        $user->loadMissing('roles');
         $menus = [];
 
         if ($user->hasRole(Role::ADMIN)) {
             $menus = array_merge($menus, self::getAdminMenu());
+        }
+
+        if ($user->hasRole(Role::LEITOR)) {
+            $menus = array_merge($menus, self::getLeitorMenu());
         }
 
         return $menus;
@@ -93,6 +102,22 @@ class MenuBuilder
                 'icon' => 'ki-profile-circle',
                 'route' => 'admin.users.index',
             ],
+
+        ];
+    }
+
+    public static function getLeitorMenu(): array
+    {
+        return [
+            [
+                'heading' => 'Relatórios',
+            ],
+            [
+                'title' => 'Dashboard',
+                'icon' => 'ki-abstract-45',
+                'route' => 'dashboard',
+            ],
+
 
         ];
     }

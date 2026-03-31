@@ -7,6 +7,7 @@ use App\Models\Role;
 use App\Models\User;
 use App\Notifications\CustomResetPassword;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Password;
 use Illuminate\Support\Str;
@@ -25,8 +26,7 @@ class UserController extends Controller
 
         if ($search) {
             $query->where(function ($query) use ($search) {
-                $query->where('name', 'like', '%'.$search.'%')
-                    ->orWhere('email', 'like', '%'.$search.'%');
+                $query->where('name', 'like', '%'.$search.'%')->orWhere('email', 'like', '%'.$search.'%');
                 $query->orWhereHas('roles', function ($query) use ($search) {
                     $query->where('name', 'like', '%'.$search.'%');
                 });
@@ -60,49 +60,46 @@ class UserController extends Controller
      */
     public function store(Request $request)
     {
-
         $messages = [
             'email.unique' => 'O email já está em uso.',
             // Adicione outras mensagens como necessário
         ];
-        $request->validate([
-            'name' => 'required|min:5',
-            'telefone' => 'required|min:5',
-            'email' => 'required|email|unique:users',
-            'roles' => 'required|array',
+        $request->validate(
+            [
+                'name' => 'required|min:5',
+                'telefone' => 'required|min:5',
+                'email' => 'required|email|unique:users',
+                'roles' => 'required|array',
 
-            'whatsApp' => 'nullable|string',
-            'area_atuacao' => 'nullable|string',
-            'indicado' => 'nullable|string',
-            'empresa' => 'nullable|string',
-            'cargo' => 'nullable|string',
-            'cep' => 'nullable|string',
-            'cidade' => 'nullable|string',
-            'logradouro' => 'nullable|string',
-            'complemento' => 'nullable|string',
-            'unidade' => 'nullable|string',
-            'bairro' => 'nullable|string',
-            'instagram' => 'nullable|string',
-            'facebook' => 'nullable|string',
-            'linkedin' => 'nullable|string',
+                'whatsApp' => 'nullable|string',
+                'area_atuacao' => 'nullable|string',
+                'indicado' => 'nullable|string',
+                'empresa' => 'nullable|string',
+                'cargo' => 'nullable|string',
+                'cep' => 'nullable|string',
+                'cidade' => 'nullable|string',
+                'logradouro' => 'nullable|string',
+                'complemento' => 'nullable|string',
+                'unidade' => 'nullable|string',
+                'bairro' => 'nullable|string',
+                'instagram' => 'nullable|string',
+                'facebook' => 'nullable|string',
+                'linkedin' => 'nullable|string',
 
-            // Papéis
-            'julgador' => 'nullable|boolean',
-            'organizador' => 'nullable|boolean',
-            'seindicador' => 'nullable|boolean',
-            'seavaliador' => 'nullable|boolean',
-            'indicador' => 'nullable|array',
-            'avaliador' => 'nullable|array',
-
-        ], $messages);
+                // Papéis
+                'julgador' => 'nullable|boolean',
+                'organizador' => 'nullable|boolean',
+                'seindicador' => 'nullable|boolean',
+                'seavaliador' => 'nullable|boolean',
+                'indicador' => 'nullable|array',
+                'avaliador' => 'nullable|array',
+            ],
+            $messages,
+        );
 
         $password = Hash::make(Str::random(10));
 
-        $extra_data_collumns = [
-            'whatsapp', 'area_atuacao', 'indicado', 'empresa',
-            'cargo', 'instagram', 'facebook', 'linkedin',
-            'escolaridade', 'estado', 'cidade', 'cep', 'logradouro', 'complemento', 'unidade', 'bairro',
-        ];
+        $extra_data_collumns = ['whatsapp', 'area_atuacao', 'indicado', 'empresa', 'cargo', 'instagram', 'facebook', 'linkedin', 'escolaridade', 'estado', 'cidade', 'cep', 'logradouro', 'complemento', 'unidade', 'bairro'];
 
         $user = User::create([
             'name' => $request['name'],
@@ -114,7 +111,11 @@ class UserController extends Controller
 
         $user->roles()->attach($request->roles);
 
-        if ($request->hasAny($extra_data_collumns)) {
+        $anyExtraDataCollumn = array_filter($extra_data_collumns,function($column)use($request){
+            return $request[$column] !== null;
+        });
+
+        if (sizeof($anyExtraDataCollumn)) {
             $user->extraData()->create([
                 'whatsapp' => $request['whatsapp'] ?? null,
                 'area_atuacao' => $request['area_atuacao'] ?? null,
@@ -151,7 +152,6 @@ class UserController extends Controller
                 $token = Password::createToken($user);
                 $user->notify(new CustomResetPassword($token));
             }
-
         } catch (\Exception $e) {
             dd($e->getMessage());
         }
@@ -187,7 +187,6 @@ class UserController extends Controller
         })->get();
 
         return view('admin.users.create', ['roles' => $roles, 'categories' => $categories, 'user' => $user]);
-
     }
 
     /**
@@ -254,7 +253,7 @@ class UserController extends Controller
                 'facebook' => $validated['facebook'] ?? null,
                 'linkedin' => $validated['linkedin'] ?? null,
                 'escolaridade' => $validated['escolaridade'] ?? null,
-            ]
+            ],
         );
 
         // Sincronizando indicadores
@@ -289,5 +288,39 @@ class UserController extends Controller
         }
 
         return redirect()->route('admin.users.index');
+    }
+
+    public function loginAs(Request $request, $id)
+    {
+        // Verifica se o usuário atual é admin (ou tem permissão)
+        if (! $request->user()->hasRole('admin')) {
+            // ajuste conforme sua lógica de roles
+            abort(403, 'Acesso negado.');
+        }
+
+        // Busca o usuário pelo ID
+        $user = User::findOrFail($id);
+
+        // Salva o ID do admin na sessão (para voltar depois, se necessário)
+        session()->put('admin_user_id', Auth::id());
+
+        // Faz login como o usuário selecionado
+        Auth::login($user);
+
+        return redirect()->route('dashboard'); // redireciona para a home ou painel do usuário
+    }
+
+    public function returnToAdmin()
+    {
+        $adminId = session()->pull('admin_user_id');
+
+        if (! $adminId) {
+            abort(403, 'Nenhum administrador encontrado.');
+        }
+
+        $adminUser = User::find($adminId);
+        Auth::login($adminUser);
+
+        return redirect()->route('dashboard');
     }
 }
