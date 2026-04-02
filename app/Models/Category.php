@@ -62,4 +62,17 @@ class Category extends Model
     {
         return $this->belongsToMany(User::class, 'evaluators');
     }
+
+    /**
+     * Get the registrations for the category.
+     */
+    public function registrations(): HasMany
+    {
+        return $this->hasMany(Registration::class);
+    }
+
+    public function nominees(): HasMany
+    {
+        return $this->hasMany(Nominee::class);
+    }
 }
