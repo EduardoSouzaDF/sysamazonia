@@ -23,11 +23,11 @@ class Registration extends Model
      * @var array
      */
     protected $fillable = [
-        'candidate_id',
-        'category_id',
-        'title',
-        'coautores',
-        'resumo',
+            'candidate_id',
+            'category_id',
+            'title',
+            'coautores',
+            'resumo',
         'desenvolvimento',
         'objetivo',
         'conclusao',
@@ -87,4 +87,7 @@ class Registration extends Model
     {
         return $this->hasMany(RegistrationFile::class);
     }
+
+
+
 }

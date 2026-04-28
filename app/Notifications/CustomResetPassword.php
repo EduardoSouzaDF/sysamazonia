@@ -45,6 +45,7 @@ class CustomResetPassword extends Notification implements ShouldQueue
     public function toMail($notifiable)
     {
         return (new MailMessage)
+                    ->subject('Seja Bem vindo ! Defina sua nova senha')
                     ->greeting('Olá, ' . $notifiable->name . '!')
                     ->line('Sua conta foi criada com sucesso!')
                     ->line('Para acessar sua conta, por favor clique no link abaixo:')

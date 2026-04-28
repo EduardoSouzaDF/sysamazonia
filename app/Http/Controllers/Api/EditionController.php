@@ -4,51 +4,157 @@ namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
 use App\Http\Requests\CandidateRequest;
+use App\Http\Requests\RegistrationRequest;
 use App\Models\Candidate;
 use App\Models\Edition;
+use App\Models\Registration;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Crypt;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Facades\Validator;
+use App\Models\RegistrationFile;
 
 class EditionController extends Controller
 {
     public function registration(Request $request)
     {
+    try{
         $data = $this->checkJsonDecode();
         $candidate = $this->candidate($data);
+        $data['edition'] = Crypt::decryptString($data['edition']);
+        $data['candidate_id'] = Crypt::decryptString($candidate['id']);
+        $data['category_id'] = Crypt::decryptString($data['category_id']);
 
+        $request->merge(['data' => json_encode($data)]);
+        $value1 = $this->checkRulesforRegistration($candidate);
+        $registration = $this->registrationSave();
+        if (isset($_FILES['files']) && !empty($_FILES['files'])) {
+            if ($request->hasFile('files')) {
+            foreach ($request->file('files') as $file) {
+
+
+                if (!$file->isValid()) {
+                    return response()->json([
+                        'status' => 'error',
+                        'message' => 'Um dos arquivos é inválido.'
+                    ], 400);
+                }
+
+                if ($file->getSize() > 5 * 1024 * 1024) {
+                    return response()->json([
+                        'status' => 'error',
+                        'message' => 'Arquivo muito grande. Máximo permitido: 5MB.'
+                    ], 400);
+                }
+
+                $blockedExtensions = ['php', 'exe', 'bat', 'sh', 'pl', 'py', 'jsp', 'asp', 'aspx', 'js'];
+                $extension = strtolower($file->getClientOriginalExtension());
+
+                if (in_array($extension, $blockedExtensions)) {
+                    return response()->json([
+                        'status' => 'error',
+                        'message' => "Tipo de arquivo não permitido: .{$extension}"
+                    ], 400);
+                }
+
+
+
+                if ($file->isValid()) {
+                    // Define pasta de destino
+                    $path = $file->store('registrations/files/'.Crypt::decryptString($registration['id']).'/', 'private');
+
+                    // Cria o registro do arquivo
+                    $registrationFile = new RegistrationFile();
+                    $registrationFile->registration_id = Crypt::decryptString($registration['id']);
+                    $registrationFile->file_name = $file->getClientOriginalName();
+                    $registrationFile->file_path = $path;
+                    $registrationFile->file_type = $file->getMimeType();
+                    $registrationFile->file_size = $file->getSize();
+                    $registrationFile->document_type = 'anexo'; // ou outro tipo conforme necessário
+                    $registrationFile->save();
+                }
+                }
+            }
+        }
+
+    } catch (\InvalidArgumentException $e) {
         return response()->json([
-            'status' => 'success',
-            'data' => ['candidate'=>$candidate],
-        ], 200);
+            'status' => 'error',
+            'message' => $e->getMessage(),
+        ], 400)->setEncodingOptions(JSON_UNESCAPED_UNICODE);
+    }
 
-        // $this->checkJsonDecode();
+
+    return response()->json([
+        'status' => 'success',
+        'data' => ['candidate'=>$candidate, 'registration' => $registration],
+    ], 200)->setEncodingOptions(JSON_UNESCAPED_UNICODE);
+
+    }
+
+    public function registrationSave(){
+            $registrationRequest = app(RegistrationRequest::class);
+            $registration = new Registration($registrationRequest->validated());
+            $registration->save();
+            $response = $registration->toArray();
+            $response['id'] = $this->encrypt($response['id']);
+            $response['candidate_id'] = $this->encrypt($response['candidate_id']);
+            $response['category_id'] = $this->encrypt($response['category_id']);
+            $response['candidate_id'] = $this->encrypt($response['candidate_id']);
+            unset($response['updated_at']);
+            unset($response['created_at']);
+
+            return $response;
+    }
+
+    public function checkRulesforRegistration(Array $candidate){
+        $jsonData = $this->checkJsonDecode();
+        $registersEditionCount = Registration::where('candidate_id',$this->decript($candidate['id']))
+       ->whereHas('category.modality.edition', function ($query)use($jsonData) {
+          $query->where('id', $jsonData['edition']);
+        })->get()->count();
+
+        $maxByEdition = Edition::find($jsonData['edition'])->applications_per_candidate;
+
+        if($registersEditionCount >= $maxByEdition){
+                $this->throwError('Atingiu máximo de inscrição por Edição :'.$maxByEdition);
+        }
+
 
     }
 
     public function candidate(Array $data){
-        $candidate = Candidate::where('cpf',$data['cpf'])->first()->get();
+        $candidate = Candidate::where('cpf',$data['cpf'])->first();
+        $response = [];
         if(!$candidate){
             $candidateRequest = app(CandidateRequest::class);
             $candidate = new Candidate($candidateRequest->validated());
-            // $candidate->save();
+            $candidate->save();
+            $response = $candidate->toArray();
+        }else{
+           $a = $candidate->get();
+           $response = $a[0]->toArray();
+
         }
 
-        return $candidate;
+        $response['id'] = $this->encrypt($response['id']);
+        unset($response['created_at']);
+        unset($response['updated_at']);
+
+        return $response;
     }
 
 
 
 
-
+    private function throwError(String $error){
+        throw new \InvalidArgumentException($error);
+    }
 
     private function checkJsonDecode(){
         $data = json_decode(request()->input('data'), true);
         if (json_last_error() !== JSON_ERROR_NONE) {
-            return response()->json([
-                'status' => 'error',
-                'message' => 'JSON inválido no campo data.',
-            ], 400);
+            $this->throwError('JSON inválido no campo data.');
         }
         return $data;
     }
@@ -89,7 +195,7 @@ class EditionController extends Controller
             ],404);
     }
 
-    private function getEdition()
+    public function getEdition()
     {
         $edition = Edition::where('is_registration_active', true)
             ->where('registration_start', '<=', now())
@@ -118,6 +224,10 @@ class EditionController extends Controller
     {
         return Crypt::encryptString($value);
 
+    }
+
+    private function decript(string $value){
+        return Crypt::decryptString($value);
     }
 
     private function unsetPreventData($edition)

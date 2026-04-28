@@ -5,10 +5,11 @@ use App\Http\Controllers\CategoryController;
 use App\Http\Controllers\EditionController;
 use App\Http\Controllers\EvaluationCriterionController;
 use App\Http\Controllers\ModalityController;
+use App\Http\Controllers\RegistrationController;
 use App\Http\Controllers\UserController;
 use App\Http\Middleware\CheckAdmin;
 use Illuminate\Support\Facades\Route;
-
+use Illuminate\Support\Facades\File;
 // Rotas públicas
 // Route::get('/', function () {
 //     return view('welcome');
@@ -17,6 +18,18 @@ use Illuminate\Support\Facades\Route;
 // Rotas publicas
 Route::get('/editions/regulations/{file}', [EditionController::class, 'showRegulation'])
     ->name('editions.regulations.show');
+
+Route::get('/forms/edition', [EditionController::class, 'formEdition'])
+    ->name('form.edition');
+
+Route::get('/json/estados-cidades', function () {
+    $path = public_path('json/estados_cidades.json');
+    $content = File::get($path);
+    return response($content, 200)
+        ->header('Content-Type', 'application/json')
+        ->header('Access-Control-Allow-Origin', '*');
+});
+
 
 // Rotas de autenticação
 Route::middleware('guest')->group(function () {
@@ -89,6 +102,10 @@ Route::middleware('auth')->group(function () {
             'edit' => 'admin.criteria.edit',
             'update' => 'admin.criteria.update',
             'destroy' => 'admin.criteria.destroy',
+        ]);
+
+        Route::resource('registration', RegistrationController::class)->middleware($middleware)->names([
+            'index' => 'admin.registration.index'
         ]);
 
         Route::get('/admin/users/{user}/login-as', [UserController::class, 'loginAs'])->middleware($middleware)->name('admin.users.login-as');
