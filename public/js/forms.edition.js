@@ -63,8 +63,6 @@ function getUfCidadeData(){
         option.setAttribute("value", "");
         option.innerText = "Escolha um Estado";
         var estados = [];
-
-
         $.each(data, function(key, val) {
             const option = document.createElement("option");
             option.setAttribute("value", val.sigla);
@@ -78,7 +76,6 @@ function getUfCidadeData(){
             option.innerText = val.nome;
             selectEstadoRG.append(option);
         });
-
 
 
          $.each(data, function(key, val) {
@@ -105,12 +102,7 @@ function getUfCidadeData(){
 
         });
 
-
-
-
-
         $("input[name='whatsApp']").mask("(99) 99999-9999");
-
         // Se for um campo input do tipo date, mostrar máscara somente no Safari e Firefox pra evitar problemas com validação e mobile
         var isFirefox = typeof InstallTrigger !== 'undefined';
         var isSafari = Object.prototype.toString.call(window.HTMLElement).indexOf('Constructor') >
@@ -172,6 +164,13 @@ function formatarLocalidade(str) {
         }
 
 function prepareForm() {
+
+    const inputData = document.querySelector('#input-dt_nascimento');
+    const hoje = new Date();
+    const dataLimite = new Date(hoje.getFullYear() - 18, hoje.getMonth(), hoje.getDate());
+    const dataFormatada = dataLimite.toISOString().split('T')[0];
+    inputData.setAttribute('max', dataFormatada);
+
     getUfCidadeData()
     $("#input-cpf").mask("999.999.999-99");
     $("#input-celular").mask("(99) 99999-999?9");
