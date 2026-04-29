@@ -5,14 +5,20 @@
         <input type="text" class="form-control " style="margin-top: -6px;" required id="input-cep"  name="inputcep" placeholder="99999-999">
     </div>
 
-    <div>
-        <x-form-select label="Estado  (*)"   name="estado" id="input-estado" required multiple="{{ false }}"
-              required="{{ true }}" />
-    </div>
+
+
+     <div>
+            <label class="form-label" for="input-Estado">Estado: (*)</label>
+            <select  class="form-control"    required name="estado" id="input-estado"  >
+                  <option selected value="">Escolha um Estado</option>
+            </select>
+        </div>
 
     <div>
-         <x-form-select label="Cidade  (*)" required="true"   name="cidade" id="input-cidade" required multiple="{{ false }}"
-             required="{{ false }}" />
+         <label class="form-label" for="incidadeput-EstaCidadedo">Cidade: (*)</label>
+            <select  class="form-control"    required name="cidade" id="input-cidade"  >
+            </select>
+
     </div>
 </div>
 
@@ -25,7 +31,7 @@
 
      <span>
         <label for="input-numero" class="form-label">Número: (*)</label>
-        <input type="text" class="form-control "   required  id="input-numero"  >
+        <input type="text" class="form-control "   required name="numero" id="input-numero"  >
     </span>
 
     <span>

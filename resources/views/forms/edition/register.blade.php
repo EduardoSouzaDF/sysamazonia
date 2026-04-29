@@ -1,5 +1,5 @@
 
-<form enctype="multipart/form-data" id="formRegistration" class="needs-validation" >
+<form enctype="multipart/form-data" id="formRegistration" enctype="multipart/form-data" class="needs-validation" >
 <sl-card class="card-footer w-full min-w-full">
 
     <sl-tab-group >

@@ -12,8 +12,9 @@
 
 <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 ">
     <div>
-        <x-form-select label="Categoria" class="mt-2"   name="category" id="input-category_id" multiple="{{ false }}"
-              required="{{ true }}" value=""   />
+        <label class="form-label" for="input-category_id">Categoria: (*)</label>
+        <select  class="form-control"    required  name="category" id="input-category_id" >
+        </select>
     </div>
 </div>
 
@@ -36,7 +37,7 @@
         <span>
             <label for="input-resumo" class="form-label">Resumo: (*)</label>
             <input  type="text" class="hidden" name="input-resumo" id="input-resumo" val="" required />
-            <div id="editor-resumo" class="kt-input-text input-resumo" style="height: 300px;"></div>
+            <div id="editor-resumo" class="kt-input-text input-resumo editor-resumo" style="height: 300px;"></div>
             <div   class="form-text">
             O resumo deverá conter no mínimo 500 palavras e no máximo 1000.
             </div>
@@ -80,8 +81,12 @@
         </span>
 
         <div class="mt-2">
-        <x-form-select label="Estado de Residência do(a) Indicado(a): (*)"   name="state" id="input-state" multiple="{{ false }}"
-              required="{{ true }}" />
+
+         <label class="form-label" for="input-Estado">Estado de Residência do(a) Indicado(a): (*)</label>
+            <select  class="form-control"    required name="state" id="input-state"  >
+                <option selected value="">Escolha um Estado</option>
+            </select>
+
         </div>
 
          <span>
@@ -105,7 +110,7 @@
 
         <span>
             <label for="input-justification" class="form-label">Justifique a indicação: (*)</label>
-            <input type="text" name="input-justification " class="hidden" required />
+            <input type="text" name="input-justification " id="input-justification" class="hidden" required />
             <div id="editor-justification" class="kt-input-text input-justification" style="height: 300px;"></div>
 
         </span>

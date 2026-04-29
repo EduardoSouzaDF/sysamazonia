@@ -32,6 +32,7 @@ class Registration extends Model
         'objetivo',
         'conclusao',
         'status',
+        'protocol',
     ];
 
     /**

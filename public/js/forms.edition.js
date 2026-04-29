@@ -55,46 +55,47 @@ $(document).ready(async function () {
 function getUfCidadeData(){
      var jsonData = "https://sysamazonia.test/json/estados-cidades";
     $.getJSON(jsonData, function(data) {
-        let selectEstado = document.querySelector("sl-select[name='estado']");
-        let selectStateNominee = document.querySelector("sl-select[name='state']");
-        let selectCidade = document.querySelector("sl-select[name='cidade']");
-        let option = document.createElement("sl-option");
+        let selectEstadoRG = document.querySelector("select[name='input-rg_uf']");
+        let selectEstado = document.querySelector("select[name='estado']");
+        let selectStateNominee = document.querySelector("select[name='state']");
+        let selectCidade = document.querySelector("select[name='cidade']");
+        let option = document.createElement("option");
         option.setAttribute("value", "");
         option.innerText = "Escolha um Estado";
-
         var estados = [];
-        var options = '<sl-option value="">escolha um estado</sl-option>';
 
-        selectEstado.append(option);
-        selectStateNominee.append(option);
 
         $.each(data, function(key, val) {
-
-            const option = document.createElement("sl-option");
+            const option = document.createElement("option");
             option.setAttribute("value", val.sigla);
             option.innerText = val.nome;
             selectEstado.append(option);
-            // selectStateNominee.append(option);
         });
 
          $.each(data, function(key, val) {
-
-            const option = document.createElement("sl-option");
+            const option = document.createElement("option");
             option.setAttribute("value", val.sigla);
             option.innerText = val.nome;
-            // selectEstado.append(option);
+            selectEstadoRG.append(option);
+        });
+
+
+
+         $.each(data, function(key, val) {
+            const option = document.createElement("option");
+            option.setAttribute("value", val.sigla);
+            option.innerText = val.nome;
             selectStateNominee.append(option);
         });
 
-        selectEstado.addEventListener('sl-change', event => {
-            while (selectCidade.firstChild) {
-                selectCidade.removeChild(selectCidade.firstChild);
-            }
+        selectEstado.addEventListener('change', event => {
+
+            $(selectCidade).empty();
             let value = event.target.value;
             $.each(data, function(key, val) {
                 if (val.sigla == value) {
                     $.each(val.cidades, function(key_city, val_city) {
-                        const option = document.createElement("sl-option");
+                        const option = document.createElement("option");
                         option.setAttribute("value", val_city);
                         option.innerText = val_city;
                         selectCidade.append(option);
@@ -185,18 +186,41 @@ function prepareForm() {
                 success: function (data) {
                   if(data.status === 'success'){
                     $('#input-email').val(data.candidate.email);
-                    $('#input-nome').val(data.candidate.nome);
+                    $('#nome').val(data.candidate.nome);
                     $('#input-rg').val(data.candidate.rg);
                     $('#input-rg_expeditor').val(data.candidate.rg_expeditor);
                     $('#input-rg_uf').val(data.candidate.rg_uf);
                     $('#input-escolaridade').val(data.candidate.escolaridade);
                     $('#input-sexo').val(data.candidate.sexo);
                     $('#input-celular').val('('+data.candidate.ddd+') '+data.candidate.celular);
+
+                    $('#input-cep').val(data.candidate.cep);
+                    const select = document.querySelector('#input-estado'); // ou a sua variável selectEstado
+                    select.value = data.candidate.ufendereco;
+                    // Cria e dispara o evento de forma que o addEventListener consiga ouvir
+                    const evento = new Event('change', { bubbles: true });
+                    select.dispatchEvent(evento);
+                    setTimeout(()=>{
+                        $('#input-cidade').val(data.candidate.cidade).trigger('change');
+                    },1000)
+
+                    $('#input-endereco').val(data.candidate.endereco).trigger('change');
+                    $('#input-numero').val(data.candidate.numero).trigger('change');
+                    $('#input-complemento').val(data.candidate.complemento).trigger('change');
+
+
+                    $('#escolaridade').val(data.candidate.escolaridade).trigger('change');
+                    $('#editor-resumo-curricular').summernote('code', data.candidate.resumo_curricular);
+                    $('#input-instituicao').val(data.candidate.instituicao).trigger('change');
+                    $('#input-instagram').val(data.candidate.instagram).trigger('change');
+                    $('#input-facebook').val(data.candidate.facebook).trigger('change');
+                    $('#input-outra_rede_social').val(data.candidate.outra_rede_social).trigger('change');
+
+
                     setDateField('#input-dt_nascimento', data.candidate.dt_nascimento);
                     const switchEl = document.querySelector('sl-switch');
                     switchEl.checked = data.candidate.whatsapp;
-                    $('#tab-addres').attr('disabled', true);
-                    $('#tab-social').attr('disabled', true);
+
                   }else{
 
                      $('#input-email').val('');
@@ -209,8 +233,6 @@ function prepareForm() {
                     $('#input-celular').val('');
                     setDateField('#input-dt_nascimento', '');
 
-                     $('#tab-addres').attr('disabled', false);
-                    $('#tab-social').attr('disabled', false);
                   }
                 },
                 error:function(data){
@@ -231,7 +253,6 @@ function showForm() {
         dataType: "html",
         success: function (data) {
             $("#formularioRegistroContainer").html(data);
-            console.log("Conteúdo carregado com sucesso!");
             prepareForm();
         },
         error: function (xhr, status, error) {
@@ -248,12 +269,12 @@ function checkhasRegistrationActive() {
         url: "https://sysamazonia.test/api/has-registrations", // Substitua pela URL correta
         type: "GET",
         dataType: "json",
-        success: function (data) {
-            console.log("Há Edição ativa");
+        success: function (res) {
             showForm();
             setTimeout(()=>{
-                loadSelects(data);
+                loadSelects(res);
                 setFormValidation();
+                  $('#edition').attr('value',res.data.id) ;
             },2000);
 
 
@@ -267,6 +288,12 @@ function checkhasRegistrationActive() {
 
 
 function setFormValidation(){
+ $('#input-cpf').change((e) =>{
+    if(!validarCPF(e.target.value)){
+        $('#input-cpf').val('');
+    }
+ })
+
 $('form input,select').on('change',()=>{
     const forms = document.querySelector('.needs-validation');
 
@@ -285,14 +312,131 @@ const forms = document.querySelectorAll('.needs-validation')
     form.addEventListener('submit', event => {
         event.preventDefault();
         event.stopPropagation();
-        // form.checkValidity();
-         console.log(form.checkValidity());
-
-
+        sendPost();
     }, false)
   })
 
 }
+
+function sendPost(){
+    const form = document.querySelector('form');
+    json = JSON.parse(formParaJSON(form));
+    prepareJson = {};
+    prepareJson.edition  = json.edition;
+    prepareJson.nome  = json.nome;
+    prepareJson.cpf  = json['input-cpf'];
+    prepareJson.dt_nascimento  = json.dt_nascimento;
+    prepareJson.rg  = json.rg;
+    prepareJson.rg_expeditor  = json.rg_expeditor;
+    prepareJson.rg_uf  = json['input-rg_uf'];
+    prepareJson.sexo  = json.sexo;
+    prepareJson.cep  = json.inputcep;
+    prepareJson.ufendereco  = json.estado;
+    prepareJson.cidade  = json.cidade;
+    prepareJson.endereco  = json.endereco;
+    prepareJson.numero  = json.numero;
+    prepareJson.complemento  = json.complemento;
+    prepareJson.ddd  = json.celular.slice(1,3);
+    prepareJson.celular  =  json.celular.slice(5,15);
+    const el = document.querySelector('sl-switch');
+    prepareJson.whatsapp  =el.checked;
+    prepareJson.email  = json['input-email'];
+    prepareJson.instituicao  = json.instituicao;
+    prepareJson.escolaridade  = json.escolaridade;
+    prepareJson.instagram  = json.instagram;
+    prepareJson.facebook  = json.facebook;
+    prepareJson.outra_rede_social  = json.outra_rede_social;
+    prepareJson.resumo_curricular  = json['resumo_curricular'];
+    prepareJson.category_id  = json.category;
+    prepareJson.title  = json.titulo;
+    prepareJson.coautores  = json.coautores;
+    prepareJson.resumo  = json['input-resumo'];
+    prepareJson.desenvolvimento  = json['input-desenvolvimento'];
+    prepareJson.objetivo  = json['input-objetivo'];
+    prepareJson.conclusao  = json['input-conclusao'];
+    let formData = new FormData(form);
+    console.log(formData);
+    if(json.file1){
+        formData.append('files1', json.file1);
+    }
+
+    if(json.file2){
+        formData.append('files2', json.file2);
+    }
+
+    if(json.file3){
+        formData.append('files3', json.file3);
+    }
+
+    formData.append('data', JSON.stringify(prepareJson));
+
+    $.ajax({
+        url: 'https://sysamazonia.test/api/registration',
+        type: 'POST',
+        data: formData,
+         processData: false,
+        contentType: false,  // ✅ CORRETO - Deixe o jQuery definir automaticamente
+        cache: false,        // ✅ Adicione esta linha
+        success: function(response) {
+            protocolo = response.data.registration.protocol;
+            $('form').trigger("reset");
+            resetEditores();
+            $("sl-tab[panel='personal']").click();
+            notify('Inscrição Realizada! Verifique seu Email!','success','info-circle',90000000);
+            notify('Protocolo:'+protocolo,'info','info-circle',90000000);
+        },
+        error: function(resp) {
+            console.log(resp);
+            Object.entries(resp.responseJSON.erros).forEach(([campo, mensajes]) => {
+                // Como 'mensajes' es un array, recorremos cada mensaje
+                mensajes.forEach(mensaje => {
+                    notify(`Erro em ${campo}: ${mensaje}`,'danger','info-circle',90000000);
+                });
+            });
+
+        }
+    });
+
+
+}
+
+function resetEditores(){
+    $('.input-conclusao').summernote('reset');
+    $('.input-desenvolvimento').summernote('reset');
+    $('.editor-resumo').summernote('reset');
+    $('.input-resumo').summernote('reset');
+    $('.input-objetivo').summernote('reset');
+    $('.input-presentation').summernote('reset');
+    $('.input-activities').summernote('reset');
+    $('.input-justification').summernote('reset');
+}
+function formParaJSON(formSelector) {
+    const obj = {};
+    const form = $(formSelector);
+
+    // Captura inputs nativos e do Shoelace
+    form.find('input, select, sl-checkbox').each(function() {
+        const name = $(this).attr('name');
+        const val = $(this).val();
+
+        if (!name) return;
+
+        // Se o nome já existe (ex: múltiplos checkboxes com mesmo nome), cria um array
+        if (obj[name]) {
+            if (!Array.isArray(obj[name])) {
+                obj[name] = [obj[name]];
+            }
+            obj[name].push(val);
+        } else {
+            obj[name] = val;
+        }
+    });
+
+    return JSON.stringify(obj);
+}
+
+
+
 function verificarErros() {
     const erros = [];
     const form = document.querySelector('.needs-validation');
@@ -315,14 +459,14 @@ function verificarErros() {
 function loadSelects(resp= []){
     $('.notHonorific input, .notHonorific select, .notHonorific textarea').prop('disabled', true);
     $('.Honorific input, .Honorific select, .Honorific textarea').prop('disabled', true);
-    const selectCategory = document.querySelector("sl-select[name='category']");
-    const option = document.createElement("sl-option");
+    const selectCategory = document.querySelector("select[name='category']");
+    const option = document.createElement("option");
     option.setAttribute("value", "");
     option.innerText = "Escolha uma Categoria";
     selectCategory.append(option);
     $.each(resp.data.modalities, function(key, modality) {
         $.each(modality.categories,function(kkey,category){
-            const option = document.createElement("sl-option");
+            const option = document.createElement("option");
             option.setAttribute("value", category.id);
             option.innerText = category.title;
             selectCategory.append(option);
@@ -330,7 +474,7 @@ function loadSelects(resp= []){
     });
 
 
-    selectCategory.addEventListener('sl-change', event => {
+    selectCategory.addEventListener('change', event => {
                 let value = event.target.value;
                 let categorySel= {};
 
@@ -383,7 +527,7 @@ function loadSelects(resp= []){
 
 // Exemplo de função que só deve rodar depois que tudo estiver pronto
 function InitForm() {
-    this.checkhasRegistrationActive();
+    checkhasRegistrationActive();
 }
 
 function setDateField(selector, dateString) {
@@ -430,3 +574,22 @@ function setDateField(selector, dateString) {
     document.body.append(alert);
     return alert.toast();
   }
+
+  function validarCPF(cpf) {
+    cpf = cpf.replace(/[^\d]+/g, ''); // Remove máscara (pontos e traço)
+    if (cpf == '' || cpf.length != 11 || !!cpf.match(/(\d)\1{10}/)) return false;
+
+    let add = 0;
+    for (let i = 0; i < 9; i++) add += parseInt(cpf.charAt(i)) * (10 - i);
+    let rev = 11 - (add % 11);
+    if (rev == 10 || rev == 11) rev = 0;
+    if (rev != parseInt(cpf.charAt(9))) return false;
+
+    add = 0;
+    for (let i = 0; i < 10; i++) add += parseInt(cpf.charAt(i)) * (11 - i);
+    rev = 11 - (add % 11);
+    if (rev == 10 || rev == 11) rev = 0;
+    if (rev != parseInt(cpf.charAt(10))) return false;
+
+    return true;
+}

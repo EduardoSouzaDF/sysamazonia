@@ -3,7 +3,7 @@
     <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
         <div class="mb-3">
             <label for="file1" class="form-label">Escolher arquivo #1</label>
-            <input class="form-control" type="file" id="file1" name="file1"
+            <input class="form-control" type="file" id="file1" name="files[]"
                    accept=".pdf,image/*" data-max-size="5242880">
 
              <div class="form-text mb-4">
@@ -13,7 +13,7 @@
 
         <div class="mb-3">
             <label for="file2" class="form-label">Escolher arquivo #2</label>
-            <input class="form-control" type="file" id="file2" name="file2"
+            <input class="form-control" type="file" id="file2" name="files[]"
                    accept=".pdf,image/*" data-max-size="5242880">
 
                     <div class="form-text mb-4">
@@ -23,7 +23,7 @@
 
         <div class="mb-3">
             <label for="file3" class="form-label">Escolher arquivo #3</label>
-            <input class="form-control" type="file" id="file3" name="file3"
+            <input class="form-control" type="file" id="file3" name="files[]"
                    accept=".pdf,image/*" data-max-size="5242880">
 
                     <div class="form-text mb-4">

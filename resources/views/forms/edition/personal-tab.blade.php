@@ -1,10 +1,19 @@
 <div class="  gap-4">
 
-   <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+   <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
         <div>
+            <input type="hidden" name="edition" id="edition" value="" id="edition">
             <label for="input-cpf" class="form-label">CPF (*)</label>
             <input type="text" class="form-control" name="input-cpf" value="" id="input-cpf" required  >
+             <div class="form-text mb-4">
+                Somente será aceito CPF Válido !.
+            </div>
 
+        </div>
+
+        <div>
+            <label for="input-nome" class="form-label">Nome (*)</label>
+            <input type="text" class="form-control" id="nome" name="nome"  required  >
         </div>
 
         <div>
@@ -23,9 +32,12 @@
              <label class="form-label" for="input-rg_expeditor">Órgão expeditor do RG:  (*)</label>
             <input class="form-control" type="text" id="input-rg_expeditor" required name="rg_expeditor"  >
         </div>
-        <div>
-            <label  class="form-label"for="input-rg_uf">UF do RG: (*)</label>
-            <input class="form-control" type="text" id="input-rg_uf" required name="rg_uf" >
+
+         <div>
+            <label class="form-label" for="input-rg_uf">UF do RG: (*)</label>
+            <select  class="form-control"    required name="input-rg_uf" id="input-rg_uf"  >
+                <option selected value="">Escolha um Estado</option>
+            </select>
         </div>
     </div>
 
