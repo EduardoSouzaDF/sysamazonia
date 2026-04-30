@@ -110,7 +110,7 @@
 
         <span>
             <label for="input-justification" class="form-label">Justifique a indicação: (*)</label>
-            <input type="text" name="input-justification " id="input-justification" class="hidden" required />
+            <input type="text" name="input-justification" id="input-justification" class="hidden" required />
             <div id="editor-justification" class="kt-input-text input-justification" style="height: 300px;"></div>
 
         </span>

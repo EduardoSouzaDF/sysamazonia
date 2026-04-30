@@ -320,6 +320,7 @@ const forms = document.querySelectorAll('.needs-validation')
 function sendPost(){
     const form = document.querySelector('form');
     json = JSON.parse(formParaJSON(form));
+    console.log(json);
     prepareJson = {};
     prepareJson.edition  = json.edition;
     prepareJson.nome  = json.nome;
@@ -347,12 +348,21 @@ function sendPost(){
     prepareJson.outra_rede_social  = json.outra_rede_social;
     prepareJson.resumo_curricular  = json['resumo_curricular'];
     prepareJson.category_id  = json.category;
+
     prepareJson.title  = json.titulo;
     prepareJson.coautores  = json.coautores;
     prepareJson.resumo  = json['input-resumo'];
     prepareJson.desenvolvimento  = json['input-desenvolvimento'];
     prepareJson.objetivo  = json['input-objetivo'];
     prepareJson.conclusao  = json['input-conclusao'];
+
+
+    prepareJson.name  = json['name_nominee'];
+    prepareJson.state  = json['state'];
+    prepareJson.contact_data  = json['contact-data'];
+    prepareJson.presentation  = json['input-presentation'];
+    prepareJson.activities  = json['input-activities'];
+    prepareJson.justification  = json['input-justification'];
     let formData = new FormData(form);
     console.log(formData);
     if(json.file1){

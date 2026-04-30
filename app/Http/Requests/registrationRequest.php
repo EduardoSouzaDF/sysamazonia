@@ -1,6 +1,7 @@
 <?php
 namespace App\Http\Requests;
 
+use App\Models\Category;
 use Carbon\Carbon;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Contracts\Validation\Validator;
@@ -41,23 +42,52 @@ class RegistrationRequest extends FormRequest
      */
     public function rules()
     {
-        return [
-            'candidate_id' => 'required|exists:candidates,id',
-            'category_id' => 'required|exists:categories,id',
-            'title' => 'required|string|max:255',
-            'coautores' => 'nullable|string|max:1000',
-            // 'resumo' => ['required','string',new WordCountRule(500, 1000)],
-            // 'desenvolvimento' => ['required','string',new WordCountRule(2000, 3000)],
-            // 'objetivo' => ['required','string',new WordCountRule(1000, 2000)],
-            // 'conclusao' => ['required','string',new WordCountRule(500, 1000)],
 
-            'resumo' => ['required','string',new WordCountRule(1, 1000)],
-            'desenvolvimento' => ['required','string',new WordCountRule(1, 1000)],
-            'objetivo' => ['required','string',new WordCountRule(1, 1000)],
-            'conclusao' => ['required','string',new WordCountRule(1,1000)],
+        $categoryId = $this->input('category_id');
+        $category = Category::find($categoryId);
 
-            'status' => 'nullable|integer',
-        ];
+        if($category && !$category->is_honorific){
+            //Nao horifico
+            return [
+                        'candidate_id' => 'required|exists:candidates,id',
+                        'category_id' => 'required|exists:categories,id',
+                        'title' => 'required|string|max:255',
+                        'coautores' => 'nullable|string|max:1000',
+                        'resumo' => ['required','string',new WordCountRule(500, 1000)],
+                        'desenvolvimento' => ['required','string',new WordCountRule(2000, 3000)],
+                        'objetivo' => ['required','string',new WordCountRule(1000, 2000)],
+                        'conclusao' => ['required','string',new WordCountRule(500, 1000)],
+
+                        // 'resumo' => ['required','string',new WordCountRule(1, 1000)],
+                        // 'desenvolvimento' => ['required','string',new WordCountRule(1, 1000)],
+                        // 'objetivo' => ['required','string',new WordCountRule(1, 1000)],
+                        // 'conclusao' => ['required','string',new WordCountRule(1,1000)],
+
+                        'status' => 'nullable|integer',
+                    ];
+        }else{
+                return [
+                            'candidate_id' => 'required|exists:candidates,id',
+                            'category_id' => 'required|exists:categories,id',
+                            'name' => 'required|string|max:255',
+                            'state' => 'required|string|max:255',
+                            'contact_data' => 'required|string|max:255',
+
+
+                            'presentation' => ['required','string',new WordCountRule(200, 1000)],
+                            'activities' => ['required','string',new WordCountRule(200, 1000)],
+                            'justification' => ['required','string',new WordCountRule(200, 1000)],
+                            'conclusao' => ['required','string',new WordCountRule(200,1000)],
+
+
+                            // 'presentation' => ['required','string',new WordCountRule(1, 1000)],
+                            // 'activities' => ['required','string',new WordCountRule(1, 1000)],
+                            // 'justification' => ['required','string',new WordCountRule(1, 1000)],
+                            // 'conclusao' => ['required','string',new WordCountRule(1,1000)],
+                        ];
+        }
+
+
 
     }
 
@@ -75,20 +105,21 @@ class RegistrationRequest extends FormRequest
             'category_id.exists' => 'A categoria selecionada não existe.',
             'title.required' => 'O campo título é obrigatório.',
             'title.string' => 'O título deve ser um texto válido.',
-            'coautores.string' => 'Os coautores devem ser um texto válido.',
-            'resumo.required' => 'O campo resumo é obrigatório.',
-            'resumo.string' => 'O resumo deve ser um texto válido.',
-            'resumo.string' => 'O resumo deve ser um texto válido.',
-            'desenvolvimento.required' => 'O campo desenvolvimento é obrigatório.',
-            'desenvolvimento.string' => 'O desenvolvimento deve ser um texto válido.',
-            'desenvolvimento.max' => 'O desenvolvimento não pode exceder 5000 caracteres.',
-            'objetivo.required' => 'O campo objetivo é obrigatório.',
-            'objetivo.string' => 'O objetivo deve ser um texto válido.',
-            'objetivo.max' => 'O objetivo não pode exceder 2000 caracteres.',
-            'conclusao.required' => 'O campo conclusão é obrigatório.',
-            'conclusao.string' => 'A conclusão deve ser um texto válido.',
-            'status.integer' => 'O status deve ser um número inteiro.',
-            'status.in' => 'O status deve ser 0 (rascunho), 1 (pendente), 2 (aprovado) ou 3 (rejeitado).',
+
+            'name.required' => 'O campo nome é obrigatório.',
+            'name.string' => 'O nome deve ser um texto válido.',
+
+            'state.required' => 'O campo Estado é obrigatório.',
+
+            'contact_data.required' => 'O campo Dados de Contato é obrigatório.',
+            'contact_data.string' => 'O campo Dados de Contato deve ser um texto válido.',
+
+
+            'presentation.required' => 'O campo Apresentação do(a) Indicado(a) é obrigatório.',
+            'presentation.string' => 'O campo Apresentação do(a) Indicado(a) deve ser um texto válido.',
+            'presentation.max' => 'O campo Apresentação do(a) Indicado(a) não pode exceder 1000 caracteres.',
+            'presentation.min' => 'O campo Apresentação do(a) Indicado(a) deverá ter no mínimo 200 caracteres.',
+
         ];
     }
 

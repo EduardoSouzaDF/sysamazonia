@@ -6,15 +6,18 @@ use App\Http\Controllers\Controller;
 use App\Http\Requests\CandidateRequest;
 use App\Http\Requests\RegistrationRequest;
 use App\Models\Candidate;
+use App\Models\Category;
 use App\Models\Edition;
+use App\Models\Nominee;
 use App\Models\Registration;
 use App\Models\RegistrationFile;
+use App\Notifications\RegistrationProtocol;
+use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Crypt;
-use Illuminate\Support\Facades\Storage;
-use Carbon\Carbon;
 use Illuminate\Support\Facades\Notification;
-use App\Notifications\RegistrationProtocol;
+use Illuminate\Support\Facades\Storage;
+
 class EditionController extends Controller
 {
     public function registration(Request $request)
@@ -91,7 +94,17 @@ class EditionController extends Controller
     public function registrationSave($candidate)
     {
         $registrationRequest = app(RegistrationRequest::class);
-        $registration = new Registration($registrationRequest->validated());
+
+
+        $categoryId = $this->decript(request()->input('category'));
+        $category = Category::find($categoryId);
+
+        if($category && !$category->is_honorific){
+             $registration = new Registration($registrationRequest->validated());
+        }else{
+             $registration = new Nominee($registrationRequest->validated());
+        }
+
         $registration->status = 1;
 
         $registration->protocol = Carbon::now()->year.'-'.$registration->candidate_id.'-'.$registration->category_id.'-'.$candidate['cpf'];
@@ -138,8 +151,7 @@ class EditionController extends Controller
             $candidate->save();
             $response = $candidate->toArray();
         } else {
-            $a = $candidate->get();
-            $response = $a[0]->toArray();
+            $response = $candidate->toArray();
 
         }
 
