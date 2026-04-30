@@ -269,12 +269,17 @@ function checkhasRegistrationActive() {
         type: "GET",
         dataType: "json",
         success: function (res) {
+
+
             showForm();
             setTimeout(()=>{
                 loadSelects(res);
                 setFormValidation();
                   $('#edition').attr('value',res.data.id) ;
+                  $('#linkRegulamento').attr('href',res.data.regulation_file_path)
             },2000);
+
+            ;
 
 
         },
@@ -295,8 +300,8 @@ function setFormValidation(){
 
 $('form input,select').on('change',()=>{
     const forms = document.querySelector('.needs-validation');
-
-    if(!forms.checkValidity()){
+    let regulamento = $('input[name="regulamento"]').is(':checked');
+    if(!forms.checkValidity() || !regulamento){
         $('.btn-success').prop('disabled', true);
         console.log(verificarErros());
     }else{
@@ -378,7 +383,7 @@ function sendPost(){
     }
 
     formData.append('data', JSON.stringify(prepareJson));
-
+    $('.btn-success').prop('disabled', true);
     $.ajax({
         url: 'https://sysamazonia.test/api/registration',
         type: 'POST',
@@ -393,8 +398,10 @@ function sendPost(){
             $("sl-tab[panel='personal']").click();
             notify('Inscrição Realizada! Verifique seu Email!','success','info-circle',90000000);
             notify('Protocolo:'+protocolo,'info','info-circle',90000000);
+            $('.btn-success').prop('disabled', false);
         },
         error: function(resp) {
+            $('.btn-success').prop('disabled', false);
             console.log(resp);
             Object.entries(resp.responseJSON.erros).forEach(([campo, mensajes]) => {
                 // Como 'mensajes' es un array, recorremos cada mensaje

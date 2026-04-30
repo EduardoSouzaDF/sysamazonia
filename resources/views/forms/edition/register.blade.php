@@ -48,6 +48,8 @@
 
       </sl-tab-panel>
 
+      <input type="checkbox" name="regulamento" > Confirmo que li o <a href="" target="__blank" id="linkRegulamento">Regulamento</a> e aceito seus termos.
+
 
     </sl-tab-group>
 
