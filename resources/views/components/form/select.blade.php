@@ -23,7 +23,7 @@
         <label class="kt-form-label">{{ $label }} {{ $required == 'true' ? '*' : '' }}</label>
     @endif
 
-    <sl-select name="{{ $name }}" value="{{ $value }}" @if ($value) filled @endif
+    <sl-select name="{{ $name }}" @required($required) @if ($value) filled @endif
         @if ($multiple) multiple clearable @endif>
         @foreach ($options as $key => $option)
             <sl-option value="{{ $key }}">{{ $option }}</sl-option>

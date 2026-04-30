@@ -15,6 +15,7 @@
         "laravel/tinker": "^2.10.1"
     },
     "require-dev": {
+        "barryvdh/laravel-ide-helper": "*",
         "fakerphp/faker": "^1.23",
         "fruitcake/laravel-debugbar": "*",
         "laravel/boost": "^1.8",

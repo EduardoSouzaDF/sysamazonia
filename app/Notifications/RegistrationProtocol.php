@@ -1,6 +1,5 @@
 <?php
 
-// app/Notifications/CustomResetPassword.php
 
 namespace App\Notifications;
 
@@ -9,20 +8,22 @@ use Illuminate\Notifications\Notification;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Notifications\Messages\MailMessage;
 
-class CustomResetPassword extends Notification implements ShouldQueue
+class RegistrationProtocol extends Notification implements ShouldQueue
 {
     use Queueable;
 
     private $token;
+    private $name;
 
     /**
      * Create a new notification instance.
      *
      * @return void
      */
-    public function __construct($token)
+    public function __construct($token, $name)
     {
         $this->token = $token;
+        $this->name = $name;
     }
 
     /**
@@ -45,11 +46,10 @@ class CustomResetPassword extends Notification implements ShouldQueue
     public function toMail($notifiable)
     {
         return (new MailMessage)
-                    ->subject('Seja Bem vindo ! Defina sua nova senha')
-                    ->greeting('Olá, ' . $notifiable->name . '!')
-                    ->line('Sua conta foi criada com sucesso!')
-                    ->line('Para acessar sua conta, por favor clique no link abaixo:')
-                    ->action('Alterar senha', route('password.reset', $this->token).'?email=' . $notifiable->email)
+                    ->subject('Inscrição Realizada !')
+                    ->greeting('Olá, ' . $this->name . '!')
+                    ->line('Sua Inscrição foi realizada com sucesso!')
+                    ->line('Favor guardar o número do   protocolo: '.$this->token.' ')
                     ->line('Se você tiver alguma dúvida, por favor não hesite em entrar em contato conosco.')
                     ->salutation('Atenciosamente,');
     }

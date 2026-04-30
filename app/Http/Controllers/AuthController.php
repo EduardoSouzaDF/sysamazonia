@@ -3,7 +3,10 @@
 namespace App\Http\Controllers;
 
 use App\Http\Controllers\Controller;
+use App\Models\Candidate;
 use App\Models\User;
+use App\Models\Registration;
+use App\Models\Edition;
 use Illuminate\Auth\Events\PasswordReset;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -103,6 +106,7 @@ class AuthController extends Controller
      */
     public function dashboard()
     {
+
         return view('dashboard', [
             'user' => Auth::user(),
         ]);

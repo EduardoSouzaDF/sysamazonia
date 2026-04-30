@@ -78,6 +78,12 @@ class MenuBuilder
                 'route' => 'admin.criteria.index',
             ],
             [
+                'title' => 'Inscrições',
+                // 'icon' => 'ki-abstract-26',
+                'icon' => 'ki-scroll',
+                'route' => 'admin.registration.index',
+            ],
+            [
                 'heading' => 'Tarefas Sincronizadas',
             ],
             [

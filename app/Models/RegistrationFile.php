@@ -7,7 +7,11 @@ use Illuminate\Database\Eloquent\Model;
 
 class RegistrationFile extends Model
 {
+
+
     use HasFactory;
+    protected $table = 'registrations_files';
+
 
     protected $fillable = [
         'registration_id',

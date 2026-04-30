@@ -114,4 +114,6 @@ class Candidate extends Model
     {
         return $this->hasMany(Nominee::class);
     }
+
+
 }

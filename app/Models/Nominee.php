@@ -21,6 +21,8 @@ class Nominee extends Model
         'presentation',
         'activities',
         'justification',
+        'protocol',
+        'status',
     ];
 
     protected $casts = [
