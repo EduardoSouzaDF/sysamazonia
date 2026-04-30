@@ -41,19 +41,20 @@ Route::middleware('guest')->group(function () {
 
     // password.reset
     Route::get('/reset-password/{token}', [AuthController::class, 'showReset'])->name('password.reset');
-    Route::post('/reset-password/{token}', [AuthController::class, 'reset'])->name('password.reset');
+    Route::post('/reset-password/{token}', [AuthController::class, 'reset'])->name('password.resets');
 
 });
 
 // Rotas autenticadas
 Route::middleware('auth')->group(function () {
-    Route::get('/', [AuthController::class, 'dashboard'])->name('dashboard');
+   Route::redirect('/', '/dashboard');
     Route::get('/dashboard', [AuthController::class, 'dashboard'])->name('dashboard');
-    Route::get('/logout', [AuthController::class, 'logout'])->name('logout');
+    // Route::get('/logouts', [AuthController::class, 'logout'])->name('logouts');
 
     Route::prefix('admin')->group(function () {
-        $middleware = ['auth', CheckAdmin::class.':admin'];
 
+        $middleware = ['auth', CheckAdmin::class.':admin'];
+    Route::get('/admin/sair', [AuthController::class, 'logout'])->middleware($middleware)->name('admin.sair');
         Route::resource('users', UserController::class)->middleware($middleware)->names([
             'index' => 'admin.users.index',
             'create' => 'admin.users.create',
