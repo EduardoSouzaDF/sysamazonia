@@ -2,7 +2,8 @@
 
    <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
         <div>
-            <input type="hidden" name="edition" id="edition" value="" id="edition">
+            <input type="hidden" name="edition" id="edition" value=""  >
+            <input type="hidden" name="candidate_id" id="candidate_id" value=""  >
             <label for="input-cpf" class="form-label">CPF (*)</label>
             <input type="text" class="form-control" name="input-cpf" value="" id="input-cpf" required  >
              <div class="form-text mb-4">

@@ -13,10 +13,9 @@
 
       <!-- Inscrição -->
       <sl-tab slot="nav" panel="register">Inscrição</sl-tab>
-
-      <!-- Documentos -->
-
       <sl-tab slot="nav" panel="documents">Documentos</sl-tab>
+
+      <sl-tab slot="nav" panel="registrations" id="registrations_tab" class="hidden">Inscrições Realizadas</sl-tab>
       <div class="alert-toast">
         <sl-alert  variant="primary" open   closable class="mt-2"  >
             <sl-icon slot="icon" name="exclamation-octagon"></sl-icon>
@@ -47,6 +46,12 @@
          @include('forms.edition.documents-tab')
 
       </sl-tab-panel>
+
+      <sl-tab-panel name="registrations">
+         @include('forms.edition.registrations-tab')
+
+      </sl-tab-panel>
+
 
       <input type="checkbox" name="regulamento" > Confirmo que li o <a href="" target="__blank" id="linkRegulamento">Regulamento</a> e aceito seus termos.
 

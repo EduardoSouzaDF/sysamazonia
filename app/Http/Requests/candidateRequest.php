@@ -3,12 +3,15 @@
 namespace App\Http\Requests;
 
 use Carbon\Carbon;
-use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Contracts\Validation\Validator;
+use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Http\Exceptions\HttpResponseException;
+use Illuminate\Support\Facades\Crypt;
 
 class CandidateRequest extends FormRequest
 {
+
+    private $decodedData = [];
     /**
      * Determine if the user is authorized to make this request.
      *
@@ -25,7 +28,7 @@ class CandidateRequest extends FormRequest
 
         if (is_string($data)) {
             $decoded = json_decode($data, true);
-
+            $this->decodedData = $decoded;
             if (json_last_error() === JSON_ERROR_NONE) {
                 // Isso joga os campos do JSON para o nível principal do Request
                 $this->merge($decoded);
@@ -40,7 +43,7 @@ class CandidateRequest extends FormRequest
      */
     public function rules()
     {
-        return [
+        $rules = [
             'nome' => 'required|string|max:255|min:5',
             'cpf' => 'required|string|unique:candidates',
             'dt_nascimento' => 'required|date',
@@ -65,6 +68,14 @@ class CandidateRequest extends FormRequest
             'outra_rede_social' => 'nullable|string|max:100',
             'resumo_curricular' => 'nullable|string|max:1000',
         ];
+
+        if (!empty($this->decodedData['candidate_id'])) {
+                $candidateId =   Crypt::decryptString($this->decodedData['candidate_id']);
+                $rules['email'] = 'required|email|unique:candidates,email,' . $candidateId;
+                $rules['cpf'] = 'required|string|unique:candidates,cpf,' . $candidateId;
+            }
+
+        return $rules;
     }
 
     /**
