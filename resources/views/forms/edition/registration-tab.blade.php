@@ -10,7 +10,7 @@
 
 @endphp
 
-<div class="grid grid-cols-1 sm:grid-cols-2 gap-4 ">
+<div class="grid grid-cols-1 sm:grid-cols-2 gap-4  categoryDiv">
     <div>
         <label class="form-label" for="input-category_id">Categoria: (*)</label>
         <select  class="form-control"    required  name="category" id="input-category_id" >

@@ -14,6 +14,35 @@
 namespace App\Models{
 /**
  * @property int $id
+ * @property string $protocol
+ * @property string $token
+ * @property string $action
+ * @property \Illuminate\Support\Carbon $expires_at
+ * @property \Illuminate\Support\Carbon|null $activated_at
+ * @property \Illuminate\Support\Carbon|null $consumed_at
+ * @property \Illuminate\Support\Carbon|null $created_at
+ * @property \Illuminate\Support\Carbon|null $updated_at
+ * @property-read \Illuminate\Database\Eloquent\Model|\Eloquent $tokenable
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|ActionToken newModelQuery()
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|ActionToken newQuery()
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|ActionToken query()
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|ActionToken valid()
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|ActionToken whereAction($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|ActionToken whereActivatedAt($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|ActionToken whereConsumedAt($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|ActionToken whereCreatedAt($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|ActionToken whereExpiresAt($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|ActionToken whereId($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|ActionToken whereProtocol($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|ActionToken whereToken($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|ActionToken whereUpdatedAt($value)
+ */
+	class ActionToken extends \Eloquent {}
+}
+
+namespace App\Models{
+/**
+ * @property int $id
  * @property \Illuminate\Support\Carbon|null $created_at
  * @property \Illuminate\Support\Carbon|null $updated_at
  * @property string $nome
@@ -265,6 +294,8 @@ namespace App\Models{
  * @property string $justification
  * @property \Illuminate\Support\Carbon|null $created_at
  * @property \Illuminate\Support\Carbon|null $updated_at
+ * @property string|null $protocol
+ * @property string|null $status
  * @property-read \App\Models\Candidate $candidate
  * @property-read \App\Models\Category $category
  * @method static \Illuminate\Database\Eloquent\Builder<static>|Nominee newModelQuery()
@@ -279,7 +310,9 @@ namespace App\Models{
  * @method static \Illuminate\Database\Eloquent\Builder<static>|Nominee whereJustification($value)
  * @method static \Illuminate\Database\Eloquent\Builder<static>|Nominee whereName($value)
  * @method static \Illuminate\Database\Eloquent\Builder<static>|Nominee wherePresentation($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|Nominee whereProtocol($value)
  * @method static \Illuminate\Database\Eloquent\Builder<static>|Nominee whereState($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|Nominee whereStatus($value)
  * @method static \Illuminate\Database\Eloquent\Builder<static>|Nominee whereUpdatedAt($value)
  */
 	class Nominee extends \Eloquent {}
@@ -299,11 +332,11 @@ namespace App\Models{
  * @property string $objetivo
  * @property string $conclusao
  * @property int $status
+ * @property string|null $protocol
  * @property-read \App\Models\Candidate $candidate
  * @property-read \App\Models\Category $category
  * @property-read \Illuminate\Database\Eloquent\Collection<int, \App\Models\RegistrationFile> $files
  * @property-read int|null $files_count
- * @method static \Illuminate\Database\Eloquent\Builder<static>|Registration byEdition($editionId)
  * @method static \Illuminate\Database\Eloquent\Builder<static>|Registration newModelQuery()
  * @method static \Illuminate\Database\Eloquent\Builder<static>|Registration newQuery()
  * @method static \Illuminate\Database\Eloquent\Builder<static>|Registration query()
@@ -317,6 +350,7 @@ namespace App\Models{
  * @method static \Illuminate\Database\Eloquent\Builder<static>|Registration whereDesenvolvimento($value)
  * @method static \Illuminate\Database\Eloquent\Builder<static>|Registration whereId($value)
  * @method static \Illuminate\Database\Eloquent\Builder<static>|Registration whereObjetivo($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|Registration whereProtocol($value)
  * @method static \Illuminate\Database\Eloquent\Builder<static>|Registration whereResumo($value)
  * @method static \Illuminate\Database\Eloquent\Builder<static>|Registration whereStatus($value)
  * @method static \Illuminate\Database\Eloquent\Builder<static>|Registration whereTitle($value)

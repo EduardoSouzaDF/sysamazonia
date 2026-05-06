@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Api;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\CandidateRequest;
 use App\Http\Requests\RegistrationRequest;
+use App\Models\ActionToken;
 use App\Models\Candidate;
 use App\Models\Category;
 use App\Models\Edition;
@@ -12,6 +13,7 @@ use App\Models\Nominee;
 use App\Models\Registration;
 use App\Models\RegistrationFile;
 use App\Notifications\RegistrationProtocol;
+use App\Notifications\RequestProtocol;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Crypt;
@@ -32,50 +34,8 @@ class EditionController extends Controller
             $request->merge(['data' => json_encode($data)]);
             $value1 = $this->checkRulesforRegistration($candidate);
             $registration = $this->registrationSave($candidate);
-            if (isset($_FILES['files']) && ! empty($_FILES['files'])) {
-                if ($request->hasFile('files')) {
-                    foreach ($request->file('files') as $file) {
-                        try {
-                            // Verifica se o arquivo é válido
-                            if (! $file->isValid()) {
-                                throw new \InvalidArgumentException( $file->getError());
-                            }
+            $this->saveFiles($registersEditionCount,$request);
 
-                            // Valida tamanho do arquivo
-                            if ($file->getSize() > 5 * 1024 * 1024) {
-                                throw new \InvalidArgumentException('Arquivo muito grande. Máximo permitido: 5MB.');
-                            }
-
-                            // Bloqueia extensões perigosas
-                            $blockedExtensions = ['php', 'exe', 'bat', 'sh', 'pl', 'py', 'jsp', 'asp', 'aspx', 'js'];
-                            $extension = strtolower($file->getClientOriginalExtension());
-
-                            if (in_array($extension, $blockedExtensions)) {
-                                throw new \InvalidArgumentException("Tipo de arquivo não permitido: .{$extension}");
-                            }
-
-                            // Salva o arquivo
-                            $path = $file->store('registrations/files/'.Crypt::decryptString($registration['id']).'/', 'private');
-
-                            // Registra no banco
-                            $registrationFile = new RegistrationFile;
-                            $registrationFile->registration_id = Crypt::decryptString($registration['id']);
-                            $registrationFile->file_name = $file->getClientOriginalName();
-                            $registrationFile->file_path = $path;
-                            $registrationFile->file_type = $file->getMimeType();
-                            $registrationFile->file_size = $file->getSize();
-                            $registrationFile->document_type = 'anexo';
-                            $registrationFile->save();
-
-                        } catch (\InvalidArgumentException $e) {
-                            return response()->json([
-                                'status' => 'error',
-                                'message' => $e->getMessage(),
-                            ], 400)->setEncodingOptions(JSON_UNESCAPED_UNICODE);
-                        }
-                    }
-                }
-            }
 
         } catch (\InvalidArgumentException $e) {
             return response()->json([
@@ -91,12 +51,60 @@ class EditionController extends Controller
 
     }
 
+    public function saveFiles($registration, Request $request){
+        if (isset($_FILES['files']) && ! empty($_FILES['files'])) {
+            if ($request->hasFile('files')) {
+                foreach ($request->file('files') as $file) {
+                    try {
+                        // Verifica se o arquivo é válido
+                        if (! $file->isValid()) {
+                            throw new \InvalidArgumentException( $file->getError());
+                        }
+
+                        // Valida tamanho do arquivo
+                        if ($file->getSize() > 5 * 1024 * 1024) {
+                            throw new \InvalidArgumentException('Arquivo muito grande. Máximo permitido: 5MB.');
+                        }
+
+                        // Bloqueia extensões perigosas
+                        $blockedExtensions = ['php', 'exe', 'bat', 'sh', 'pl', 'py', 'jsp', 'asp', 'aspx', 'js'];
+                        $extension = strtolower($file->getClientOriginalExtension());
+
+                        if (in_array($extension, $blockedExtensions)) {
+                            throw new \InvalidArgumentException("Tipo de arquivo não permitido: .{$extension}");
+                        }
+
+                        // Salva o arquivo
+                        $path = $file->store('registrations/files/'.Crypt::decryptString($registration['id']).'/', 'private');
+
+                        // Registra no banco
+                        $registrationFile = new RegistrationFile;
+                        $registrationFile->registration_id = Crypt::decryptString($registration['id']);
+                        $registrationFile->file_name = $file->getClientOriginalName();
+                        $registrationFile->file_path = $path;
+                        $registrationFile->file_type = $file->getMimeType();
+                        $registrationFile->file_size = $file->getSize();
+                        $registrationFile->document_type = 'anexo';
+                        $registrationFile->save();
+
+                    } catch (\InvalidArgumentException $e) {
+                        return response()->json([
+                            'status' => 'error',
+                            'message' => $e->getMessage(),
+                        ], 400)->setEncodingOptions(JSON_UNESCAPED_UNICODE);
+                    }
+                }
+            }
+        }
+    }
+
     public function registrationSave($candidate)
     {
         $registrationRequest = app(RegistrationRequest::class);
 
 
         $categoryId = $this->decript(request()->input('category'));
+
         $category = Category::find($categoryId);
 
         if($category && !$category->is_honorific){
@@ -106,8 +114,8 @@ class EditionController extends Controller
         }
 
         $registration->status = 1;
-
-        $registration->protocol = Carbon::now()->year.'-'.$registration->candidate_id.'-'.$registration->category_id.'-'.$candidate['cpf'];
+        $registration->save();
+        $registration->protocol = Carbon::now()->year.'-'.$registration->candidate_id.'-'.$registration->category_id.'-'.$registration->id.'-'.$candidate['cpf'];
         $registration->save();
         $email = $candidate['email'];
         $protocolToken = $registration->protocol;
@@ -151,6 +159,9 @@ class EditionController extends Controller
             $candidate->save();
             $response = $candidate->toArray();
         } else {
+            $candidateRequest = app(CandidateRequest::class);
+            $candidate->fill($candidateRequest->validated());
+            $candidate->save();
             $response = $candidate->toArray();
 
         }
@@ -204,9 +215,32 @@ class EditionController extends Controller
             $reponse = $candidate->toArray();
             $reponse['id'] = $this->encrypt($reponse['id']);
 
+            $candidatures = [];
+            $registrations = Registration::where('candidate_id',$candidate['id'])->get();
+            $nominees = Nominee::where('candidate_id',$candidate['id'])->get();
+
+            if($registrations->count()){
+               $dados = $registrations->toArray();
+
+                $dados = array_map(function ($item) {
+                    $item['id'] = $this->encrypt($item['id']);
+                    return $item;
+                }, $dados);
+                $candidatures = array_merge($candidatures, $dados);
+            }
+            if($nominees->count()){
+                $dados = $nominees->toArray();
+
+                $dados = array_map(function ($item) {
+                    $item['id'] = $this->encrypt($item['id']);
+                    return $item;
+                }, $dados);
+                $candidatures = array_merge($candidatures, $dados);
+            }
             return response()->json([
                 'status' => 'success',
                 'candidate' => $reponse,
+                'candidatures' => $candidatures
             ]);
         }
 
@@ -238,6 +272,114 @@ class EditionController extends Controller
         }
 
         return false;
+    }
+
+    public function requestTokenAction( $protocol,$actionType){
+        $token = bin2hex(random_bytes(32));
+        $expiresAt =  now()->addHours(2);
+
+        try {
+            $model = $this->getRegistrationModelByPrtocol($protocol);
+            if($model){
+                $candidate = Candidate::findOrFail($model->candidate_id);
+                $newToken =    ActionToken::create([
+                                'token' => $token,
+                                'action' => $actionType,
+                                'protocol' => $protocol,
+                                'expires_at' => $expiresAt
+                                ]);
+
+                Notification::route('mail', $candidate->email)->notify(new RequestProtocol($newToken->token,$candidate->nome,$model->protocol,$newToken->expires_at));
+                return response()->json(['message' => 'Verifique seu e-mail para confirmar a ação.'])->setEncodingOptions(JSON_UNESCAPED_UNICODE);
+            }else{
+                return response()->json(['status' => 'error',], 404);
+            }
+
+        } catch (\Throwable $th) {
+                return response()->json(['status' => $th->getMessage(),], 204);
+        }
+
+    }
+
+
+    private function getRegistrationModelByPrtocol($protocol){
+        $model = Registration::where('protocol',$protocol)->get()->first() ?? Nominee::where('protocol',$protocol)->get()->first();
+        return $model;
+    }
+
+    public function consumeTokenPost($token,Request $request){
+
+    try {
+         $action = ActionToken::where('token',$token)->first();
+        if($action->isValid()){
+
+            $model = $this->getRegistrationModelByPrtocol($action->protocol);
+            $data = $this->checkJsonDecode();
+            $data['candidate_id'] = $model->candidate_id;
+            $data['category_id'] = $model->category_id;
+            $request->merge(['data' => json_encode($data)]);
+            $registrationRequest = app(RegistrationRequest::class);
+            $model->fill($data);
+            $model->save();
+
+            $this->deleteRegistrationFiles($model);
+            $dataSaveFiles = $model->toArray();
+            $dataSaveFiles['id'] = $this->encrypt($dataSaveFiles['id']);
+            $this->saveFiles($dataSaveFiles, $request);
+
+            // $action->activate();
+            // $action->consume();
+            return response()->json(['status' => 'success','message' => 'Registro Alterado.'], 200);
+        }
+    } catch (\Throwable $th) {
+         return response()->json(['status' => 'error','message' => $th->getMessage()], 204);
+    }
+
+    }
+
+    public function consumeToken($token){
+        try {
+            $action = ActionToken::where('token',$token)->first();
+            if($action->isValid()){
+                if($action->action == 'delete'){
+                    $action->activate();
+                    $action->consume();
+                    $model = $this->getRegistrationModelByPrtocol($action->protocol);
+                    if ($model instanceof Registration) {
+                        $this->deleteRegistrationFiles($model);
+                    }
+                    $model->delete();
+                    return response()->json(['status' => 'success','message' => 'Registro deletado.'], 200);
+                }else if($action->action == "edit"){
+                    $model = $this->getRegistrationModelByPrtocol($action->protocol);
+                    $model->candidate_id = $this->encrypt($model->candidate_id);
+                    $model->category_id = $this->encrypt($model->category_id);
+                    $model->id = $this->encrypt($model->id);
+                    $model->candidate_id = $this->encrypt($model->candidate_id);
+                    return response()->json(['status' => 'edit','message' => 'Atualização de Inscrição', 'candidature' => $model], 200);
+                }
+            }else{
+                return response()->json(['status' => 'error','message' => 'Token Expirado !'], 204);
+            }
+        } catch (\Throwable $th) {
+        return response()->json(['status' => 'error','message' => $th->getMessage()], 204);
+        }
+
+    }
+
+    private function deleteRegistrationFiles(Registration $registration)
+    {
+        $files = $registration->files; // Supondo que exista um relacionamento "files"
+
+        foreach ($files as $file) {
+            // Remover arquivo do storage
+            if (Storage::disk('private')->exists($file->file_path)) {
+                Storage::disk('private')->delete($file->file_path);
+            }
+
+            // Deletar registro do banco
+            $file->delete();
+        }
     }
 
     private function encrypt(string $value)
