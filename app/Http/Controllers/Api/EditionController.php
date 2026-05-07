@@ -34,7 +34,7 @@ class EditionController extends Controller
             $request->merge(['data' => json_encode($data)]);
             $value1 = $this->checkRulesforRegistration($candidate);
             $registration = $this->registrationSave($candidate);
-            $this->saveFiles($registersEditionCount,$request);
+            $this->saveFiles($registration,$request);
 
 
         } catch (\InvalidArgumentException $e) {

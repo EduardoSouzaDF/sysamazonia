@@ -1,4 +1,5 @@
-let urlAmazonia = 'https://sysamazonia.test';
+let urlAmazonia = 'http://hmsisamazonia.ibict.br';
+ urlAmazonia = 'https://sysamazonia.test';
 
 function addCss(url) {
     return new Promise((resolve, reject) => {
@@ -24,7 +25,7 @@ function addJs(src, type = "text/javascript") {
     });
 }
 $(document).ready(async function() {
-    const jsFiles = ["https://cdn.jsdelivr.net/npm/summernote@0.9.0/dist/summernote-lite.min.js", urlAmazonia+"/resources/comp_themes/ktui/ktui.min.js", urlAmazonia+"/public/js/jquery.maskedinput.min.js", "https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/js/bootstrap.bundle.min.js", "https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4",
+    const jsFiles = ["https://cdn.jsdelivr.net/npm/summernote@0.9.0/dist/summernote-lite.min.js", urlAmazonia+"/build/assets/ktui.min-55m0iKcC.js", urlAmazonia+"/js/jquery.maskedinput.min.js", "https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/js/bootstrap.bundle.min.js", "https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4",
         // 'https://cdn.jsdelivr.net/npm/@shoelace-style/shoelace@2.20.1/cdn/shoelace.js'
     ];
     const cssFiles = ["https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css", "https://cdn.jsdelivr.net/npm/@shoelace-style/shoelace@2.20.1/cdn/themes/light.css", "https://cdn.jsdelivr.net/npm/summernote@0.9.0/dist/summernote-lite.min.css", ];
