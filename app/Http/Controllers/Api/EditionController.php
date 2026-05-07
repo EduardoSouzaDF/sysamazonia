@@ -120,7 +120,7 @@ class EditionController extends Controller
         $email = $candidate['email'];
         $protocolToken = $registration->protocol;
 
-        Notification::route('mail', $email)->notify(new RegistrationProtocol($protocolToken,$candidate['nome']));
+        // Notification::route('mail', $email)->notify(new RegistrationProtocol($protocolToken,$candidate['nome']));
 
         $response = $registration->toArray();
         $response['id'] = $this->encrypt($response['id']);
