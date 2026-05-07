@@ -1,4 +1,5 @@
 let urlAmazonia = 'http://hmsisamazonia.ibict.br';
+ urlAmazonia = 'https://sysamazonia.test';
 
 function addCss(url) {
     return new Promise((resolve, reject) => {
