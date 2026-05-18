@@ -6,9 +6,20 @@ sl-tab[active]::part(base) {
 }
 
 sl-alert::part(base) {
-  width: 100vw;       /* Altera a largura (padrão costuma ser menor) */
+  width: 40vw;       /* Altera a largura (padrão costuma ser menor) */
   font-size: 1.2rem;   /* Aumenta o tamanho do texto interno */
   padding: 1rem;       /* Aumenta o espaçamento interno */
+}
+
+/* Força o container de notificações a ficar no topo e à frente da navbar */
+.sl-toast-stack {
+     width: 90vw;       /* Alt
+  top: 10px !important;       /* Distância do topo da tela */
+  right: 20px !important;     /* Distância do canto direito */
+  bottom: auto !important;    /* Garante que não puxe para baixo */
+
+  /* Um valor maior que o 1030 da .navbar-fixed-top do Bootstrap */
+  z-index: 99999 !important;
 }
 </style>
 <form enctype="multipart/form-data" id="formRegistration" enctype="multipart/form-data" class="needs-validation" >
