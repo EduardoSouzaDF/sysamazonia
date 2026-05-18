@@ -1,3 +1,4 @@
+
 <div class="  gap-4">
 
    <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
@@ -52,9 +53,11 @@
             <label class="form-label" for="input-sexo">Sexo: (*)</label>
             <select  class="form-control"  required="true" required id="input-sexo" name="sexo">
                 <option value="" >Selecione</option>
-                <option value="M" >Masculino</option>
-                <option value="F">Feminino</option>
-                <option value="O">Outro</option>
+                <option value="Mulher (transgênero)">Mulher (transgênero)</option>
+                <option value="Homem">Homem</option>
+                <option value="Homem (transgênero)">Homem (transgênero)</option>
+                <option value="Não binário (identidade que não é estritamente homem ou mulher)">Não binário (identidade que não é estritamente homem ou mulher)</option>
+                <option value="Prefiro não informar">Prefiro não informar</option>
             </select>
         </div>
 

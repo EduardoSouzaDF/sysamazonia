@@ -194,7 +194,7 @@ class EditionController extends Controller
         $edition = $this->getEdition();
         if ($edition) {
             $edition = $this->unsetPreventData($edition);
-            $edition['regulation_file_path'] = url(Storage::url($edition['regulation_file_path']));
+            $edition['regulation_file_path'] = config('app.url').'/'.$edition['regulation_file_path'];
 
             return response()->json([
                 'status' => 'success',

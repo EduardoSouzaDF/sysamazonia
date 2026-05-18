@@ -1,12 +1,17 @@
 @php
+
     $escolaridade = [
-        'Ensino Fundamental' => 'Ensino Fundamental',
-        'Ensino Médio' => 'Ensino Médio',
-        'Ensino Superior' => 'Ensino Superior',
-        'Ensino Fundamental Incompleto' => 'Ensino Fundamental Incompleto',
-        'Ensino  Médio Incompleto' => 'Ensino  Médio Incompleto',
-        'Ensino Superior Incompleto' => 'Ensino Superior Incompleto',
-    ];
+    'Médio - Incompleto' => 'Médio - Incompleto',
+    'Médio - Completo' => 'Médio - Completo',
+    'Superior - Incompleto' => 'Superior - Incompleto',
+    'Superior - Completo' => 'Superior - Completo',
+    'Pós-graduação (Lato sensu) - Incompleto' => 'Pós-graduação (Lato sensu) - Incompleto',
+    'Pós-graduação (Lato sensu) - Completo' => 'Pós-graduação (Lato sensu) - Completo',
+    'Pós-graduação (Stricto sensu, nível mestrado) - Incompleto' => 'Pós-graduação (Stricto sensu, nível mestrado) - Incompleto',
+    'Pós-graduação (Stricto sensu, nível mestrado) - Completo' => 'Pós-graduação (Stricto sensu, nível mestrado) - Completo',
+    'Pós-graduação (Stricto sensu, nível doutor) - Incompleto' => 'Pós-graduação (Stricto sensu, nível doutor) - Incompleto',
+    'Pós-graduação (Stricto sensu, nível doutor) - Completo' => 'Pós-graduação (Stricto sensu, nível doutor) - Completo',
+];
 
 @endphp
 

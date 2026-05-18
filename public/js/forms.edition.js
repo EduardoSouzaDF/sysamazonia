@@ -1,4 +1,5 @@
 let urlAmazonia = 'https://hmsisamazonia.ibict.br';
+// let urlAmazonia = 'https://sysamazonia.test';
 
 function addCss(url) {
     return new Promise((resolve, reject) => {
@@ -144,8 +145,14 @@ function prepareForm() {
     getUfCidadeData()
     $("#input-cpf").mask("999.999.999-99");
     $("#input-celular").mask("(99) 99999-999?9");
-    $("#input-cpf").change(function(e) {
-        let value = e.target.value;
+    $("#input-cpf").keyup(function(e) {
+        var valorSemMascara = $('#input-cpf').val().replace(/\D/g, '');
+        if(valorSemMascara.length == 11){
+            if (!validarCPF(e.target.value)) {
+                $('#input-cpf').val('');
+                notify('CPF Inválido','danger');
+            }else{
+let value = e.target.value;
         if (value.length == 14) {
             $.ajax({
                 url: urlAmazonia + "/api/candidato/" + value, // Substitua pela URL correta
@@ -204,6 +211,10 @@ function prepareForm() {
                 }
             });
         }
+            }
+        }
+
+
     });
 }
 
@@ -245,11 +256,8 @@ function checkhasRegistrationActive() {
 }
 
 function setFormValidation() {
-    $('#input-cpf').change((e) => {
-        if (!validarCPF(e.target.value)) {
-            $('#input-cpf').val('');
-        }
-    })
+
+
     $('form input,select').on('change', () => {
         const forms = document.querySelector('.needs-validation');
         let regulamento = $('input[name="regulamento"]').is(':checked');
@@ -276,6 +284,14 @@ function sendPost() {
     json = JSON.parse(formParaJSON(form));
     prepareJson = {};
 
+    if(!$('.Honorific').hasClass('hidden')){
+        if($('#nome').val() == $("#input-name").val()){
+            notify('Nome do(a) Indicado(a) tem que ser diferente do nome Pessoal ( seu nome )','danger',90000000000000);
+            $("#input-name").val('');
+            $('#nome').val('');
+            return false;
+        }
+    }
 
       const urlParams = new URLSearchParams(window.location.search);
     const token = urlParams.get('token');
@@ -533,7 +549,7 @@ function escapeHtml(html) {
     return div.innerHTML;
 }
 // Custom function to emit toast notifications
-function notify(message, variant = 'danger', icon = 'info-circle', duration = 3000) {
+function notify(message, variant = 'danger', icon = 'info-circle', duration = 9999999999999) {
     const alert = Object.assign(document.createElement('sl-alert'), {
         variant,
         closable: true,

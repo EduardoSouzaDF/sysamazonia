@@ -1,8 +1,20 @@
 
+<style>
+sl-tab[active]::part(base) {
+    background-color: #0284c7; /* Altere para a sua cor desejada */
+    color: white;            /* Altere a cor do texto para dar contraste, se necessário */
+}
+
+sl-alert::part(base) {
+  width: 100vw;       /* Altera a largura (padrão costuma ser menor) */
+  font-size: 1.2rem;   /* Aumenta o tamanho do texto interno */
+  padding: 1rem;       /* Aumenta o espaçamento interno */
+}
+</style>
 <form enctype="multipart/form-data" id="formRegistration" enctype="multipart/form-data" class="needs-validation" >
 <sl-card class="card-footer w-full min-w-full">
 
-    <sl-tab-group >
+    <sl-tab-group noScrollControls="true" >
       <!-- Dados Pessoais -->
       <sl-tab slot="nav" panel="personal">Dados Pessoais</sl-tab>
 
@@ -53,7 +65,7 @@
       </sl-tab-panel>
 
 
-      <input type="checkbox" name="regulamento" > Confirmo que li o <a href="" target="__blank" id="linkRegulamento">Regulamento</a> e aceito seus termos.
+      <input type="checkbox" name="regulamento" > Confirmo que li o <a href="" style="text-decoration-color: red; color:red" target="__blank" id="linkRegulamento">Regulamento</a> e aceito seus termos.
 
 
     </sl-tab-group>
