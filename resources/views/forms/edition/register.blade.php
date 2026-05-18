@@ -21,6 +21,11 @@ sl-alert::part(base) {
   /* Um valor maior que o 1030 da .navbar-fixed-top do Bootstrap */
   z-index: 99999 !important;
 }
+
+.page-content {
+    background-color: unset !important;
+    padding: 0px !important;
+}
 </style>
 <form enctype="multipart/form-data" id="formRegistration" enctype="multipart/form-data" class="needs-validation" >
 <sl-card class="card-footer w-full min-w-full">
