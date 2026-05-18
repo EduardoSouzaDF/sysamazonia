@@ -59,7 +59,7 @@
     </sl-tab-group>
 
     <div slot="footer" class="flex justify-between gap-x-2">
-        <button type="submit" disabled class="btn w-full  btn-success hidden">Enviar inscrição</button>
+        <button type="submit" disabled class="btn w-full  btn-success">Enviar inscrição</button>
     </div>
   </sl-card>
 

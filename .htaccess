@@ -1,0 +1,2 @@
+Header set Access-Control-Allow-Origin "http://hmamazonia.ibict.br"
+Header set Access-Control-Allow-Private-Network "true"

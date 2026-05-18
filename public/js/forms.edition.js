@@ -1,5 +1,4 @@
-let urlAmazonia = 'http://hmsisamazonia.ibict.br';
- urlAmazonia = 'https://sysamazonia.test';
+let urlAmazonia = 'https://hmsisamazonia.ibict.br';
 
 function addCss(url) {
     return new Promise((resolve, reject) => {
@@ -9,7 +8,8 @@ function addCss(url) {
         link.href = url;
         link.onload = () => resolve();
         link.onerror = () => reject(new Error(`Failed to load CSS: ${url}`));
-        document.head.appendChild(link);
+        document.head.insertBefore(link, document.head.firstChild);
+        //document.head.appendChild(link);
     });
 }
 
@@ -213,12 +213,12 @@ function showForm() {
         type: "GET",
         dataType: "html",
         success: function(data) {
-            $("#formularioRegistroContainer").html(data);
+            $(".sistema").html(data);
             prepareForm();
         },
         error: function(xhr, status, error) {
             console.error("Erro ao carregar conteúdo:", error);
-            $("#formularioRegistroContainer").html("<p>Erro ao carregar o formulário.</p>", );
+            $(".sistema").html("<p>Erro ao carregar o formulário.</p>", );
         },
     });
 }
