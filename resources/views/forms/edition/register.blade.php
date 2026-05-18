@@ -6,14 +6,14 @@ sl-tab[active]::part(base) {
 }
 
 sl-alert::part(base) {
-  width: 40vw;       /* Altera a largura (padrão costuma ser menor) */
+  width: 80vw;       /* Altera a largura (padrão costuma ser menor) */
   font-size: 1.2rem;   /* Aumenta o tamanho do texto interno */
   padding: 1rem;       /* Aumenta o espaçamento interno */
 }
 
 /* Força o container de notificações a ficar no topo e à frente da navbar */
 .sl-toast-stack {
-     width: 90vw;       /* Alt
+     width: 80vw;       /* Alt
   top: 10px !important;       /* Distância do topo da tela */
   right: 20px !important;     /* Distância do canto direito */
   bottom: auto !important;    /* Garante que não puxe para baixo */
