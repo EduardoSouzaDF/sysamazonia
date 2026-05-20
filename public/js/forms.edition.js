@@ -43,7 +43,7 @@ $(document).ready(async function() {
         "https://cdn.jsdelivr.net/npm/@shoelace-style/shoelace@2.20.1/cdn/themes/light.css",
         "https://cdn.jsdelivr.net/npm/summernote@0.9.0/dist/summernote-lite.min.css",
         "https://cdn.jsdelivr.net/npm/summernote@0.9.0/dist/summernote-lite.min.css",
-        urlAmazonia+"/build/assets/slidercaptcha-BJFKN9QS.css"
+         urlAmazonia+"/css/slidercaptcha.min.css",
     ];
     try {
         await Promise.all(jsFiles.map(addJs));

@@ -9,7 +9,6 @@ export default defineConfig({
                 'resources/css/app.css',
                     'resources/comp_themes/keenicons/styles.bundle.css',
                     'resources/css/styles.css',
-                    'resources/css/slidercaptcha.min.css',
                     'resources/comp_themes/apexcharts/apexcharts.css',
                     'resources/js/core.bundle.js',
                     'resources/comp_themes/apexcharts/apexcharts.min.js',
