@@ -19,7 +19,7 @@
 
     <div>
         <div>
-            <label class="form-label" for="input-Estado">Escolaridade</label>
+            <label class="form-label" for="input-Estado">Escolaridade (*)</label>
             <select  class="form-control"    required name="escolaridade" id="escolaridade"  >
                   <option selected value="">Escolha  </option>
                   @foreach ($escolaridade as $option  )

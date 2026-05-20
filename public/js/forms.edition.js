@@ -1,5 +1,6 @@
 let urlAmazonia = 'https://hmsisamazonia.ibict.br';
 // let urlAmazonia = 'https://sysamazonia.test';
+let hasRegistration = null;
 
 function addCss(url) {
     return new Promise((resolve, reject) => {
@@ -26,18 +27,29 @@ function addJs(src, type = "text/javascript") {
     });
 }
 $(document).ready(async function() {
-    const jsFiles = ["https://cdn.jsdelivr.net/npm/summernote@0.9.0/dist/summernote-lite.min.js", urlAmazonia+"/build/assets/ktui.min-55m0iKcC.js", urlAmazonia+"/js/jquery.maskedinput.min.js", "https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/js/bootstrap.bundle.min.js", "https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4",
+    const jsFiles = [
+        "https://cdn.jsdelivr.net/npm/summernote@0.9.0/dist/summernote-lite.min.js",
+        urlAmazonia+"/build/assets/ktui.min-55m0iKcC.js",
+         urlAmazonia+"/js/jquery.maskedinput.min.js",
+         urlAmazonia+"/js/longbow.slidercaptcha.min.js",
+        "https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/js/bootstrap.bundle.min.js",
+        "https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4",
+        "https://www.jqueryscript.net/demo/image-puzzle-slider-captcha/disk/longbow.slidercaptcha.js",
+        // "https://www.google.com/recaptcha/enterprise.js?render=6LcMs_MsAAAAAI5zxkpRDeWOi61gG9QP8z4msiOV"
         // 'https://cdn.jsdelivr.net/npm/@shoelace-style/shoelace@2.20.1/cdn/shoelace.js'
     ];
-    const cssFiles = ["https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css", "https://cdn.jsdelivr.net/npm/@shoelace-style/shoelace@2.20.1/cdn/themes/light.css", "https://cdn.jsdelivr.net/npm/summernote@0.9.0/dist/summernote-lite.min.css", ];
+    const cssFiles = [
+        "https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css",
+        "https://cdn.jsdelivr.net/npm/@shoelace-style/shoelace@2.20.1/cdn/themes/light.css",
+        "https://cdn.jsdelivr.net/npm/summernote@0.9.0/dist/summernote-lite.min.css",
+        "https://cdn.jsdelivr.net/npm/summernote@0.9.0/dist/summernote-lite.min.css",
+        urlAmazonia+"/build/assets/slidercaptcha-BJFKN9QS.css"
+    ];
     try {
         await Promise.all(jsFiles.map(addJs));
         await Promise.all(cssFiles.map(addCss));
         console.log("Todos os scripts e estilos foram carregados!");
         InitForm() ;
-
-
-
     } catch (error) {
         console.error("Erro ao carregar algum recurso:", error);
     }
@@ -152,7 +164,7 @@ function prepareForm() {
                 $('#input-cpf').val('');
                 notify('CPF Inválido','danger');
             }else{
-let value = e.target.value;
+        let value = e.target.value;
         if (value.length == 14) {
             $.ajax({
                 url: urlAmazonia + "/api/candidato/" + value, // Substitua pela URL correta
@@ -192,7 +204,7 @@ let value = e.target.value;
                         setDateField('#input-dt_nascimento', data.candidate.dt_nascimento);
                         const switchEl = document.querySelector('sl-switch');
                         switchEl.checked = data.candidate.whatsapp;
-                        initDrawerRegistrations(data.candidatures);
+
                     } else {
                         $('#input-email').val('');
                         $('#input-nome').val('');
@@ -225,12 +237,101 @@ function showForm() {
         dataType: "html",
         success: function(data) {
             $(".sistema").html(data);
-            prepareForm();
+
+            const urlParams = new URLSearchParams(window.location.search);
+            const token = urlParams.get('token');
+            if (token !== null) {
+               $('#recaptchaInit').remove();
+               $('.formRegistration ').removeClass('hidden');
+               InitRegistrationsRequests();
+
+            }else{
+            checkCPFInicial();
+            sliderCaptcha({
+            id: 'captcha',
+            repeatIcon: 'fa fa-redo',
+            loadingText: 'Carregando...',
+            failedText: 'Tente Novamente',
+            barText: 'Mova a peça corretamente',
+            onSuccess: function () {
+                var handler = setTimeout(function () {
+                     value =  $("#input-cpf").val();
+                     $.ajax({
+
+                            url: urlAmazonia + "/api/candidato/" + value, // Substitua pela URL correta
+                            type: "GET",
+                            dataType: "json",
+                            success: function(data) {
+                                console.log(data);
+                                if (data.status === 'success') {
+                                    $('#recaptchaInit').remove();
+                                    if(data.candidatures.length){
+                                        $(".chooseAction").removeClass('hidden');
+                                        $("#btnNovaInscrição").bind('click',()=>{
+                                            $(".chooseAction").remove();
+                                            $(".formRegistration").removeClass('hidden');
+                                            gotoForm(value);
+                                        });
+
+                                        $("#btnNovaInscrição").bind('click',()=>{
+                                            $(".chooseAction").remove();
+                                            $(".formRegistration").removeClass('hidden');
+                                            gotoForm(value);
+                                        });
+
+                                        $("#btnEditarInscrição").bind('click',()=>{
+                                            console.log(data);
+                                            $(".chooseAction").remove();
+                                            $(".formRegistration").removeClass('hidden');
+                                        initDrawerRegistrations(data.candidatures);
+                                        });
+                                    }else{
+                                          $(".chooseAction").removeClass('hidden');
+                                            $(".chooseAction").remove();
+                                            $(".formRegistration").removeClass('hidden');
+                                            gotoForm(value);
+                                    }
+
+
+
+
+
+
+
+                                }
+                            },
+                            error: function(data) {
+                                $('#recaptchaInit').remove();
+                                $(".formRegistration").removeClass('hidden');
+                                gotoForm(value);
+                            }
+                        });
+
+
+                }, 500);
+            }
+        });
+            }
+
+
         },
         error: function(xhr, status, error) {
             console.error("Erro ao carregar conteúdo:", error);
             $(".sistema").html("<p>Erro ao carregar o formulário.</p>", );
         },
+    });
+}
+
+function checkCPFInicial(){
+     $("#input-cpf").mask("999.999.999-99");
+    $("#input-cpf").keyup(function(e) {
+        var valorSemMascara = $('#input-cpf').val().replace(/\D/g, '');
+        if(valorSemMascara.length == 11){
+            if (!validarCPF(e.target.value)) {
+                $('#input-cpf').val('');
+                notify('CPF Inválido','danger');
+            }
+        }
     });
 }
 
@@ -240,17 +341,11 @@ function checkhasRegistrationActive() {
         type: "GET",
         dataType: "json",
         success: function(res) {
+            hasRegistration = res;
             showForm();
-            setTimeout(() => {
-                loadSelects(res);
-                setFormValidation();
-                $('#edition').attr('value', res.data.id);
-                $('#linkRegulamento').attr('href', res.data.regulation_file_path);
-                InitRegistrationsRequests();
-            }, 2000);;
         },
         error: function(xhr, status, error) {
-            window.location = "https://amazonia.ibict.br/insc-enceradas/";
+            // window.location = "https://amazonia.ibict.br/insc-enceradas/";
         },
     });
 }
@@ -284,7 +379,7 @@ function sendPost() {
     json = JSON.parse(formParaJSON(form));
     prepareJson = {};
 
-    if(!$('.Honorific').hasClass('hidden')){
+    if($('.notHonorific').hasClass('hidden')){
         if($('#nome').val() == $("#input-name").val()){
             notify('Nome do(a) Indicado(a) tem que ser diferente do nome Pessoal ( seu nome )','danger',90000000000000);
             $("#input-name").val('');
@@ -373,6 +468,7 @@ function sendUpdateAjax(formData){
         contentType: false, // ✅ CORRETO - Deixe o jQuery definir automaticamente
         cache: false, // ✅ Adicione esta linha
         success: function(response) {
+
             if(response.status == 'edit'){
                 editProtocol(response.candidature);
             }else{
@@ -399,6 +495,8 @@ function sendPonstAjax(formData){
             $('form').trigger("reset");
             resetEditores();
             $("sl-tab[panel='personal']").click();
+
+            $('#formRegistration').remove();
             notify('Inscrição Realizada! Verifique seu Email!', 'success', 'info-circle', 90000000);
             notify('Protocolo:' + protocolo, 'info', 'info-circle', 90000000);
             $('.btn-success').prop('disabled', false);
@@ -580,6 +678,7 @@ function validarCPF(cpf) {
 }
 
 function InitRegistrationsRequests() {
+    console.log('InitRegistrationsRequests');
     const urlParams = new URLSearchParams(window.location.search);
     const token = urlParams.get('token');
     if (token !== null) {
@@ -587,11 +686,19 @@ function InitRegistrationsRequests() {
             url: urlAmazonia + '/api/verifyToken/' + token,
             type: 'GET',
             success: function(response) {
-                if(response.status == 'edit'){
-                    editProtocol(response.candidature);
+                if(response !== undefined){
+                    if(response.status == 'edit'){
+                        editProtocol(response.candidature);
+                        setFormValidation();
+                    }else{
+                        $('.formRegistration').addClass('hidden');
+                        notify(response.message, 'success');
+                    }
                 }else{
-                    notify(response.message, 'success');
+                    const urlSemParametros = window.location.origin + window.location.pathname;
+                    window.location = urlSemParametros;
                 }
+
 
             },
             error: function(resp) {
@@ -603,7 +710,18 @@ function InitRegistrationsRequests() {
 
 function initDrawerRegistrations(candidaturas) {
     if (candidaturas.length) {
+        $(".alert-toast  ").remove();
+        $(".confirmRegulamento").remove();
+        $(".footerPage").remove();
         $('#registrations_tab').removeClass('hidden');
+        $('#registrations_tab').click();
+        $('#tab-personal').addClass('hidden');
+        $('#tab-addres').addClass('hidden');
+        $('#tab-social').addClass('hidden');
+        $('#tab-register').addClass('hidden');
+        $('#tab-documents').addClass('hidden');
+
+
         popularLista(candidaturas);
     }
 }
@@ -612,17 +730,12 @@ function popularLista(listaDeItens = []) {
     const container = document.querySelector('#inscricoesDiv');
     // Mapeia o array para HTML e junta tudo em uma string
     container.innerHTML = listaDeItens.map(item => `
-    <div class="btn-group mb-4" role="group" aria-label="Button group with nested dropdown">
+    <div class="btn-group mb-4 w-full" role="group" >
     <button type="button" class="btn btn-primary">Titulo: ${item['title'] || item['name']}  &nbsp;&nbsp;&nbsp; Protocolo: ${item['protocol']}</button>
-    <div class="btn-group dropend" role="group">
-        <button type="button" class="btn btn-primary dropdown-toggle" data-bs-toggle="dropdown" aria-expanded="false">
-        Ações
-        </button>
-        <ul class="dropdown-menu">
-        <li><a class="dropdown-item" onClick="sendRequestprotocol('${item['protocol']}','edit');" >Editar</a></li>
-        <li><a class="dropdown-item" onClick="sendRequestprotocol('${item['protocol']}','delete');"  >Excluir</a></li>
-        </ul>
-    </div>
+    <button type="button" class="btn btn-primary">Titulo: ${item['title'] || item['name']}  &nbsp;&nbsp;&nbsp; Protocolo: ${item['protocol']}</button>
+    <button type="button" onClick="sendRequestprotocol('${item['protocol']}','edit');"  class="btn btn-info">Editar</button>
+    <button type="button" onClick="sendRequestprotocol('${item['protocol']}','delete');" class="btn btn-danger">Excluir</button>
+
     </div>
   `).join('');
 }
@@ -700,3 +813,25 @@ function editProtocol(item){
 
 
 }
+
+
+function gotoForm(cpf){
+    setTimeout(() => {
+        loadSelects(hasRegistration);
+        setFormValidation();
+        $('#edition').attr('value', hasRegistration.data.id);
+        $('#linkRegulamento').attr('href', hasRegistration.data.regulation_file_path);
+
+
+
+    }, 2000);
+    prepareForm();
+    $("#input-cpf").val(value).trigger('keyup');
+}
+
+ $('#captcha').sliderCaptcha({
+    repeatIcon: 'fa fa-redo',
+    onSuccess: function () {
+        gotoForm();
+    }
+});
