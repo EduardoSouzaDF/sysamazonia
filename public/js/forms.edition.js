@@ -497,8 +497,39 @@ function sendPonstAjax(formData){
             $("sl-tab[panel='personal']").click();
 
             $('#formRegistration').remove();
-            notify('Inscrição Realizada! Verifique seu Email!', 'success', 'info-circle', 90000000);
-            notify('Protocolo:' + protocolo, 'info', 'info-circle', 90000000);
+            $('#confirmationRegistration').removeClass('hidden');
+            console.log(response);
+
+            $('#show_protocol').html(response.data.registration.protocol);
+            $('#show_name').html(response.data.candidate.nome);
+            $('#show_category').html(response.data.registration.category.title);
+
+            if(response.data.registration.category.is_honorific){
+                $('.show_title').remove();
+                $('#show_indicate').html(response.data.registration.name);
+            }else{
+                $('.show_indicate').remove();
+                $('#show_title').html(response.data.registration.title);
+            }
+
+
+            $('#show_title').html(response.data.registration.title);
+            $('#show_title').html(response.data.registration.title);
+            let a = new Date(response.data.registration.created_at);
+            dataFormatada = a.toLocaleDateString('pt-BR');
+            $('#show_date').html(dataFormatada);
+
+             a = new Date(response.data.registration.category.modality.edition.judgment_date);
+             dataFormatada = a.toLocaleDateString('pt-BR');
+            $('#show_date_judge').html(dataFormatada);
+
+            a = new Date(response.data.registration.category.modality.edition.grant_date);
+            dataFormatada = a.toLocaleDateString('pt-BR');
+            $('#show_date_out').html(dataFormatada);
+
+
+            // notify('Inscrição Realizada! Verifique seu Email!', 'success', 'info-circle', 90000000);
+            // notify('Protocolo:' + protocolo, 'info', 'info-circle', 90000000);
             $('.btn-success').prop('disabled', false);
         },
         error: function(resp) {

@@ -105,7 +105,7 @@ class EditionController extends Controller
 
         $categoryId = $this->decript(request()->input('category'));
 
-        $category = Category::find($categoryId);
+        $category =Category::with(['modality.edition'])->find($categoryId);
 
         if($category && !$category->is_honorific){
              $registration = new Registration($registrationRequest->validated());
@@ -127,8 +127,13 @@ class EditionController extends Controller
         $response['candidate_id'] = $this->encrypt($response['candidate_id']);
         $response['category_id'] = $this->encrypt($response['category_id']);
         $response['candidate_id'] = $this->encrypt($response['candidate_id']);
+        $response['category'] = $category->toArray();
+        unset($response['category']['id']);
+        unset($response['category']['updated_at']);
         unset($response['updated_at']);
-        unset($response['created_at']);
+        unset($response['category']['modality_id']);
+        unset($response['category']['modality']['edition_id']);
+        unset($response['category']['modality']['edition']['id']);
 
         return $response;
     }

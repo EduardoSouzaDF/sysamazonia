@@ -54,9 +54,41 @@ sl-alert::part(base) {
             .refreshIcon {
                 top: -54px;
             }
+
+
+    @media print {
+    /* Esconde absolutamente tudo na página */
+    .hiddenPrint {
+        visibility: hidden;
+    }
+    }
 </style>
 <script src="https://www.google.com/recaptcha/api.js" async defer></script>
+<div class="hidden" id="confirmationRegistration">
+
+    <div class="flex flex-col items-center justify-center grow bg-center bg-no-repeat page-bg gap-4">
+          <img alt="image" class="dark:hidden max-h-[130px]" src="https://hmsisamazonia.ibict.br/images/logo.png">
+          <h5 class="mt-40">Prêmios Professos Samuel Benchimol e Banco da Amazônia de Empreendedorismo consciente</h5>
+          <h4 style="color:#3b7d2f">Protocolo</h4>
+          <h4 id="show_protocol"> </h4>
+
+          <div class="grid grid-cols-1  gap-2 w-full">
+                <span>Autor: <b  id="show_name"> </b></span>
+                <span>Categoria: <b id="show_category"></b></span>
+                <span class="show_title">Título: <b id="show_title"></b></span>
+                <span class="show_indicate">Indicado: <b id="show_indicate"></b></span>
+                <span>Data da Inscrição: <b id="show_date"></b></span>
+                <h5 style="color:#3b7d2f">Acompanhe as próximas etapas</h3>
+                <span>Data do Julgamento: <b id="show_date_judge"></b></span>
+                <span>Outorga dos Prêmios: <b id="show_date_out"></b></span>
+          </div>
+              <button type="button" onclick="window.print()"   class="btn w-full  btn-primary hiddenPrint">Imprimir</button>
+
+    </div>
+</div>
 <form enctype="multipart/form-data" id="formRegistration" enctype="multipart/form-data" class="needs-validation" >
+
+
 <div class="" id="recaptchaInit">
 
     <div class=" ">
