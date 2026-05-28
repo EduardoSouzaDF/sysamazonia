@@ -12,7 +12,7 @@
 
 <div class="grid grid-cols-1 sm:grid-cols-2 gap-4  categoryDiv">
     <div>
-        <label class="form-label" for="input-category_id">Categoria: <span class="text-red-600">(*)</span></label>
+        <label class="form-label" for="input-category_id">Categoria: <b class="text-red-600">(*)</b></label>
         <select  class="form-control"    required  name="category" id="input-category_id" >
         </select>
     </div>
@@ -21,7 +21,7 @@
 <div class="w-full min-h-100">
     <div class="  grid grid-cols-1 sm:grid-cols-2 gap-4  mt-4  notHonorific">
         <span>
-                <label for="input-title" class="form-label">Título <span class="text-red-600">(*)</span></label>
+                <label for="input-title" class="form-label">Título <b class="text-red-600">(*)</b></label>
                 <input type="text" class="form-control " name="titulo" required   id="input-title"   >
         </span>
 
@@ -35,7 +35,7 @@
         </span>
 
         <span>
-            <label for="input-resumo" class="form-label">Resumo: <span class="text-red-600">(*)</span></label>
+            <label for="input-resumo" class="form-label">Resumo: <b class="text-red-600">(*)</b></label>
             <input  type="text" class="hidden" name="input-resumo" id="input-resumo" val="" required />
             <div id="editor-resumo" class="kt-input-text input-resumo editor-resumo" style="height: 300px;"></div>
             <div   class="form-text">
@@ -44,7 +44,7 @@
         </span>
 
         <span>
-            <label for="input-desenvolvimento" class="form-label">Desenvolvimento: <span class="text-red-600">(*)</span></label>
+            <label for="input-desenvolvimento" class="form-label">Desenvolvimento: <b class="text-red-600">(*)</b></label>
             <input  type="text" class="hidden" name="input-desenvolvimento" id="input-desenvolvimento" val="" required />
             <div id="editor-desenvolvimento" class="kt-input-text input-desenvolvimento" style="height: 300px;"></div>
             <div   class="form-text">
@@ -53,7 +53,7 @@
         </span>
 
         <span>
-            <label for="input-objetivo" class="form-label">Objetivo: <span class="text-red-600">(*)</span></label>
+            <label for="input-objetivo" class="form-label">Objetivo: <b class="text-red-600">(*)</b></label>
             <input  type="text" class="hidden" name="input-objetivo" id="input-objetivo" val="" required />
             <div id="editor-objetivo" class="kt-input-text input-objetivo" style="height: 300px;"></div>
             <div   class="form-text">
@@ -64,7 +64,7 @@
 
 
         <span>
-            <label for="input-conclusao" class="form-label">Conclusão: <span class="text-red-600">(*)</span></label>
+            <label for="input-conclusao" class="form-label">Conclusão: <b class="text-red-600">(*)</b></label>
             <input  type="text" class="hidden" name="input-conclusao" id="input-conclusao" val="" required />
             <div id="editor-conclusao" class="kt-input-text input-conclusao" style="height: 300px;"></div>
             <div   class="form-text">
@@ -76,13 +76,13 @@
 
     <div class="  grid grid-cols-1 sm:grid-cols-2 gap-4  mt-4  Honorific">
         <span>
-            <label for="input-title" class="form-label">Nome do(a) Indicado(a): <span class="text-red-600">(*)</span></label>
+            <label for="input-title" class="form-label">Nome do(a) Indicado(a): <b class="text-red-600">(*)</b></label>
             <input type="text" class="form-control " name="name_nominee"   id="input-name" required   >
         </span>
 
         <div class="mt-2">
 
-         <label class="form-label" for="input-Estado">Estado de Residência do(a) Indicado(a): <span class="text-red-600">(*)</span></label>
+         <label class="form-label" for="input-Estado">Estado de Residência do(a) Indicado(a): <b class="text-red-600">(*)</b></label>
             <select  class="form-control"    required name="state" id="input-state"  >
                 <option selected value="">Escolha um Estado</option>
             </select>
@@ -90,26 +90,26 @@
         </div>
 
          <span>
-            <label for="input-contact_data" class="form-label">Dados de contato do(a) Indicado(a): <span class="text-red-600">(*)</span></label>
+            <label for="input-contact_data" class="form-label">Dados de contato do(a) Indicado(a): <b class="text-red-600">(*)</b></label>
             <input type="text" class="form-control " name="contact-data"  required id="input-contact_data"   >
         </span>
 
         <span>
-            <label for="input-presentation" class="form-label">Apresentação do(a) Indicado(a): <span class="text-red-600">(*)</span></label>
+            <label for="input-presentation" class="form-label">Apresentação do(a) Indicado(a): <b class="text-red-600">(*)</b></label>
             <input  type="text" class="hidden" name="input-presentation" id="input-presentation" val="" required />
             <div id="editor-presentation" class="kt-input-text input-presentation" style="height: 300px;"></div>
 
         </span>
 
          <span>
-            <label for="input-activities" class="form-label">Atividades desempenhadas: <span class="text-red-600">(*)</span></label>
+            <label for="input-activities" class="form-label">Atividades desempenhadas: <b class="text-red-600">(*)</b></label>
             <input  type="text" class="hidden" name="input-activities" id="input-activities" val="" required />
             <div id="editor-activities" class="kt-input-text input-activities" style="height: 300px;"></div>
 
         </span>
 
         <span>
-            <label for="input-justification" class="form-label">Justifique a indicação: <span class="text-red-600">(*)</span></label>
+            <label for="input-justification" class="form-label">Justifique a indicação: <b class="text-red-600">(*)</b></label>
             <input type="text" name="input-justification" id="input-justification" class="hidden" required />
             <div id="editor-justification" class="kt-input-text input-justification" style="height: 300px;"></div>
 

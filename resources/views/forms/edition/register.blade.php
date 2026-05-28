@@ -97,7 +97,7 @@ sl-alert::part(base) {
             <div>
                 <input type="hidden" name="edition" id="edition" value=""  >
                 <input type="hidden" name="candidate_id" id="candidate_id" value=""  >
-                <label for="input-cpf" class="form-label">CPF <span class="text-red-600">(*)</span></label>
+                <label for="input-cpf" class="form-label">CPF <b class="text-red-600">(*)</b></label>
                 <input type="text" class="form-control" name="input-cpf" value="" id="input-cpf" required  >
                 <div class="form-text mb-4">
                     Somente será aceito CPF Válido !.
@@ -142,7 +142,7 @@ sl-alert::part(base) {
       <div class="alert-toast  ">
         <sl-alert  variant="primary" open   closable class="mt-2"  >
             <sl-icon slot="icon" name="exclamation-octagon"></sl-icon>
-            Os campos com asterisco <span class="text-red-600">(*)</span> são obrigatórios !
+            Os campos com asterisco <b class="text-red-600">(*)</b> são obrigatórios !
         </sl-alert>
       </div>
 
