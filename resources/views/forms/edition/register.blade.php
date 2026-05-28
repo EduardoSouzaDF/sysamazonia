@@ -56,11 +56,19 @@ sl-alert::part(base) {
             }
 
 
-    @media print {
+   @media print {
     /* Esconde absolutamente tudo na página */
-    .hiddenPrint {
-        visibility: hidden;
+    .navbar {
+        display:none;
     }
+
+		.container h1{
+			display: none;
+		}
+
+		.footer{
+			display: none;
+		}
     }
 </style>
 <script src="https://www.google.com/recaptcha/api.js" async defer></script>
