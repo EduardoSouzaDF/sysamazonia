@@ -15,7 +15,7 @@
 
         <div>
             <label for="input-nome" class="form-label">Nome <b class="text-red-600">(*)</b></label>
-            <input type="text" class="form-control" id="nome" name="nome"  required  >
+            <input type="text" class="form-control" id="nome" name="nome" oninput="mascaraLetrasComAcentos(this)" required  >
         </div>
 
         <div>
@@ -28,11 +28,11 @@
     <div class="grid grid-cols-1 sm:grid-cols-3   gap-4 mt-4">
         <div>
             <label class="form-label" for="input-rg">RG: <b class="text-red-600">(*)</b></label>
-            <input class="form-control" type="text" id="input-rg" required name="rg" >
+            <input class="form-control"  type="text" id="input-rg" required name="rg" maxlength="16" >
         </div>
         <div>
              <label class="form-label" for="input-rg_expeditor">Órgão expeditor do RG:  <b class="text-red-600">(*)</b></label>
-            <input class="form-control" type="text" id="input-rg_expeditor" required name="rg_expeditor"  >
+            <input class="form-control" type="text" oninput="mascaraLetrasSemAcento(this)" id="input-rg_expeditor" required name="rg_expeditor"  >
         </div>
 
          <div>

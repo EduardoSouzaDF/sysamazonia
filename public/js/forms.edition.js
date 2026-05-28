@@ -1,5 +1,5 @@
-let urlAmazonia = 'https://hmsisamazonia.ibict.br';
-// let urlAmazonia = 'https://sysamazonia.test';
+// let urlAmazonia = 'https://hmsisamazonia.ibict.br';
+let urlAmazonia = 'https://sysamazonia.test';
 let hasRegistration = null;
 
 function addCss(url) {
@@ -872,3 +872,19 @@ function gotoForm(cpf){
         gotoForm();
     }
 });
+
+
+function mascaraLetrasComAcentos(input) {
+    // Permite a-z, A-Z, espaços (\s) e todos os caracteres acentuados da língua portuguesa
+    input.value = input.value.replace(/[^a-zA-ZáàâãéèêíïóôõöúçñÁÀÂÃÉÈÊÍÏÓÔÕÖÚÇÑ\s]/g, "");
+}
+
+function mascaraApenasNumeros(input) {
+    // Remove absolutamente tudo o que NÃO for número
+    input.value = input.value.replace(/\D/g, "");
+}
+
+function mascaraLetrasSemAcento(input) {
+    // Remove tudo o que NÃO for letras de A a Z (maiúsculas/minúsculas) ou espaços
+    input.value = input.value.replace(/[^a-zA-Z\s]/g, "");
+}

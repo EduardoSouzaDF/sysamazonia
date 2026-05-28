@@ -2,7 +2,7 @@
     <div>
 
         <label for="input-cep" class="form-label">CEP <b class="text-red-600">(*)</b></label>
-        <input type="text" class="form-control " style="margin-top: -6px;" required id="input-cep"  name="inputcep" placeholder="99999-999">
+        <input type="text" class="form-control " style="margin-top: -6px;" oninput="mascaraApenasNumeros(this)" required id="input-cep"  name="inputcep" placeholder="99999-999">
     </div>
 
 
