@@ -39,7 +39,7 @@
             <input  type="text" class="hidden" name="input-resumo" id="input-resumo" val="" required />
             <div id="editor-resumo" class="kt-input-text input-resumo editor-resumo" style="height: 300px;"></div>
             <div   class="form-text">
-            O resumo deverá conter no mínimo 500 palavras e no máximo 1000.
+            O resumo deverá conter no mínimo 10 palavras e no máximo 1000.
             </div>
         </span>
 
@@ -48,7 +48,7 @@
             <input  type="text" class="hidden" name="input-desenvolvimento" id="input-desenvolvimento" val="" required />
             <div id="editor-desenvolvimento" class="kt-input-text input-desenvolvimento" style="height: 300px;"></div>
             <div   class="form-text">
-            O desenvolvimento deverá conter no mínimo 2000 palavras e no máximo 3000.
+            O desenvolvimento deverá conter no mínimo 10 palavras e no máximo 3000.
             </div>
         </span>
 
@@ -57,7 +57,7 @@
             <input  type="text" class="hidden" name="input-objetivo" id="input-objetivo" val="" required />
             <div id="editor-objetivo" class="kt-input-text input-objetivo" style="height: 300px;"></div>
             <div   class="form-text">
-            O objetivo deverá conter no mínimo 1000 palavras e no máximo 2000.
+            O objetivo deverá conter no mínimo 10 palavras e no máximo 2000.
             </div>
         </span>
 
@@ -68,7 +68,7 @@
             <input  type="text" class="hidden" name="input-conclusao" id="input-conclusao" val="" required />
             <div id="editor-conclusao" class="kt-input-text input-conclusao" style="height: 300px;"></div>
             <div   class="form-text">
-            O objetivo deverá conter no mínimo 500 palavras e no máximo 1000.
+            O objetivo deverá conter no mínimo 10 palavras e no máximo 1000.
             </div>
         </span>
 

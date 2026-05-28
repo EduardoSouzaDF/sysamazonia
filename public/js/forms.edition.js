@@ -66,6 +66,7 @@ function getUfCidadeData() {
         option.setAttribute("value", "");
         option.innerText = "Escolha um Estado";
         var estados = [];
+
         $.each(data, function(key, val) {
             const option = document.createElement("option");
             option.setAttribute("value", val.sigla);
@@ -124,18 +125,17 @@ function getUfCidadeData() {
         if (val.length == 8) {
             $.getJSON(url, function(data) {
                 if (data.erro !== 'true') {
-                    const selectEstado = document.querySelector("sl-select[name='estado']");
-                    const selectCidade = document.querySelector("sl-select[name='cidade']");
-                    selectEstado.value = data.uf.toUpperCase();
-                    const evento = new CustomEvent('sl-change', {
-                        bubbles: true,
-                        cancelable: true
-                    });
+                    estado = data.uf.toUpperCase();
+                    selectEstado = document.querySelector("select[name='estado']");
+                    selectCidade = document.querySelector("select[name='cidade']");
+                    selectEstado.value = estado;
+                    const evento = new Event('change');
                     selectEstado.dispatchEvent(evento);
-                    let localidade = formatarLocalidade(data.localidade);
+
                     setTimeout(() => {
-                        selectCidade.value = localidade;
-                    }, 1000);
+                        selectCidade.value = data.localidade;
+                        console.log(data.localidade);
+                    }, 1500);
                     // selectCidade.value = localidade;
                     $('#input-endereco').val(data.regiao + ' ' + data.bairro + ' ' + data.logradouro);
                 }

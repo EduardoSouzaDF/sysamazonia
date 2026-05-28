@@ -59,10 +59,10 @@ class RegistrationRequest extends FormRequest
                         // 'objetivo' => ['required','string',new WordCountRule(1000, 2000)],
                         // 'conclusao' => ['required','string',new WordCountRule(500, 1000)],
 
-                        'resumo' => ['required','string',new WordCountRule(1, 1000)],
-                        'desenvolvimento' => ['required','string',new WordCountRule(1, 1000)],
-                        'objetivo' => ['required','string',new WordCountRule(1, 1000)],
-                        'conclusao' => ['required','string',new WordCountRule(1,1000)],
+                        'resumo' => ['required','string',new WordCountRule(10, 1000)],
+                        'desenvolvimento' => ['required','string',new WordCountRule(10, 1000)],
+                        'objetivo' => ['required','string',new WordCountRule(10, 1000)],
+                        'conclusao' => ['required','string',new WordCountRule(10,1000)],
 
                         'status' => 'nullable|integer',
                     ];
@@ -79,9 +79,9 @@ class RegistrationRequest extends FormRequest
                             // 'activities' => ['required','string',new WordCountRule(200, 1000)],677.795.380-9500
                             // 'justification' => ['required','string',new WordCountRule(200, 1000)],
 
-                            'presentation' => ['required','string',new WordCountRule(1, 1000)],
-                            'activities' => ['required','string',new WordCountRule(1, 1000)],
-                            'justification' => ['required','string',new WordCountRule(1, 1000)],
+                            'presentation' => ['required','string',new WordCountRule(10, 1000)],
+                            'activities' => ['required','string',new WordCountRule(10, 1000)],
+                            'justification' => ['required','string',new WordCountRule(10, 1000)],
                         ];
         }
 
