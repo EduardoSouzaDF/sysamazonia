@@ -177,9 +177,7 @@ function prepareForm() {
                         $('#nome').val(data.candidate.nome);
                         $('#input-rg').val(data.candidate.rg);
                         $('#input-rg_expeditor').val(data.candidate.rg_expeditor);
-                        $('#input-rg_uf').val(data.candidate.rg_uf);
-                        $('#input-escolaridade').val(data.candidate.escolaridade);
-                        $('#input-sexo').val(data.candidate.sexo);
+
                         $('#input-celular').val('(' + data.candidate.ddd + ') ' + data.candidate.celular);
                         $('#input-cep').val(data.candidate.cep);
                         const select = document.querySelector('#input-estado'); // ou a sua variável selectEstado
@@ -195,7 +193,7 @@ function prepareForm() {
                         $('#input-endereco').val(data.candidate.endereco).trigger('change');
                         $('#input-numero').val(data.candidate.numero).trigger('change');
                         $('#input-complemento').val(data.candidate.complemento).trigger('change');
-                        $('#escolaridade').val(data.candidate.escolaridade).trigger('change');
+
                         $('#editor-resumo-curricular').summernote('code', data.candidate.resumo_curricular);
                         $('#input-instituicao').val(data.candidate.instituicao).trigger('change');
                         $('#input-instagram').val(data.candidate.instagram).trigger('change');
@@ -204,6 +202,14 @@ function prepareForm() {
                         setDateField('#input-dt_nascimento', data.candidate.dt_nascimento);
                         const switchEl = document.querySelector('sl-switch');
                         switchEl.checked = data.candidate.whatsapp;
+
+                        setTimeout(()=>{
+                            $('#input-rg_uf').val(data.candidate.rg_uf);
+                            $('#input-escolaridade').val(data.candidate.escolaridade);
+                            $('#input-sexo').val(data.candidate.sexo);
+                            $('#escolaridade').val(data.candidate.escolaridade).trigger('change');
+                        },1000);
+
 
                     } else {
                         $('#input-email').val('');

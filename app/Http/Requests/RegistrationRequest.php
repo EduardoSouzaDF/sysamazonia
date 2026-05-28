@@ -2,12 +2,13 @@
 namespace App\Http\Requests;
 
 use App\Models\Category;
-use Carbon\Carbon;
-use Illuminate\Foundation\Http\FormRequest;
-use Illuminate\Contracts\Validation\Validator;
-use Illuminate\Http\Exceptions\HttpResponseException;
 use App\Rules\WordCountRule;
+use Carbon\Carbon;
+use Illuminate\Contracts\Validation\Validator;
+use Illuminate\Foundation\Http\FormRequest;
+use Illuminate\Http\Exceptions\HttpResponseException;
 use Illuminate\Support\Facades\Crypt;
+use Illuminate\Support\Str;
 
 class RegistrationRequest extends FormRequest
 {
@@ -43,14 +44,14 @@ class RegistrationRequest extends FormRequest
     public function rules()
     {
 
-        $categoryId = $this->input('category_id');
+        $categoryId = Str::length($this->input('category_id'))  > 10  ? Crypt::decryptString($this->input('category_id')) : $this->input('category_id');
         $category = Category::find($categoryId);
 
         if($category && !$category->is_honorific){
             //Nao horifico
             return [
-                        'candidate_id' => 'required|exists:candidates,id',
-                        'category_id' => 'required|exists:categories,id',
+                        // 'candidate_id' => 'required|exists:candidates,id',
+                        // 'category_id' => 'required|exists:categories,id',
                         'title' => 'required|string|max:255',
                         'coautores' => 'nullable|string|max:1000',
                         // 'resumo' => ['required','string',new WordCountRule(500, 1000)],
@@ -67,8 +68,8 @@ class RegistrationRequest extends FormRequest
                     ];
         }else{
                 return [
-                            'candidate_id' => 'required|exists:candidates,id',
-                            'category_id' => 'required|exists:categories,id',
+                            // 'candidate_id' => 'required|exists:candidates,id',
+                            // 'category_id' => 'required|exists:categories,id',
                             'name' => 'required|string|max:255',
                             'state' => 'required|string|max:255',
                             'contact_data' => 'required|string|max:255',

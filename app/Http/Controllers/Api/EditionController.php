@@ -26,7 +26,17 @@ class EditionController extends Controller
     {
         try {
             $data = $this->checkJsonDecode();
+
+            $candidateRequest = app(CandidateRequest::class);
+
+            $registrationRequest = app(RegistrationRequest::class);
+
+
+
             $candidate = $this->candidate($data);
+
+            //valida forms
+
             $data['edition'] = Crypt::decryptString($data['edition']);
             $data['candidate_id'] = Crypt::decryptString($candidate['id']);
             $data['category_id'] = Crypt::decryptString($data['category_id']);
@@ -114,6 +124,8 @@ class EditionController extends Controller
         }
 
         $registration->status = 1;
+        $registration->candidate_id = $this->decript($candidate['id']);
+        $registration->category_id = $categoryId;
         $registration->save();
         $registration->protocol = Carbon::now()->year.'-'.$registration->candidate_id.'-'.$registration->category_id.'-'.$registration->id.'-'.$candidate['cpf'];
         $registration->save();

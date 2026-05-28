@@ -6,14 +6,14 @@ sl-tab[active]::part(base) {
 }
 
 sl-alert::part(base) {
-  width: 80vw;       /* Altera a largura (padrão costuma ser menor) */
+  width: 40vw;       /* Altera a largura (padrão costuma ser menor) */
   font-size: 1.2rem;   /* Aumenta o tamanho do texto interno */
   padding: 1rem;       /* Aumenta o espaçamento interno */
 }
 
 /* Força o container de notificações a ficar no topo e à frente da navbar */
 .sl-toast-stack {
-     width: 80vw;       /* Alt
+   width: 50vw;       /* Alt
   top: 10px !important;       /* Distância do topo da tela */
   right: 20px !important;     /* Distância do canto direito */
   bottom: auto !important;    /* Garante que não puxe para baixo */
@@ -97,7 +97,7 @@ sl-alert::part(base) {
             <div>
                 <input type="hidden" name="edition" id="edition" value=""  >
                 <input type="hidden" name="candidate_id" id="candidate_id" value=""  >
-                <label for="input-cpf" class="form-label">CPF (*)</label>
+                <label for="input-cpf" class="form-label">CPF <span class="text-red-600">(*)</span></label>
                 <input type="text" class="form-control" name="input-cpf" value="" id="input-cpf" required  >
                 <div class="form-text mb-4">
                     Somente será aceito CPF Válido !.
@@ -142,7 +142,7 @@ sl-alert::part(base) {
       <div class="alert-toast  ">
         <sl-alert  variant="primary" open   closable class="mt-2"  >
             <sl-icon slot="icon" name="exclamation-octagon"></sl-icon>
-            Os campos com asterisco (*) são obrigatórios !
+            Os campos com asterisco <span class="text-red-600">(*)</span> são obrigatórios !
         </sl-alert>
       </div>
 

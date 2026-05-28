@@ -19,7 +19,7 @@
 
     <div>
         <div>
-            <label class="form-label" for="input-Estado">Escolaridade (*)</label>
+            <label class="form-label" for="input-Estado">Escolaridade <span class="text-red-600">(*)</span></label>
             <select  class="form-control"    required name="escolaridade" id="escolaridade"  >
                   <option selected value="">Escolha  </option>
                   @foreach ($escolaridade as $option  )
@@ -31,7 +31,7 @@
     </div>
 
     <span>
-            <label for="input-resumo_curricular" class="form-label">Resumo Curricular (*)</label>
+            <label for="input-resumo_curricular" class="form-label">Resumo Curricular <span class="text-red-600">(*)</span></label>
             <input type="text" required class="hidden" name="resumo_curricular" id="resumo_curricular" />
             <div id="editor-resumo-curricular" class="kt-input-text input-resumo" style="height: 300px;"></div>
 
