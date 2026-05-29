@@ -60,8 +60,7 @@ class RequestProtocol extends Notification implements ShouldQueue
                     ->line('Este pedido expira em: **' . $expireFormatted . '**') // Linha adicionada
                     ->line('Para confirmar a ação por favor clique no link abaixo')
                     // ->action('Alterar / Excluir Registro', route('consume.token', $this->token))
-                    ->action('Alterar / Excluir Registro', 'http://hmamazonia.ibict.br/novo-sistema/?token='.$this->token)
-                    // ->action('Alterar / Excluir Registro', 'file:///D:/DEV/laravel11-docker/ibict/sysamazonia/tests/forms/editions.html/?token='.$this->token)
+                    ->action('Alterar / Excluir Registro', 'https://hmamazonia.ibict.br/novo-sistema/?token='.$this->token)
                     ->line('Se você tiver alguma dúvida, por favor não hesite em entrar em contato conosco.')
                     ->salutation('Atenciosamente,');
     }

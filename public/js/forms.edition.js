@@ -260,6 +260,14 @@ function showForm() {
             failedText: 'Tente Novamente',
             barText: 'Mova a peça corretamente',
             onSuccess: function () {
+
+                if($("#input-cpf").val().length <= 13){
+                    notify('Informe o CPF','danger');
+                    $('.refreshIcon').click();
+                    return false;
+                }
+
+
                 var handler = setTimeout(function () {
                      value =  $("#input-cpf").val();
                      $.ajax({
@@ -869,7 +877,15 @@ function gotoForm(cpf){
  $('#captcha').sliderCaptcha({
     repeatIcon: 'fa fa-redo',
     onSuccess: function () {
-        gotoForm();
+
+         notify('Informe o CPF','danger');
+        //   notify('Informe o CPF','danger');
+        // if($("#input-cpf").val().length >= 14){
+        //     gotoForm();
+        // }else{
+
+        // }
+
     }
 });
 
