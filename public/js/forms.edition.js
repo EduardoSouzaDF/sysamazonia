@@ -49,7 +49,12 @@ $(document).ready(async function() {
         await Promise.all(jsFiles.map(addJs));
         await Promise.all(cssFiles.map(addCss));
         console.log("Todos os scripts e estilos foram carregados!");
+	$('#bootstrap-css').remove();
+	$('#bootstrap-min-css').remove();
         InitForm() ;
+	$('#intro > div > div > h1').remove();
+//	$('#intro > div > div > div > p').remove();
+	
     } catch (error) {
         console.error("Erro ao carregar algum recurso:", error);
     }

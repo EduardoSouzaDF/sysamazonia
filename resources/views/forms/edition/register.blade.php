@@ -1,5 +1,17 @@
     <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.8.1/css/all.css" integrity="sha384-50oBUHEmvpQ+1lW4y57PTFmhCaXp0ML5d60M1M7uH2+nqUivzIebhndOJK28anvf" crossorigin="anonymous">
 <style>
+section#intro {
+    max-width: 100%;
+    /* background: #f5f5f5 url(../img/head-shadow.png) no-repeat top center; */
+    height: auto;
+    margin: 0 auto;
+    margin-top: 0px !important;
+    padding: 0;
+    border-bottom: 1px solid #e9e9e9;
+    padding-top: 0px !important;
+    margin-bottom: 20px;
+}
+
 sl-tab[active]::part(base) {
     background-color: #0284c7; /* Altere para a sua cor desejada */
     color: white;            /* Altere a cor do texto para dar contraste, se necessário */
@@ -26,7 +38,9 @@ sl-alert::part(base) {
     background-color: unset !important;
     padding: 0px !important;
 }
-
+.sistema{
+margin-top: - 40px !important;
+}
 
 .slidercaptcha {
             margin: 0 auto;

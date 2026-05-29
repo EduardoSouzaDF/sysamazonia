@@ -20,11 +20,11 @@ return [
     'allowed_methods' => ['*'],
 
     'allowed_origins' => [
-        'http://hmamazonia.ibict.br/',
+        'https://hmamazonia.ibict.br',
         'https://hmsisamazonia.ibict.br/',
     ],
 
-    // 'allowed_origins' => ['*' ],
+   // 'allowed_origins' => ['*' ],
 
 
     'allowed_origins_patterns' => [],
