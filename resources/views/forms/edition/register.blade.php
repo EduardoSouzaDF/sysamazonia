@@ -213,7 +213,7 @@ margin-top: - 40px !important;
     <div slot="footer" class="flex justify-between gap-x-2 footerPage">
         <button type="button" id="btn-voltar"  class="btn w-full  btn-info btnAnt  ">Aba anterior</button>
         <button type="button" id="btn-proximo"  class="btn w-full  btn-info btnPro  ">Próxima Aba</button>
-        <button type="submit" disabled class="btn w-full  btn-success hidden">Enviar inscrição</button>
+        <button type="submit" disabled class="btn w-full  btn-success ">Enviar inscrição</button>
     </div>
   </sl-card>
 
