@@ -1,5 +1,5 @@
-// let urlAmazonia = 'https://hmsisamazonia.ibict.br';
-let urlAmazonia = 'https://sysamazonia.test';
+let urlAmazonia = 'https://hmsisamazonia.ibict.br';
+// let urlAmazonia = 'https://sysamazonia.test';
 let hasRegistration = null;
 
 function addCss(url) {
