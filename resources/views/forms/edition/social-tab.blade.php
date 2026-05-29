@@ -34,6 +34,9 @@
             <label for="input-resumo_curricular" class="form-label">Resumo Curricular <b class="text-red-600">(*)</b></label>
             <input type="text" required class="hidden" name="resumo_curricular" id="resumo_curricular" />
             <div id="editor-resumo-curricular" class="kt-input-text input-resumo" style="height: 300px;"></div>
+             <div   class="form-text">
+            O resumo deverá conter no mínimo 100 palavras e no máximo 1000.
+            </div>
 
     </span>
 

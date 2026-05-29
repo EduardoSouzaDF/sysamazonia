@@ -7,6 +7,7 @@ use Illuminate\Contracts\Validation\Validator;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Http\Exceptions\HttpResponseException;
 use Illuminate\Support\Facades\Crypt;
+use App\Rules\WordCountRule;
 
 class CandidateRequest extends FormRequest
 {
@@ -66,7 +67,8 @@ class CandidateRequest extends FormRequest
             'instagram' => 'nullable|string|max:100',
             'facebook' => 'nullable|string|max:100',
             'outra_rede_social' => 'nullable|string|max:100',
-            'resumo_curricular' => 'nullable|string|max:1000',
+            'resumo_curricular' =>  ['nullable','required','string',new WordCountRule(100, 1000)],
+            'nullable|string|max:1000',
         ];
 
         if (!empty($this->decodedData['candidate_id'])) {
