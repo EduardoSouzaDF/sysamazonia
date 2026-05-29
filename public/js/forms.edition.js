@@ -54,7 +54,7 @@ $(document).ready(async function() {
         InitForm() ;
 	$('#intro > div > div > h1').remove();
 //	$('#intro > div > div > div > p').remove();
-	
+
     } catch (error) {
         console.error("Erro ao carregar algum recurso:", error);
     }
@@ -236,9 +236,67 @@ function prepareForm() {
         }
             }
         }
-
-
     });
+
+
+    const tabGroup = document.querySelector('#tabsform');
+    btnAnt = $('.btnAnt');
+    btnPro = $('.btnPro');
+    btnAnt.prop('disabled', true);
+    console.log(tabGroup);
+    tabGroup.addEventListener('sl-tab-show', (event) => {
+            const tabName = event.detail.name;
+            const tabs = Array.from(tabGroup.querySelectorAll('sl-tab'));
+            const tabIndex = tabs.findIndex(tab => tab.getAttribute('panel') === tabName);
+            switch (tabIndex) {
+                case 0:
+                    btnAnt.prop('disabled', true);
+                    btnPro.prop('disabled', false);
+                    break;
+
+                case 1:
+                case 2:
+                case 3:
+                    btnAnt.prop('disabled', false);
+                    btnPro.prop('disabled', false);
+                break;
+
+                case 4:
+                    btnAnt.prop('disabled', false);
+                    btnPro.prop('disabled', true);
+                break;
+
+                default:
+                    break;
+            }
+    });
+
+    const btnVoltar = document.querySelector('#btn-voltar');
+    const btnProximo = document.querySelector('#btn-proximo');
+    btnVoltar.addEventListener('click', () => {
+        const tabs = Array.from(tabGroup.querySelectorAll('sl-tab'));
+        const indiceAtual = tabs.findIndex(tab => tab.hasAttribute('active'));
+        const indiceAnterior = indiceAtual - 1;
+        if (indiceAnterior >= 0) {
+            const abaAnterior = tabs[indiceAnterior];
+            const nomeDoPainel = abaAnterior.getAttribute('panel');
+            tabGroup.show(nomeDoPainel);
+        } else {
+            console.log("Você já está na primeira aba!");
+        }
+    });
+
+    btnProximo.addEventListener('click', () => {
+        const tabs = Array.from(tabGroup.querySelectorAll('sl-tab'));
+        const indiceAtual = tabs.findIndex(tab => tab.hasAttribute('active'));
+        const indiceAnterior = indiceAtual + 1;
+        if (indiceAnterior <= 4) {
+            const abaAnterior = tabs[indiceAnterior];
+            const nomeDoPainel = abaAnterior.getAttribute('panel');
+            tabGroup.show(nomeDoPainel);
+        }
+    });
+
 }
 
 function showForm() {
@@ -339,6 +397,9 @@ function showForm() {
             $(".sistema").html("<p>Erro ao carregar o formulário.</p>", );
         },
     });
+
+
+
 }
 
 function checkCPFInicial(){
@@ -909,3 +970,4 @@ function mascaraLetrasSemAcento(input) {
     // Remove tudo o que NÃO for letras de A a Z (maiúsculas/minúsculas) ou espaços
     input.value = input.value.replace(/[^a-zA-Z\s]/g, "");
 }
+

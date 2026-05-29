@@ -12,8 +12,12 @@ section#intro {
     margin-bottom: 20px;
 }
 
+sl-tab:not([active])::part(base) {
+  background-color: #d5ebff; /* Substitua pela cor desejada */
+     color: black;
+}
 sl-tab[active]::part(base) {
-    background-color: #0284c7; /* Altere para a sua cor desejada */
+    background-color: #0284c7 !important; /* Altere para a sua cor desejada */
     color: white;            /* Altere a cor do texto para dar contraste, se necessário */
 }
 
@@ -147,7 +151,7 @@ margin-top: - 40px !important;
 </div>
 <sl-card class="card-footer w-full formRegistration min-w-full hidden" id="">
 
-    <sl-tab-group noScrollControls="true" >
+    <sl-tab-group noScrollControls="true"  id="tabsform">
       <!-- Dados Pessoais -->
       <sl-tab slot="nav" id="tab-personal" panel="personal">Dados Pessoais</sl-tab>
 
@@ -161,7 +165,7 @@ margin-top: - 40px !important;
       <sl-tab slot="nav" id="tab-documents" panel="documents">Documentos</sl-tab>
 
       <sl-tab slot="nav" panel="registrations" id="registrations_tab" class="hidden">Inscrições Realizadas</sl-tab>
-      <div class="alert-toast  ">
+      <div class="alert-toast  ml-4">
         <sl-alert  variant="primary" open   closable class="mt-2"  >
             <sl-icon slot="icon" name="exclamation-octagon"></sl-icon>
             Os campos com asterisco <b class="text-red-600">(*)</b> são obrigatórios !
@@ -207,7 +211,9 @@ margin-top: - 40px !important;
     </sl-tab-group>
 
     <div slot="footer" class="flex justify-between gap-x-2 footerPage">
-        <button type="submit" disabled class="btn w-full  btn-success">Enviar inscrição</button>
+        <button type="button" id="btn-voltar"  class="btn w-full  btn-info btnAnt  ">Aba anterior</button>
+        <button type="button" id="btn-proximo"  class="btn w-full  btn-info btnPro  ">Próxima Aba</button>
+        <button type="submit" disabled class="btn w-full  btn-success hidden">Enviar inscrição</button>
     </div>
   </sl-card>
 
