@@ -26,7 +26,7 @@ class Nominee extends Model
     ];
 
     protected $casts = [
-        //
+         'status' => 'integer',
     ];
 
 
@@ -45,5 +45,48 @@ class Nominee extends Model
     public function category(): BelongsTo
     {
         return $this->belongsTo(Category::class);
+    }
+
+     /**
+     * Scope a query to only include registrations with a specific status.
+     *
+     * @param  \Illuminate\Database\Eloquent\Builder  $query
+     * @param  int  $status
+     * @return \Illuminate\Database\Eloquent\Builder
+     */
+    public function scopeStatus($query, $status)
+    {
+        return $query->where('status', $status);
+    }
+
+    /**
+     * Scope a query to search registrations by title.
+     *
+     * @param  \Illuminate\Database\Eloquent\Builder  $query
+     * @param  string  $title
+     * @return \Illuminate\Database\Eloquent\Builder
+     */
+    public function scopeSearchByTitle($query, $title)
+    {
+        return $query->where('name', 'like', "%{$title}%");
+    }
+
+     public function files()
+    {
+        return $this->hasMany(RegistrationFile::class);
+    }
+
+    public function statusName(){
+
+        switch($this->status){
+
+            case 1:
+                return 'Inscrição Realizada';
+                break;
+            default:
+                return '';
+            break;
+
+        }
     }
 }

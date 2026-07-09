@@ -19,12 +19,16 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Crypt;
 use Illuminate\Support\Facades\Notification;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Arr;
+
 
 class EditionController extends Controller
 {
     public function registration(Request $request)
     {
+
         try {
+
             $data = $this->checkJsonDecode();
 
             $candidateRequest = app(CandidateRequest::class);
@@ -64,7 +68,8 @@ class EditionController extends Controller
     public function saveFiles($registration, Request $request){
         if (isset($_FILES['files']) && ! empty($_FILES['files'])) {
             if ($request->hasFile('files')) {
-                foreach ($request->file('files') as $file) {
+               foreach (Arr::wrap($request->file('files')) as $file) {
+
                     try {
                         // Verifica se o arquivo é válido
                         if (! $file->isValid()) {
@@ -89,7 +94,12 @@ class EditionController extends Controller
 
                         // Registra no banco
                         $registrationFile = new RegistrationFile;
-                        $registrationFile->registration_id = Crypt::decryptString($registration['id']);
+                        if(isset($registration['name'])){
+                            $registrationFile->nominee_id = Crypt::decryptString($registration['id']);
+                        }else{
+                            $registrationFile->registration_id = Crypt::decryptString($registration['id']);
+                        }
+
                         $registrationFile->file_name = $file->getClientOriginalName();
                         $registrationFile->file_path = $path;
                         $registrationFile->file_type = $file->getMimeType();
@@ -115,7 +125,7 @@ class EditionController extends Controller
 
         $categoryId = $this->decript(request()->input('category'));
 
-        $category =Category::with(['modality.edition'])->find($categoryId);
+        $category = Category::with(['modality.edition'])->find($categoryId);
 
         if($category && !$category->is_honorific){
              $registration = new Registration($registrationRequest->validated());
@@ -132,7 +142,7 @@ class EditionController extends Controller
         $email = $candidate['email'];
         $protocolToken = $registration->protocol;
 
-        Notification::route('mail', $email)->notify(new RegistrationProtocol($protocolToken,$candidate['nome']));
+         Notification::route('mail', $email)->notify(new RegistrationProtocol($protocolToken,$candidate['nome']));
 
         $response = $registration->toArray();
         $response['id'] = $this->encrypt($response['id']);

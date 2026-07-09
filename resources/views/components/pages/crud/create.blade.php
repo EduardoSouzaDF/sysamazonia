@@ -10,6 +10,7 @@
     'put' => false,
     'space' => true,
     'btnDelete' => false,
+    'btnSubmit' => true,
     'btnDeleteRoute' => '',
     'btnDeleteId' => 'btnDeleteId',
 ])
@@ -54,7 +55,11 @@
             <a id='{{ $btnDeleteId }}' class="kt-btn kt-btn-destructive kt-btn-outline">Excluir</a>
         @endif
         <a href="{{ $btnCancelRoute }}" class="kt-btn kt-btn-outline">{{ $btnCancelTitle }}</a>
-        <button type="submit" class="kt-btn">{{ $btnSubmitTitle }}</button>
+
+        @if ($btnSubmit)
+            <button type="submit" class="kt-btn">{{ $btnSubmitTitle }}</button>
+        @endif
+
     </div>
     </form>
 </div>
