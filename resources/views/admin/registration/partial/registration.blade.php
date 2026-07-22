@@ -55,7 +55,7 @@
                 <a target="_blank" href="{{ route('admin.registration.file', ['file' => $file->id]) }}"
 
                 class="kt-btn kt-btn-outline">
-                Ver/Fazer Download do Arquivo PDF
+                Ver anexo : {{ $file->file_name }}
             </a>
             @endforeach
 
@@ -66,7 +66,7 @@
         <meta name="csrf-token" content="{{ csrf_token() }}">
         <div class="flex flex-row justify-end gap-4 mt-4">
 
-         @if($object->status == 1  )
+         @if($object->status <= 3 )
          <button type="button" class="kt-btn habilitaInscricao"
           onclick="habilitaInscricao('{{ $object->id }}', '{{get_class($object)}}')"
           >Habilitar</button>
