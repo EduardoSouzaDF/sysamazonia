@@ -1,16 +1,25 @@
 <?php
+
+use App\Models\Registration;
 use Carbon\Carbon;
 use Illuminate\Support\HtmlString;
 $columns = [
     'Edição' => 'edition',
-    'Modalidade' => 'modality',
     'Categoria' => 'category',
-    'Honorífica ?' => 'is_honorific',
+    'Autor' => 'candidate_name',
     'Titulo' => 'title',
-    'Candidato' => 'candidate_name',
-    'CPF' => 'candidate_cpf',
+    'Avaliação' => 'rating',
+    'Indicações' => 'nominations',
     'Status' => 'status',
 ];
+
+/*
+Autor -> candidate name
+Titulo | indicado
+Avaliação
+Indicações = maximo de indicações + indicações
+Status 1 = Inscrito
+*/
 
 
 $actions = [
@@ -30,23 +39,49 @@ $formattedData = array_map(function ($registration) {
 
     return [
         'edition' => $registrationModel->category->modality->edition->title,
-        'modality' => $registrationModel->category->modality->title,
-        'category' => $registrationModel->category->title,
-        'is_honorific' => $registrationModel->category->is_honorific ? 'Sim' : 'Não',
+        'category' => $registrationModel->category->acronym."-".$registrationModel->category->title,
         'title' => $registrationModel->title !== null ?: $registrationModel->name,
         'candidate_name' => $registrationModel->candidate->nome,
-        'candidate_cpf' => $registrationModel->candidate->cpf,
+        'rating' => ' 0 | 0',
+        'nominations' => ' 0 | '. $registrationModel->category->modality->edition->applications_per_candidate,
         'status' => $registrationModel->statusName(), // ✅ Usando o método do model
         'id' => $registrationModel->id,
         'type' => get_class($registration)
     ];
 }, $list->items()); // Usar items() ao invés de toArray()['data']
 
+$editions = $editions
+    ->mapWithKeys(function ($role) {
+        return [$role->id => $role->title];
+    })
+    ->toArray();
+
+$editions[''] = 'Selecione a Edição';
+
+$editionValue = '';
+$status = Registration::getStatusArray();
+$status[''] = 'Selecione o Status';
 ?>
 @extends('admin.content')
 @vite(['resources/comp_themes/apexcharts/apexcharts.min.js', 'resources/comp_themes/apexcharts/apexcharts.css'])
 @section('maincontent')
-    <x-pages.index titulo="Inscrições" subtitulo="Inscrições por edição ativa" searchPlaceholder="Procurar por título, cpf ..."
+    <x-pages.index titulo="Inscrições" subtitulo="Inscrições por edição ativa" searchPlaceholder="Procurar por categoria, autor, título, status ..."
         titleBtnPesquisar="Pesquisar" idBtnPesquisar="search-button" routeSearch="{{ route('admin.registration.index') }}"
-        :columns="$columns" :actions="$actions" :data="$formattedData" :paginator="$list" />
+        :columns="$columns" :actions="$actions" :data="$formattedData" :paginator="$list" >
+
+    <x-slot:searchForm>
+        <div style="min-width: max-content">
+            <x-form-select name="edition"   class="max-h-32" nameOld="edicao"  id="editions" value="{{ $editionValue }}"
+            multiple="{{ false }}" required="false" maxSelections="99" :options="$editions" />
+        </div>
+
+        <div style="min-width: max-content">
+            <x-form-select name="status"   class="max-h-32" nameOld="status"  id="status" value="{{ $editionValue }}"
+            multiple="{{ false }}" required="false"  :options="$status" />
+        </div>
+
+
+    </x-slot>
+
+    </x-pages.index>
 @endsection

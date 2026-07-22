@@ -108,6 +108,8 @@ Route::middleware('auth')->group(function () {
             'index' => 'admin.registration.index',
         ]);
 
+        Route::post('/admin/registration/rejeitar/{id}/{type}', [RegistrationController::class, 'rejeitar'])->middleware($middleware)->name('admin.registration.rejeitar');
+        Route::post('/admin/registration/habilitar/{id}/{type}', [RegistrationController::class, 'habilitar'])->middleware($middleware)->name('admin.registration.habilitar');
         Route::get('/admin/registration/show/{id}/{type}', [RegistrationController::class, 'show'])->middleware($middleware)->name('admin.registration.show');
         Route::get('/admin/registration/file/{file}', [RegistrationController::class, 'file'])->middleware($middleware)->name('admin.registration.file');
         Route::get('/admin/users/{user}/login-as', [UserController::class, 'loginAs'])->middleware($middleware)->name('admin.users.login-as');

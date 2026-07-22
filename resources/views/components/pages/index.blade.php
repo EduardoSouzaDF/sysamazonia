@@ -41,17 +41,23 @@
                 <div class="kt-card-header min-h-16 w-full flex flex-row">
 
 
-                    <div class="w-1/2 flex-col flex gap-x-2">
+                    <div class="w-auto flex-col flex gap-x-2">
                         <form id="search-form" class="flex-row flex gap-x-2">
-                            <input type="text" placeholder="{{ $searchPlaceholder }}" class="kt-input  "
-                                id="search-input" />
+                            <input type="text" placeholder="{{ $searchPlaceholder }}" class="kt-input w-80  "
+                                id="search-input" name="search" style="width: 40vw;"/>
 
-                            <button type="button" id="{{ $idBtnPesquisar }}" class="kt-btn kt-btn-outline">
+
+                            {{ $searchForm ?? '' }}
+                             <button type="button" id="{{ $idBtnPesquisar }}" class="kt-btn kt-btn-outline">
                                 {{ $titleBtnPesquisar }}
                             </button>
+
+
                         </form>
 
                     </div>
+
+
 
                     @if($routeCreatenew !== '/')
                         <div class="">
@@ -154,7 +160,7 @@
                             @if ($paginator !== null)
                                 <div
                                     class="kt-card-footer justify-center md:justify-between flex-col md:flex-row gap-5 text-secondary-foreground text-sm font-medium">
-                                    {{ $paginator->links() }}
+                                    {{ $paginator->appends(request()->query())->links() }}
                                 </div>
                             @endif
 
@@ -171,27 +177,57 @@
     </div>
 
 
-    @push('scripts')
-        <script>
-            $(document).ready(function() {
+  @push('scripts')
+    <script>
+        $(document).ready(function() {
+            const searchForm = document.getElementById('search-form');
+            const searchButton = document.getElementById(`{{ $idBtnPesquisar }}`);
+            const baseRoute = `{{ $routeSearch }}`;
 
-                $(`#{{ $idBtnPesquisar }}`).on('click', function() {
-                    var searchValue = $('#search-input').val();
-                    console.log(searchValue);
-                    // Implementar a lógica de busca aqui, por exemplo, redirecionar para uma rota com o parâmetro de busca
-                    window.location.href = `{{ $routeSearch }}?search=` + encodeURIComponent(searchValue);
+            /**
+             * Serializa todos os campos do formulário (input, select, textarea)
+             * retornando uma query string apenas com campos não vazios.
+             */
+            function serializeForm(form) {
+                const formData = new FormData(form);
+                const params = new URLSearchParams();
 
-                });
-                document.getElementById('search-form').addEventListener('submit', function(event) {
-                    event.preventDefault();
-                    // Código para realizar a busca
-                });
+                for (const [name, value] of formData.entries()) {
+                    // Ignora campos sem "name", vazios ou com apenas espaços
+                    if (!name || value === null || value === undefined) continue;
+                    const trimmed = String(value).trim();
+                    if (trimmed === '') continue;
 
-                document.getElementById(`{{ $idBtnPesquisar }}`).addEventListener('keypress', function(event) {
-                    if (event.key === 'Enter') {
-                        document.getElementById(`{{ $idBtnPesquisar }}`).click();
-                    }
-                });
+                    params.append(name, trimmed);
+                }
+
+                return params.toString();
+            }
+
+            /**
+             * Redireciona para a URL com os parâmetros de busca.
+             */
+            function performSearch() {
+                const queryString = serializeForm(searchForm);
+                const separator = baseRoute.includes('?') ? '&' : '?';
+                const url = queryString
+                    ? `${baseRoute}${separator}${queryString}`
+                    : baseRoute;
+
+                window.location.href = url;
+            }
+
+            // Clique no botão de pesquisa
+            searchButton.addEventListener('click', function(event) {
+                event.preventDefault();
+                performSearch();
             });
-        </script>
-    @endpush
+
+            // Submit do formulário (caso o usuário pressione Enter dentro de um input)
+            searchForm.addEventListener('submit', function(event) {
+                event.preventDefault();
+                performSearch();
+            });
+        });
+    </script>
+@endpush
