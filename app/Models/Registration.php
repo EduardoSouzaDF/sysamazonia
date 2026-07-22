@@ -94,13 +94,35 @@ class Registration extends Model
         switch($this->status){
 
             case 1:
-                return 'Inscrição Realizada';
+                return 'Inscrito';
+                break;
+            case 2:
+                return 'Rejeitado';
+                break;
+            case 3:
+                return 'Habilitado';
+                break;
+            case 4:
+                return 'Avaliado';
+                break;
+            case 5:
+                return 'Agraciado';
                 break;
             default:
-                return '';
+                return 'Inscrito';
             break;
 
         }
+    }
+
+    static function getStatusArray(){
+        return [
+            1 => 'Inscrito',
+            2 => 'Rejeitado',
+            3 => 'Habilitado',
+            4 => 'Avaliado',
+            5 => 'Agraciado',
+        ];
     }
 
 

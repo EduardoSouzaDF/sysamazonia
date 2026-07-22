@@ -21,7 +21,11 @@
             <h3 class="kt-card-title">
                 {{ $titulo }}
             </h3>
+
+
         </div>
+
+
         <form method="POST" id="{{ $formId }}" action="{{ $formAction }}" enctype="multipart/form-data" novalidate
             class="kt-form">
             @csrf
