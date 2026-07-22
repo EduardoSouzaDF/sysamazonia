@@ -11,6 +11,7 @@
     'id' => '',
     'required' => true,
     'value' => null,
+    'readyOnly' => false,
 ])
 
 <div class="kt-form-item {{ $class }}">
@@ -21,6 +22,7 @@
             value="{{ !is_null($value) ? $value : old($name) }}"
             name="{{ $name }}"
             id="{{ $id }}"
+            @readonly($readyOnly)
             aria-invalid="{{ $errors->has($name) ? 'true' : 'false' }}"
             class="kt-input" placeholder="{{ $placeholder }}" @required($required) />
     </div>

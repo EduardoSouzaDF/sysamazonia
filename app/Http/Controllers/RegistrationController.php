@@ -2,27 +2,90 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Controllers\Api\EditionController;
+use App\Models\Nominee;
 use App\Models\Registration;
+use App\Models\RegistrationFile;
+use File;
 use Illuminate\Http\Request;
+use Illuminate\Pagination\LengthAwarePaginator;
+use Illuminate\Support\Facades\Crypt;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Storage;
+use Ramsey\Uuid\Type\Integer;
 
 class RegistrationController extends Controller
 {
+
+
     public function index(Request $request)
     {
-
-        $query = Registration::with(['candidate','category.modality.edition','files'])->orderBy('created_at', 'desc'); // or 'created_at'
         $search = $request->input('search');
+        $perPage = 15;
+        $page = $request->input('page', 1);
 
+        // Query para Registration
+        $registrationQuery = Registration::with(['candidate', 'category.modality.edition', 'files']);
         if ($search) {
-            $query->where(function ($q) use ($search) {
-                $q->where('title', 'like', '%'.$search.'%');
-            });
+            $registrationQuery->where('title', 'like', '%' . $search . '%');
         }
 
-        $list = $query->paginate(15)->withQueryString();
+        // Query para Nominee
+        $nomineeQuery = Nominee::with(['candidate', 'category.modality.edition', 'files']);
+        if ($search) {
+            $nomineeQuery->where('title', 'like', '%' . $search . '%');
+        }
+
+        // Obter todos os resultados (ou limitar conforme necessário)
+        $registrations = $registrationQuery->get();
+        $nominees = $nomineeQuery->get();
+
+        // Combinar os resultados
+        $allItems = $registrations->merge($nominees);
+
+        // Ordenar por created_at (ou outro campo)
+        $allItems = $allItems->sortByDesc('created_at');
+
+        // Paginação manual
+        $total = $allItems->count();
+        $items = $allItems->forPage($page, $perPage);
+        $list = new LengthAwarePaginator($items, $total, $perPage, $page, [
+            'path' => $request->url(),
+            'pageName' => 'page',
+        ]);
+
 
         return view('admin.registration.index', compact('list'));
     }
+
+      /**
+     * Display the specified resource.
+     */
+    public function show(String $id, String $type)
+    {
+
+
+       if($type == Nominee::class){
+        $registration = Nominee::findOrFail($id);
+       }else{
+        $registration = Registration::findOrFail($id);
+       }
+
+
+       return view('admin.registration.view', compact('registration'));
+    }
+
+    public function file(String $file){
+
+        $file = RegistrationFile::findOrFail($file);
+        if (! Storage::disk('private')->exists($file->file_path)) {
+            abort(404);
+        }
+        $disk = Storage::disk('private');
+        return $disk->response($file->file_path);
+    }
+
+
 
     /**
      * Show the form for creating a new resource.
@@ -40,13 +103,7 @@ class RegistrationController extends Controller
         //
     }
 
-    /**
-     * Display the specified resource.
-     */
-    public function show(Registration $registration)
-    {
-        //
-    }
+
 
     /**
      * Show the form for editing the specified resource.

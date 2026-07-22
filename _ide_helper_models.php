@@ -22,7 +22,6 @@ namespace App\Models{
  * @property \Illuminate\Support\Carbon|null $consumed_at
  * @property \Illuminate\Support\Carbon|null $created_at
  * @property \Illuminate\Support\Carbon|null $updated_at
- * @property-read \Illuminate\Database\Eloquent\Model|\Eloquent $tokenable
  * @method static \Illuminate\Database\Eloquent\Builder<static>|ActionToken newModelQuery()
  * @method static \Illuminate\Database\Eloquent\Builder<static>|ActionToken newQuery()
  * @method static \Illuminate\Database\Eloquent\Builder<static>|ActionToken query()

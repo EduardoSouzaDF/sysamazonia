@@ -1,7 +1,6 @@
 <?php
 use Carbon\Carbon;
 use Illuminate\Support\HtmlString;
-
 $columns = [
     'Edição' => 'edition',
     'Modalidade' => 'modality',
@@ -13,21 +12,35 @@ $columns = [
     'Status' => 'status',
 ];
 
-$actions = [];
+
+$actions = [
+    'Visualizar' => function($registration){
+        return  route('admin.registration.show', ['id' => $registration['id'],'type' => $registration['type']]);
+    },
+
+];
+
+
 
 $formattedData = array_map(function ($registration) {
+    /** @var \App\Models\Registration $registrationModel */
+    $registrationModel = $registration;
+
+
+
     return [
-        'edition' => $registration['category']['modality']['edition']['title'],
-        'modality' => $registration['category']['modality']['title'],
-        'category' => $registration['category']['title'],
-        'is_honorific' => $registration['category']['is_honorific'] ? 'Sim' : 'Não',
-        'title' => $registration['title'],
-        'candidate_name' => $registration['candidate']['nome'],
-        'candidate_cpf' => $registration['candidate']['cpf'],
-        'status' => $registration['status'],
-        'id' => $registration['id'],
+        'edition' => $registrationModel->category->modality->edition->title,
+        'modality' => $registrationModel->category->modality->title,
+        'category' => $registrationModel->category->title,
+        'is_honorific' => $registrationModel->category->is_honorific ? 'Sim' : 'Não',
+        'title' => $registrationModel->title !== null ?: $registrationModel->name,
+        'candidate_name' => $registrationModel->candidate->nome,
+        'candidate_cpf' => $registrationModel->candidate->cpf,
+        'status' => $registrationModel->statusName(), // ✅ Usando o método do model
+        'id' => $registrationModel->id,
+        'type' => get_class($registration)
     ];
-}, $list->toArray()['data']);
+}, $list->items()); // Usar items() ao invés de toArray()['data']
 
 ?>
 @extends('admin.content')
@@ -35,5 +48,5 @@ $formattedData = array_map(function ($registration) {
 @section('maincontent')
     <x-pages.index titulo="Inscrições" subtitulo="Inscrições por edição ativa" searchPlaceholder="Procurar por título, cpf ..."
         titleBtnPesquisar="Pesquisar" idBtnPesquisar="search-button" routeSearch="{{ route('admin.registration.index') }}"
-        :columns="$columns" :data="$formattedData" :paginator="$list" />
+        :columns="$columns" :actions="$actions" :data="$formattedData" :paginator="$list" />
 @endsection

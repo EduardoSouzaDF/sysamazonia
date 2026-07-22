@@ -78,7 +78,6 @@ Route::middleware('auth')->group(function () {
             'index' => 'admin.modalities.index',
             'create' => 'admin.modalities.create',
             'store' => 'admin.modalities.store',
-            // 'show' => 'admin.editions.show',
             'edit' => 'admin.modalities.edit',
             'update' => 'admin.modalities.update',
             'destroy' => 'admin.modalities.destroy',
@@ -104,13 +103,18 @@ Route::middleware('auth')->group(function () {
             'destroy' => 'admin.criteria.destroy',
         ]);
 
+
         Route::resource('registration', RegistrationController::class)->middleware($middleware)->names([
-            'index' => 'admin.registration.index'
+            'index' => 'admin.registration.index',
         ]);
 
+        Route::get('/admin/registration/show/{id}/{type}', [RegistrationController::class, 'show'])->middleware($middleware)->name('admin.registration.show');
+        Route::get('/admin/registration/file/{file}', [RegistrationController::class, 'file'])->middleware($middleware)->name('admin.registration.file');
         Route::get('/admin/users/{user}/login-as', [UserController::class, 'loginAs'])->middleware($middleware)->name('admin.users.login-as');
         Route::get('/admin/users/return-to-admin', [UserController::class, 'returnToAdmin'])->name('admin.users.return-to-admin');
 
     });
+
+
 
 });

@@ -15,6 +15,7 @@ class RegistrationFile extends Model
 
     protected $fillable = [
         'registration_id',
+        'nominee_id',
         'file_name',
         'file_path',
         'file_type',
@@ -29,5 +30,14 @@ class RegistrationFile extends Model
     public function registration()
     {
         return $this->belongsTo(Registration::class);
+    }
+
+
+    /**
+     * Obter a inscrição relacionada a este arquivo
+     */
+    public function nominee()
+    {
+        return $this->belongsTo(Nominee::class);
     }
 }

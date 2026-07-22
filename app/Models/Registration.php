@@ -23,11 +23,11 @@ class Registration extends Model
      * @var array
      */
     protected $fillable = [
-            'candidate_id',
-            'category_id',
-            'title',
-            'coautores',
-            'resumo',
+        'candidate_id',
+        'category_id',
+        'title',
+        'coautores',
+        'resumo',
         'desenvolvimento',
         'objetivo',
         'conclusao',
@@ -87,6 +87,20 @@ class Registration extends Model
     public function files()
     {
         return $this->hasMany(RegistrationFile::class);
+    }
+
+    public function statusName(){
+
+        switch($this->status){
+
+            case 1:
+                return 'Inscrição Realizada';
+                break;
+            default:
+                return '';
+            break;
+
+        }
     }
 
 
