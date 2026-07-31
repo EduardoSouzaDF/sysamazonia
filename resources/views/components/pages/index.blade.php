@@ -105,44 +105,70 @@
                                                 </td>
                                             @endforeach
                                             @if (!empty($actions))
-                                                <td>
-                                                    <div data-kt-dropdown="true" data-kt-dropdown-trigger="click">
-                                                        <button class="kt-btn" data-kt-dropdown-toggle="true">
-                                                            Gerenciar<svg xmlns="http://www.w3.org/2000/svg"
-                                                                width="24" height="24" viewBox="0 0 24 24"
-                                                                fill="none" stroke="currentColor" stroke-width="2"
-                                                                stroke-linecap="round" stroke-linejoin="round"
-                                                                class="lucide lucide-chevron-down" aria-hidden="true">
-                                                                <path d="m6 9 6 6 6-6"></path>
-                                                            </svg>
-                                                        </button>
-                                                        <div class="kt-dropdown-menu w-52" data-kt-dropdown-menu="true">
-                                                            <ul class="kt-dropdown-menu-sub">
-                                                                @foreach ($actions as $actionName => $actionRoute)
-                                                                    <li>
-                                                                        <a href="{{ is_callable($actionRoute) ? $actionRoute($item) : $actionRoute }}"
-                                                                            class="kt-dropdown-menu-link">
-                                                                            @switch($actionName)
-                                                                                @case('Logar Como')
-                                                                                    <i class="ki-filled ki-security-user"></i>
-                                                                                @break
+                                                @if(sizeof($actions) > 1)
+                                                    <td>
+                                                        <div data-kt-dropdown="true" data-kt-dropdown-trigger="click">
+                                                            <button class="kt-btn" data-kt-dropdown-toggle="true">
+                                                                Gerenciar<svg xmlns="http://www.w3.org/2000/svg"
+                                                                    width="24" height="24" viewBox="0 0 24 24"
+                                                                    fill="none" stroke="currentColor" stroke-width="2"
+                                                                    stroke-linecap="round" stroke-linejoin="round"
+                                                                    class="lucide lucide-chevron-down" aria-hidden="true">
+                                                                    <path d="m6 9 6 6 6-6"></path>
+                                                                </svg>
+                                                            </button>
+                                                            <div class="kt-dropdown-menu w-52" data-kt-dropdown-menu="true">
+                                                                <ul class="kt-dropdown-menu-sub">
+                                                                    @foreach ($actions as $actionName => $actionRoute)
+                                                                        <li>
+                                                                            <a href="{{ is_callable($actionRoute) ? $actionRoute($item) : $actionRoute }}"
+                                                                                class="kt-dropdown-menu-link">
+                                                                                @switch($actionName)
+                                                                                    @case('Logar Como')
+                                                                                        <i class="ki-filled ki-security-user"></i>
+                                                                                    @break
 
-                                                                                @case('Editar')
-                                                                                    <i class="ki-filled ki-setting-4"></i>
-                                                                                @break
+                                                                                    @case('Editar')
+                                                                                        <i class="ki-filled ki-setting-4"></i>
+                                                                                    @break
 
-                                                                                @case('Deletar')
-                                                                                    <i class="ki-filled ki-delete-folder"></i>
-                                                                                @break
-                                                                            @endswitch
-                                                                            {{ $actionName }}
-                                                                        </a>
-                                                                    </li>
-                                                                @endforeach
-                                                            </ul>
+                                                                                    @case('Deletar')
+                                                                                        <i class="ki-filled ki-delete-folder"></i>
+                                                                                    @break
+                                                                                @endswitch
+                                                                                {{ $actionName }}
+                                                                            </a>
+                                                                        </li>
+                                                                    @endforeach
+                                                                </ul>
+                                                            </div>
                                                         </div>
-                                                    </div>
+                                                    </td>
+                                                @else
+                                                <td>
+                                                    @foreach ($actions as $actionName => $actionRoute)
+                                                            <a href="{{ is_callable($actionRoute) ? $actionRoute($item) : $actionRoute }}"
+                                                                class="kt-btn">
+                                                                @switch($actionName)
+                                                                    @case('Logar Como')
+                                                                        <i class="ki-filled ki-security-user"></i>
+                                                                    @break
+
+                                                                    @case('Editar')
+                                                                        <i class="ki-filled ki-setting-4"></i>
+                                                                    @break
+
+                                                                    @case('Deletar')
+                                                                        <i class="ki-filled ki-delete-folder"></i>
+                                                                    @break
+                                                                @endswitch
+                                                                {{ $actionName }}
+                                                            </a>
+                                                    @endforeach
                                                 </td>
+
+                                                @endif
+
                                             @endif
                                         </tr>
                                         @empty

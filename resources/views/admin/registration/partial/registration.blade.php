@@ -25,7 +25,6 @@
         <sl-details summary="Objetivo">
             <div >{!! $object->objetivo !!}</div>
         </sl-details>
-        <br>
         <sl-details summary="Conclusão">
             <div >{!! $object->conclusao !!}</div>
         </sl-details>
@@ -39,7 +38,6 @@
             <div >{!! $object->presentation !!}</div>
         </sl-details>
 
-        <br>
 
         <sl-details summary="Atividades desempenhadas: ">
             <div >{!! $object->activities !!}</div>

@@ -323,6 +323,20 @@ namespace App\Models{
 
 namespace App\Models{
 /**
+ * @property-read \App\Models\User|null $judge
+ * @property-read \App\Models\Registration|null $registration
+ * @property-read \Illuminate\Database\Eloquent\Collection<int, \App\Models\Score> $scores
+ * @property-read int|null $scores_count
+ * @property-read \App\Models\User|null $user
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|Opinion newModelQuery()
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|Opinion newQuery()
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|Opinion query()
+ */
+	class Opinion extends \Eloquent {}
+}
+
+namespace App\Models{
+/**
  * @property int $id
  * @property int $user_id
  * @property int $registration_id
@@ -356,7 +370,7 @@ namespace App\Models{
  * @property string $desenvolvimento
  * @property string $objetivo
  * @property string $conclusao
- * @property int $status
+ * @property \App\Enum\RegistrationStatusEnum $status
  * @property string|null $protocol
  * @property-read \App\Models\Candidate $candidate
  * @property-read \App\Models\Category $category
@@ -438,6 +452,17 @@ namespace App\Models{
  * @method static \Illuminate\Database\Eloquent\Builder<static>|Role whereUpdatedAt($value)
  */
 	class Role extends \Eloquent {}
+}
+
+namespace App\Models{
+/**
+ * @property-read \App\Models\EvaluationCriterion|null $evaluationCriterion
+ * @property-read \App\Models\Opinion|null $opinion
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|Score newModelQuery()
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|Score newQuery()
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|Score query()
+ */
+	class Score extends \Eloquent {}
 }
 
 namespace App\Models{
