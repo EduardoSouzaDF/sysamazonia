@@ -12,6 +12,8 @@
     'routeSearch',
     'paginator' => null, // Instância de LengthAwarePaginator para paginação
 ])
+
+
 <style>
     nav>div {
         justify-content: space-between !important;
@@ -193,9 +195,15 @@
                         </div>
                     </div>
                 </div>
-                @if (session('success'))
+                @if(session('success'))
                     <div class="alert alert-success">
                         <x-messages.alert type="success" :message="session('success')"></x-messages.alert>
+                    </div>
+                @endif
+
+                @if(session('error'))
+                    <div class="alert alert-destructive">
+                        <x-messages.alert type="sucdestructivecess" :message="session('error')"></x-messages.alert>
                     </div>
                 @endif
             </div>

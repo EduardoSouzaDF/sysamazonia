@@ -19,6 +19,7 @@ use Illuminate\Support\Facades\Auth;
         $rejeitadas = [];
     }
 
+    $useForm =  $user->isEvaluator() ? false : true;
 @endphp
 
 @extends('admin.content')
@@ -30,6 +31,7 @@ use Illuminate\Support\Facades\Auth;
     </style>
 
     <x-pages.crud.create btnSubmit='{{ false }}'
+    useForm='{{$useForm}}'
     titulo='{{ $titulo }}' btnCancelTitle='Voltar' btnCancelRoute="{{ route('admin.registration.index') }}"  use-tabs=false>
          @if($user->isAdmin())
                 <div class="w-full flex flex-row justify-between gap-2 min-h-10">
@@ -83,7 +85,6 @@ use Illuminate\Support\Facades\Auth;
                     <div class="kt-card w-[400px]">
                         <div class="kt-card-content  ">
                             <form
-                            id="opinion-form-{{ $object->id }}"
                             method="POST"
                             action="{{ route('admin.registration.send.opinion', $object->id) }}"
                             >

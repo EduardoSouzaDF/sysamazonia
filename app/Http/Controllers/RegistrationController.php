@@ -10,6 +10,7 @@ use App\Models\Registration;
 use App\Models\RegistrationFile;
 use App\Models\Score;
 use Auth;
+use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Http\Request;
 use Illuminate\Pagination\LengthAwarePaginator;
 use Illuminate\Support\Facades\DB;
@@ -19,13 +20,19 @@ class RegistrationController extends Controller
 {
     public function index(Request $request)
     {
+
+
+        $reg = Registration::where('id',105)->get()->first();
+        $reg->updateEvaluationsAvg();
+        dd($reg);
+
         $user = Auth::user();
         $editions = Edition::all();
         $page = $request->input('page', 1);
         $perPage = 15;
 
         // Query para Registration
-        $registrationQuery = Registration::with(['candidate', 'category.modality.edition', 'files']);
+        $registrationQuery = Registration::with(['candidate', 'category.modality.edition', 'files','opinions']);
         $nomineeQuery = Nominee::with(['candidate', 'category.modality.edition', 'files']);
 
         $registrationQuery = $this->setIndexFilters($registrationQuery, $request);
@@ -33,12 +40,15 @@ class RegistrationController extends Controller
 
         if ($user->isEvaluator()) {
             $registrationQuery = $this->filterEvaluatorCategories($registrationQuery, $user);
-            $nomineeQuery = $this->filterEvaluatorCategories($nomineeQuery, $user);
         }
 
         // Obter todos os resultados (ou limitar conforme necessário)
         $registrations = $registrationQuery->get();
         $nominees = $nomineeQuery->get();
+        if ($user->isEvaluator()) {
+            $nominees = Collection::empty();
+        }
+
 
         // Combinar os resultados
         $allItems = $registrations->merge($nominees);
@@ -95,14 +105,29 @@ class RegistrationController extends Controller
 
     private function filterEvaluatorCategories($query, $user)
     {
+        //somente das categorias do usuário logado
         $query->whereHas('category', function ($q) use ($user) {
-            $q->whereIn('id', $user->evaluatorCategories()->get()->pluck('id')->toArray())
-                ->where('is_honorific', false);
+            $q->whereIn('id', $user->evaluatorCategories()->pluck('categories.id'))
+                ->where('is_honorific', false)
+                ->where(function($cat){
+                    $cat->whereRaw('(
+                            SELECT COUNT(*)
+                            FROM opinions
+                            WHERE opinions.registration_id = registrations.id
+                        ) < categories.evaluations_count');
+                });
         });
 
+        // somente das edições ativar para Avaliador
         $query->whereHas('category.modality.edition', function ($q) {
             $q->where('is_registration_active', true);
         });
+
+        // não mostra as inscrições que já avaliou
+       $query->whereDoesntHave('opinions', function ($q) use ($user) {
+            $q->where('user_id', $user->id);
+        });
+
         $query->where('status', RegistrationStatusEnum::Habilitado);
 
         return $query;
@@ -263,9 +288,14 @@ class RegistrationController extends Controller
                 }
             });
 
-            return response()->json(['message' => 'Parecer registrado com sucesso'], 200);
+
+            return redirect()
+                    ->route('admin.registration.index')
+                    ->with('success', 'Avaliação enviada com sucesso!');
         } catch (\Throwable $th) {
-            return response()->json(['message' => 'Erro ao registrar parecer'], 400);
+            return redirect()
+                    ->route('admin.registration.index')
+                    ->with('error', 'Favor tente novamente');
         }
     }
 }

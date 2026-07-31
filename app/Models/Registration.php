@@ -34,6 +34,7 @@ class Registration extends Model
         'conclusao',
         'status',
         'protocol',
+        'evaluation_avg',
     ];
 
     /**
@@ -43,6 +44,7 @@ class Registration extends Model
      */
     protected $casts = [
         'status' => RegistrationStatusEnum::class,
+        'evaluation_avg' => 'integer',
     ];
 
     /**
@@ -190,18 +192,7 @@ class Registration extends Model
         return round($sumWeighted / $sumWeights, 2);
     }
 
-    /**
-     * Soma dos pesos considerados no cálculo do averageScore().
-     * Útil para exibir o denominador em telas de auditoria.
-     */
-    public function totalScoreWeight(): float
-    {
-        return (float) Score::query()
-            ->whereIn('opinion_id', $this->opinions()->pluck('id'))
-            ->join('evaluation_criteria', 'evaluation_criteria.id', '=', 'scores.evaluation_criterion_id')
-            ->where('evaluation_criteria.weight', '>', 0)
-            ->sum('evaluation_criteria.weight');
-    }
+
 
     public function statusName(): string
     {
@@ -211,5 +202,80 @@ class Registration extends Model
     public static function getStatusArray(): array
     {
         return RegistrationStatusEnum::toArray();
+    }
+
+    public function updateEvaluationsAvg(): void
+    {
+
+        /** @var \Illuminate\Database\Eloquent\Collection<int, Opinion> $opinions */
+        $opinions = $this->opinions()->get();
+
+        // Se não houver opiniões/avaliações, define como null e encerra
+        if ($opinions->isEmpty()) {
+            $this->update(['evaluation_avg' => null]);
+            return;
+        }
+
+        $totalOpinionAverages = 0;
+        $validOpinionsCount = 0;
+
+        /** @var Opinion $opinion */
+        foreach ($opinions as $opinion) {
+            /** @var \Illuminate\Database\Eloquent\Collection<int, Score> $scores */
+            $scores = $opinion->scores;
+
+            if ($scores->isEmpty()) {
+                continue;
+            }
+
+            $weightedSum = 0;
+            $totalWeight = 0;
+
+            /** @var Score $score */
+            foreach ($scores as $score) {
+                /** @var EvaluationCriterion|null $criterio */
+                $criterio = $score->evaluationCriterion;
+
+                if (!$criterio) {
+                    continue;
+                }
+
+                $nota = $score->valor;
+                $minScore = $criterio->min_score;
+                $maxScore = $criterio->max_score;
+                $weight = $criterio->weight ?? 1; // Assume peso 1 caso não esteja definido no critério
+
+                $range = $maxScore - $minScore;
+
+                // Evita divisão por zero se min_score for igual a max_score
+                if ($range > 0) {
+                    // Normaliza a nota para uma porcentagem entre 0.0 e 1.0 (0% a 100%)
+                    $normalizedScore = ($nota - $minScore) / $range;
+
+                    $weightedSum += $normalizedScore * $weight;
+                    $totalWeight += $weight;
+                }
+            }
+
+            // Calcula a porcentagem final desta Opinião específica
+            if ($totalWeight > 0) {
+                $opinionPercentageAvg = $weightedSum / $totalWeight;
+                $totalOpinionAverages += $opinionPercentageAvg;
+                $validOpinionsCount++;
+            }
+        }
+
+        // Se houve opiniões válidas com notas calculadas
+        if ($validOpinionsCount > 0) {
+            // Média de todas as opiniões recebidas (em escala 0.0 a 1.0)
+            $finalPercentage = $totalOpinionAverages / $validOpinionsCount;
+
+            // Converte para escala de 0 a 100 e arredonda para salvar no unsignedTinyInteger
+            $evaluationAvg = (int) round($finalPercentage * 100);
+
+            $this->update(['evaluation_avg' => $evaluationAvg]);
+        } else {
+            $this->update(['evaluation_avg' => null]);
+        }
     }
 }
