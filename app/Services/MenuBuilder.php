@@ -10,7 +10,7 @@ class MenuBuilder
     public static function getMenuStructure(): array
     {
         $user = Auth::user();
-        if(!$user){
+        if (! $user) {
             return [];
         }
 
@@ -23,6 +23,13 @@ class MenuBuilder
 
         if ($user->hasRole(Role::LEITOR)) {
             $menus = array_merge($menus, self::getLeitorMenu());
+        }
+
+        if ($user->hasRole(Role::COMISSAO)) {
+            if ($user->isEvaluator()) {
+                $menus = array_merge($menus, self::getAvaliadorMenu());
+            }
+
         }
 
         return $menus;
@@ -112,6 +119,26 @@ class MenuBuilder
         ];
     }
 
+    public static function getAvaliadorMenu(): array
+    {
+
+        $user = Auth::user();
+
+        return [
+            [
+                'heading' => 'Avalliadores',
+            ],
+
+            [
+                'title' => 'Avaliar Inscrições',
+                // 'icon' => 'ki-abstract-26',
+                'icon' => 'ki-scroll',
+                'route' => 'admin.registration.index',
+            ],
+
+        ];
+    }
+
     public static function getLeitorMenu(): array
     {
         return [
@@ -123,7 +150,6 @@ class MenuBuilder
                 'icon' => 'ki-abstract-45',
                 'route' => 'dashboard',
             ],
-
 
         ];
     }
