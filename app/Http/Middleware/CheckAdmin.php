@@ -14,13 +14,16 @@ class CheckAdmin
      *
      * @param  \Closure(\Illuminate\Http\Request): (\Symfony\Component\HttpFoundation\Response)  $next
      */
-    public function handle(Request $request, Closure $next, $role = 'admin'): Response
+    public function handle(Request $request, Closure $next, string ...$roles): Response
     {
-            $user = Auth::user();
+        $user = Auth::user();
 
-         if (!$user->hasRole($role)) {
-            abort(403, 'Acesso negado. Você não tem permissão para acessar esta página.');
+        foreach ($roles as $role) {
+            if ($user->hasRole($role)) {
+                return $next($request);
+            }
         }
-        return $next($request);
+
+        abort(403, 'Acesso negado. Você não tem permissão para acessar esta página.');
     }
 }

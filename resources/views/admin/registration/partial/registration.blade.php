@@ -2,6 +2,8 @@
     'object' => null,
 ])
 
+
+
 <div class="flex w-full gap-4">
     <div class="w-full  ">
     <b>Edição :</b>  {{ $object->category->modality->edition->title }}  <br>
@@ -10,19 +12,20 @@
 
     @if (!$object->category->is_honorific)
          <b>Título:</b>  {{ $object->title }}  <br>
-         <b>Coautores:</b>  {{ $object->coautores }}  <br>
+         <b>Coautores:</b>  {{ $object->coautores }}  <br><br>
 
         <sl-details summary="Resumo">
             <div >{!! $object->resumo !!}</div>
         </sl-details>
-
+        <br>
         <sl-details summary="Desenvolvimento">
             <div >{!! $object->desenvolvimento !!}</div>
         </sl-details>
-
+        <br>
         <sl-details summary="Objetivo">
             <div >{!! $object->objetivo !!}</div>
         </sl-details>
+        <br>
         <sl-details summary="Conclusão">
             <div >{!! $object->conclusao !!}</div>
         </sl-details>
@@ -30,11 +33,13 @@
     @else
          <b>Nome do(a) Indicado(a):</b>  {{ $object->name }}  <br>
          <b>Estado de Residência do(a) Indicado(a):</b>  {{  $object->contact_data }}  <br>
-         <b>Dados de contato do(a) Indicado(a):</b>  {{  Str::upper($object->state )}}  <br>
+         <b>Dados de contato do(a) Indicado(a):</b>  {{  Str::upper($object->state )}}  <br><br>
 
         <sl-details summary="Apresentação do(a) Indicado(a)">
             <div >{!! $object->presentation !!}</div>
         </sl-details>
+
+        <br>
 
         <sl-details summary="Atividades desempenhadas: ">
             <div >{!! $object->activities !!}</div>
@@ -65,8 +70,7 @@
     @if(auth()->user()->hasRole('admin'))
         <meta name="csrf-token" content="{{ csrf_token() }}">
         <div class="flex flex-row justify-end gap-4 mt-4">
-
-         @if($object->status <= 3 )
+         @if( $object->status->value <= 3 )
          <button type="button" class="kt-btn habilitaInscricao"
           onclick="habilitaInscricao('{{ $object->id }}', '{{get_class($object)}}')"
           >Habilitar</button>
@@ -76,10 +80,12 @@
             onclick="rejeitaInscricao('{{ $object->id }}', '{{get_class($object)}}')"
           class="kt-btn kt-btn-destructive">Rejeitar</button>
          @endif
-
-    </div>
+        </div>
     @endif
 
+    @if(auth()->user()->hasRole('admin'))
+
+    @endif
 
     </div>
 </div>
