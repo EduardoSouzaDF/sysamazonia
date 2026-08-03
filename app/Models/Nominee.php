@@ -1,7 +1,7 @@
 <?php
 
 namespace App\Models;
-
+use App\Enum\RegistrationStatusEnum;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -26,6 +26,7 @@ class Nominee extends Model
     ];
 
     protected $casts = [
+          'status' => RegistrationStatusEnum::class,
          'status' => 'integer',
     ];
 
@@ -76,29 +77,14 @@ class Nominee extends Model
         return $this->hasMany(RegistrationFile::class);
     }
 
-    public function statusName(){
+      public function statusName(): string
+    {
+        return $this->status?->label() ?? RegistrationStatusEnum::Inscrito->label();
+    }
 
-        switch($this->status){
 
-            case 1:
-                return 'Inscrito';
-                break;
-            case 2:
-                return 'Rejeitado';
-                break;
-            case 3:
-                return 'Habilitado';
-                break;
-            case 4:
-                return 'Avaliado';
-                break;
-            case 5:
-                return 'Agraciado';
-                break;
-            default:
-                return 'Inscrito';
-            break;
-
-        }
+    public static function getStatusArray(): array
+    {
+        return RegistrationStatusEnum::toArray();
     }
 }
