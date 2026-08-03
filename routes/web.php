@@ -42,15 +42,17 @@ Route::middleware('guest')->group(function () {
 
     // password.reset
     Route::get('/reset-password/{token}', [AuthController::class, 'showReset'])->name('password.reset');
-    Route::post('/reset-password/{token}', [AuthController::class, 'reset'])->name('password.reset');
+    Route::post('/reset-password/{token}', [AuthController::class, 'reset'])->name('password.resetpost');
 
 });
 
 // Rotas autenticadas
 Route::middleware('auth')->group(function () {
-    Route::get('/', [AuthController::class, 'dashboard'])->name('dashboard');
+    Route::get('/', function () {
+        return redirect()->route('dashboard');
+    });
     Route::get('/dashboard', [AuthController::class, 'dashboard'])->name('dashboard');
-    Route::get('/logout', [AuthController::class, 'logout'])->name('logout');
+    Route::get('/logout', [AuthController::class, 'logout'])->name('sair');
 
     Route::prefix('admin')->group(function () {
         $middleware = ['auth', CheckAdmin::class.':admin'];

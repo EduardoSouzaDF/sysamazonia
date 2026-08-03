@@ -69,7 +69,6 @@ class User extends Authenticatable
         if (is_string($role)) {
             $role = Role::where('name', $role)->firstOrFail();
         }
-
         $this->roles()->detach($role);
     }
 
