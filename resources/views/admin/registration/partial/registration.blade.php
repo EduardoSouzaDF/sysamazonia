@@ -68,7 +68,7 @@
     @if(auth()->user()->hasRole('admin'))
         <meta name="csrf-token" content="{{ csrf_token() }}">
         <div class="flex flex-row justify-end gap-4 mt-4">
-         @if( $object->status->value <= 3 )
+         @if( $object->statusb <= 3 )
          <button type="button" class="kt-btn habilitaInscricao"
           onclick="habilitaInscricao('{{ $object->id }}', '{{get_class($object)}}')"
           >Habilitar</button>

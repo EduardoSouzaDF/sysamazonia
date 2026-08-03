@@ -28,4 +28,28 @@ enum RegistrationStatusEnum: int
             array_map(fn (self $case) => $case->label(), self::cases()),
         );
     }
+
+     static function geLabel($status): string
+    {
+
+        switch ((String) $status) {
+            case self::Inscrito:
+                return 'Inscrito';
+                break;
+            case self::Rejeitado:
+                return 'Rejeitado';
+                break;
+            case (String) self::Habilitado:
+                return 'Habilitado';
+                break;
+            case self::Avaliado:
+                return 'Avaliado';
+                break;
+            case self::Agraciado:
+                return 'Agraciado';
+                break;
+            default:
+                return 'Desconhecido';
+        }
+    }
 }

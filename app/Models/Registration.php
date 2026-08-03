@@ -43,7 +43,6 @@ class Registration extends Model
      * @var array
      */
     protected $casts = [
-        'status' => RegistrationStatusEnum::class,
         'evaluation_avg' => 'integer',
     ];
 
@@ -196,7 +195,28 @@ class Registration extends Model
 
     public function statusName(): string
     {
-        return $this->status?->label() ?? RegistrationStatusEnum::Inscrito->label();
+
+        switch((string)$this->status){
+
+            case '1':
+                return RegistrationStatusEnum::Inscrito->label();
+                break;
+            case '2':
+                return RegistrationStatusEnum::Rejeitado->label();
+                break;
+        case '3':
+                return RegistrationStatusEnum::Habilitado->label();
+                break;
+            case '4':
+                return RegistrationStatusEnum::Avaliado->label();
+                break;
+            case '5':
+                return RegistrationStatusEnum::Agraciado->label();
+                break;
+            default:
+                return 'Desconhecido';
+
+        }
     }
 
     public static function getStatusArray(): array

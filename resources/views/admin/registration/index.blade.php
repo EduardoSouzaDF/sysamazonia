@@ -1,5 +1,6 @@
 <?php
 
+use App\Enum\RegistrationStatusEnum;
 use App\Models\Registration;
 use Carbon\Carbon;
 use Illuminate\Support\HtmlString;
@@ -36,6 +37,7 @@ $actions = [
 $formattedData = array_map(function ($registration) {
     /** @var \App\Models\Registration $registrationModel */
     $registrationModel = $registration;
+
     return [
         'edition' => $registrationModel->category->modality->edition->title,
         'category' => $registrationModel->category->acronym."-".$registrationModel->category->title,
