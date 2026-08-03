@@ -16,7 +16,7 @@ class UpdateTabelaAddAverageRegistration extends Migration
     public function down()
     {
         Schema::table('registrations', function (Blueprint $table) {
-            $table->dropForeign(['evaluation_avg']);
+            $table->dropColumn(['evaluation_avg']);
         });
     }
 }

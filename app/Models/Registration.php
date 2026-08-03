@@ -269,11 +269,9 @@ class Registration extends Model
         if ($validOpinionsCount > 0) {
             // Média de todas as opiniões recebidas (em escala 0.0 a 1.0)
             $finalPercentage = $totalOpinionAverages / $validOpinionsCount;
-
             // Converte para escala de 0 a 100 e arredonda para salvar no unsignedTinyInteger
             $evaluationAvg = (int) round($finalPercentage * 100);
-
-            $this->update(['evaluation_avg' => $evaluationAvg]);
+            $this->update(['evaluation_avg' => $evaluationAvg, 'status' => RegistrationStatusEnum::Avaliado]);
         } else {
             $this->update(['evaluation_avg' => null]);
         }

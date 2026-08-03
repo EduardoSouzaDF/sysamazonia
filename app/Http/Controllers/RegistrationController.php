@@ -22,10 +22,6 @@ class RegistrationController extends Controller
     {
 
 
-        $reg = Registration::where('id',105)->get()->first();
-        $reg->updateEvaluationsAvg();
-        dd($reg);
-
         $user = Auth::user();
         $editions = Edition::all();
         $page = $request->input('page', 1);
@@ -287,6 +283,11 @@ class RegistrationController extends Controller
                     ]);
                 }
             });
+
+            if($registration->category->evaluations_count >=  sizeof($registration->opinions)){
+                $registration->updateEvaluationsAvg();
+            }
+
 
 
             return redirect()
