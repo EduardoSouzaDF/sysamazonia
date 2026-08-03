@@ -39,6 +39,11 @@ class User extends Authenticatable
             ->where('roles.active', true);
     }
 
+    public function isAdmin()
+    {
+        return $this->hasRole('admin');
+    }
+
     // Métodos auxiliares
     public function hasRole($role)
     {
@@ -117,5 +122,32 @@ class User extends Authenticatable
     public function isEvaluator()
     {
         return $this->evaluatorCategories()->exists();
+    }
+
+    /**
+     * Query builder das inscrições que o usuário pode avaliar como avaliador.
+     *
+     * Caminho: User -> categories (pivô `evaluators`) -> registrations.
+     * Retorna query vazia quando o usuário não é avaliador de nenhuma categoria.
+     */
+    public function evaluatorRegistrations(): \Illuminate\Database\Eloquent\Builder
+    {
+        $categoryIds = $this->evaluatorCategories()->pluck('categories.id');
+
+        return Registration::query()
+            ->whereIn('category_id', $categoryIds);
+    }
+
+    /**
+     * Coleção de inscrições para as quais o usuário é avaliador.
+     * Retorna coleção vazia se não for avaliador.
+     */
+    public function getEvaluatorRegistrationsList(): \Illuminate\Database\Eloquent\Collection
+    {
+        if (! $this->isEvaluator()) {
+            return new \Illuminate\Database\Eloquent\Collection;
+        }
+
+        return $this->evaluatorRegistrations()->get();
     }
 }

@@ -294,12 +294,16 @@ namespace App\Models{
  * @property \Illuminate\Support\Carbon|null $created_at
  * @property \Illuminate\Support\Carbon|null $updated_at
  * @property string|null $protocol
- * @property string|null $status
+ * @property int|null $status
  * @property-read \App\Models\Candidate $candidate
  * @property-read \App\Models\Category $category
+ * @property-read \Illuminate\Database\Eloquent\Collection<int, \App\Models\RegistrationFile> $files
+ * @property-read int|null $files_count
  * @method static \Illuminate\Database\Eloquent\Builder<static>|Nominee newModelQuery()
  * @method static \Illuminate\Database\Eloquent\Builder<static>|Nominee newQuery()
  * @method static \Illuminate\Database\Eloquent\Builder<static>|Nominee query()
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|Nominee searchByTitle($title)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|Nominee status($status)
  * @method static \Illuminate\Database\Eloquent\Builder<static>|Nominee whereActivities($value)
  * @method static \Illuminate\Database\Eloquent\Builder<static>|Nominee whereCandidateId($value)
  * @method static \Illuminate\Database\Eloquent\Builder<static>|Nominee whereCategoryId($value)
@@ -320,6 +324,30 @@ namespace App\Models{
 namespace App\Models{
 /**
  * @property int $id
+ * @property int $user_id
+ * @property int $registration_id
+ * @property \Illuminate\Support\Carbon|null $created_at
+ * @property \Illuminate\Support\Carbon|null $updated_at
+ * @property-read \App\Models\User $judge
+ * @property-read \App\Models\Registration $registration
+ * @property-read \Illuminate\Database\Eloquent\Collection<int, \App\Models\Score> $scores
+ * @property-read int|null $scores_count
+ * @property-read \App\Models\User $user
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|Opinion newModelQuery()
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|Opinion newQuery()
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|Opinion query()
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|Opinion whereCreatedAt($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|Opinion whereId($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|Opinion whereRegistrationId($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|Opinion whereUpdatedAt($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|Opinion whereUserId($value)
+ */
+	class Opinion extends \Eloquent {}
+}
+
+namespace App\Models{
+/**
+ * @property int $id
  * @property \Illuminate\Support\Carbon|null $created_at
  * @property \Illuminate\Support\Carbon|null $updated_at
  * @property int $candidate_id
@@ -330,12 +358,17 @@ namespace App\Models{
  * @property string $desenvolvimento
  * @property string $objetivo
  * @property string $conclusao
- * @property int $status
+ * @property \App\Enum\RegistrationStatusEnum $status
  * @property string|null $protocol
+ * @property int|null $evaluation_avg
  * @property-read \App\Models\Candidate $candidate
  * @property-read \App\Models\Category $category
+ * @property-read \Illuminate\Database\Eloquent\Collection<int, \App\Models\EvaluationCriterion> $evaluationCriteria
+ * @property-read int|null $evaluation_criteria_count
  * @property-read \Illuminate\Database\Eloquent\Collection<int, \App\Models\RegistrationFile> $files
  * @property-read int|null $files_count
+ * @property-read \Illuminate\Database\Eloquent\Collection<int, \App\Models\Opinion> $opinions
+ * @property-read int|null $opinions_count
  * @method static \Illuminate\Database\Eloquent\Builder<static>|Registration newModelQuery()
  * @method static \Illuminate\Database\Eloquent\Builder<static>|Registration newQuery()
  * @method static \Illuminate\Database\Eloquent\Builder<static>|Registration query()
@@ -347,6 +380,7 @@ namespace App\Models{
  * @method static \Illuminate\Database\Eloquent\Builder<static>|Registration whereConclusao($value)
  * @method static \Illuminate\Database\Eloquent\Builder<static>|Registration whereCreatedAt($value)
  * @method static \Illuminate\Database\Eloquent\Builder<static>|Registration whereDesenvolvimento($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|Registration whereEvaluationAvg($value)
  * @method static \Illuminate\Database\Eloquent\Builder<static>|Registration whereId($value)
  * @method static \Illuminate\Database\Eloquent\Builder<static>|Registration whereObjetivo($value)
  * @method static \Illuminate\Database\Eloquent\Builder<static>|Registration whereProtocol($value)
@@ -363,14 +397,16 @@ namespace App\Models{
  * @property int $id
  * @property \Illuminate\Support\Carbon|null $created_at
  * @property \Illuminate\Support\Carbon|null $updated_at
- * @property int $registration_id
+ * @property int|null $registration_id
  * @property string $file_name
  * @property string $file_path
  * @property string|null $file_type
  * @property int|null $file_size
  * @property string|null $description
  * @property string|null $document_type
- * @property-read \App\Models\Registration $registration
+ * @property int|null $nominee_id
+ * @property-read \App\Models\Nominee|null $nominee
+ * @property-read \App\Models\Registration|null $registration
  * @method static \Illuminate\Database\Eloquent\Builder<static>|RegistrationFile newModelQuery()
  * @method static \Illuminate\Database\Eloquent\Builder<static>|RegistrationFile newQuery()
  * @method static \Illuminate\Database\Eloquent\Builder<static>|RegistrationFile query()
@@ -382,6 +418,7 @@ namespace App\Models{
  * @method static \Illuminate\Database\Eloquent\Builder<static>|RegistrationFile whereFileSize($value)
  * @method static \Illuminate\Database\Eloquent\Builder<static>|RegistrationFile whereFileType($value)
  * @method static \Illuminate\Database\Eloquent\Builder<static>|RegistrationFile whereId($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|RegistrationFile whereNomineeId($value)
  * @method static \Illuminate\Database\Eloquent\Builder<static>|RegistrationFile whereRegistrationId($value)
  * @method static \Illuminate\Database\Eloquent\Builder<static>|RegistrationFile whereUpdatedAt($value)
  */
@@ -409,6 +446,31 @@ namespace App\Models{
  * @method static \Illuminate\Database\Eloquent\Builder<static>|Role whereUpdatedAt($value)
  */
 	class Role extends \Eloquent {}
+}
+
+namespace App\Models{
+/**
+ * @property int $id
+ * @property int $opinion_id
+ * @property int $evaluation_criterion_id
+ * @property int|null $valor
+ * @property string|null $descricao
+ * @property \Illuminate\Support\Carbon|null $created_at
+ * @property \Illuminate\Support\Carbon|null $updated_at
+ * @property-read \App\Models\EvaluationCriterion $evaluationCriterion
+ * @property-read \App\Models\Opinion $opinion
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|Score newModelQuery()
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|Score newQuery()
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|Score query()
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|Score whereCreatedAt($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|Score whereDescricao($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|Score whereEvaluationCriterionId($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|Score whereId($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|Score whereOpinionId($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|Score whereUpdatedAt($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|Score whereValor($value)
+ */
+	class Score extends \Eloquent {}
 }
 
 namespace App\Models{
