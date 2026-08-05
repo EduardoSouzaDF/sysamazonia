@@ -64,7 +64,7 @@ class CategoryController extends Controller
         $rules = [
             'modality_id' => 'required|string',
             'title' => 'required|string|max:255',
-            'acronym' => 'required|string|max:10|unique:categories,acronym',
+            'acronym' => 'required|string|max:10,acronym',
             'description' => 'required|filled|string',
             'nominations_count' => 'integer',
             'evaluations_count' => 'integer',
@@ -129,6 +129,8 @@ class CategoryController extends Controller
             ->whereHas('edition', function ($query) {
                 $query->where('is_registration_active', true);
             })->get();
+
+        $modalities = Modality::all();
 
         return view('admin.categories.create', compact('modalities', 'category'));
     }

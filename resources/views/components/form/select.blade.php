@@ -15,18 +15,18 @@
     'value' => '',
 ])
 @php
-
     $value = $value !== '' ? $value : old($nameOld);
+
 @endphp
 <div class="kt-form-item {{ $class }}">
     @if ($label)
         <label class="kt-form-label">{{ $label }} {{ $required == 'true' ? '*' : '' }}</label>
     @endif
 
-    <sl-select name="{{ $name }}" @required($required) @if ($value) filled @endif
+    <sl-select value="{{ $value }}" name="{{ $name }}" @required($required) @if ($value) filled @endif
         @if ($multiple) multiple clearable @endif>
         @foreach ($options as $key => $option)
-            <sl-option value="{{ $key }}">{{ $option }}</sl-option>
+            <sl-option selected value="{{ $key }}">{{ $option }}</sl-option>
         @endforeach
     </sl-select>
 
