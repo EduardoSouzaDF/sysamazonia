@@ -677,6 +677,7 @@ function loadSelects(resp = []) {
     $('.notHonorific input, .notHonorific select, .notHonorific textarea').prop('disabled', true);
     $('.Honorific input, .Honorific select, .Honorific textarea').prop('disabled', true);
     const selectCategory = document.querySelector("select[name='category']");
+    selectCategory.innerHTML = "";
     const option = document.createElement("option");
     option.setAttribute("value", "");
     option.innerText = "Escolha uma Categoria";

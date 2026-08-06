@@ -9,7 +9,7 @@ $columns = [
     'Categoria' => 'category',
     'Autor' => 'candidate_name',
     'Titulo' => 'title',
-    'Avaliação' => 'rating',
+    'Avaliações / Nota' => 'rating',
     'Indicações' => 'nominations',
     'Status' => 'status',
 ];
@@ -43,7 +43,7 @@ $formattedData = array_map(function ($registration) {
         'category' => $registrationModel->category->acronym."-".$registrationModel->category->title,
         'title' => $registrationModel->title ?? $registrationModel->name,
         'candidate_name' => $registrationModel->candidate->nome,
-        'rating' => !$registrationModel->category->is_honorific ? sizeof($registrationModel->opinions).' | '.$registrationModel->category->evaluations_count : 'Não se Aplica',
+        'rating' => !$registrationModel->category->is_honorific ? sizeof($registrationModel->opinions).' | '.$registrationModel->category->evaluations_count.' ( '.$registrationModel->evaluation_avg.' )' : 'Não se Aplica',
         'nominations' => ' 0 | '. $registrationModel->category->modality->edition->applications_per_candidate,
         'status' => $registrationModel->statusName(), // ✅ Usando o método do model
         'id' => $registrationModel->id,

@@ -4,8 +4,13 @@
 
 
 
-<div class="flex w-full gap-4">
     <div class="w-full  ">
+        <div class="  bg-green-300 min-h-16 rounded-xl flex flex-row justify-end p-4">
+            <div class="flex flex-col w-1/6">
+                <div>Nota Avaliação</div>
+                <div class="place-self-center"> {{ $object->evaluation_avg }}</div>
+            </div>
+        </div>
     <b>Edição :</b>  {{ $object->category->modality->edition->title }}  <br>
     <b>Modalidade :</b>  {{  $object->category->modality->title }}  <br>
     <b>Categoria :</b>  {{ $object->category->title }}  <br>
@@ -17,11 +22,11 @@
         <sl-details summary="Resumo">
             <div >{!! $object->resumo !!}</div>
         </sl-details>
-        <br>
+
         <sl-details summary="Desenvolvimento">
             <div >{!! $object->desenvolvimento !!}</div>
         </sl-details>
-        <br>
+
         <sl-details summary="Objetivo">
             <div >{!! $object->objetivo !!}</div>
         </sl-details>
