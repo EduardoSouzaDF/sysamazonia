@@ -358,7 +358,7 @@ namespace App\Models{
  * @property string $desenvolvimento
  * @property string $objetivo
  * @property string $conclusao
- * @property \App\Enum\RegistrationStatusEnum $status
+ * @property int $status
  * @property string|null $protocol
  * @property int|null $evaluation_avg
  * @property-read \App\Models\Candidate $candidate

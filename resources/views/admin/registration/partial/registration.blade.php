@@ -5,10 +5,20 @@
 
 
     <div class="w-full  ">
-        <div class="  bg-green-300 min-h-16 rounded-xl flex flex-row justify-end p-4">
-            <div class="flex flex-col w-1/6">
+        <div class="  flex flex-row justify-end">
+            @php
+                $bgColor = match($object->getTextEvaluationAvg()) {
+                    'Não Recomendado' => 'bg-red-300',
+                    'Meritório' => 'bg-yellow-300',
+                    'Recomendado' => 'bg-green-300',
+                    default => 'bg-gray-300',
+                };
+
+            @endphp
+            <div class="flex flex-col w-1/6  p-4 min-h-16 rounded-xl text-center {{ $bgColor }}  bg-red-400">
                 <div>Nota Avaliação</div>
-                <div class="place-self-center"> {{ $object->evaluation_avg }}</div>
+                <div class="place-self-center"> {{ $object->getEvaluationAvgPercentage() }}</div>
+                <div class="place-self-center"> {{ $object->getTextEvaluationAvg() }}</div>
             </div>
         </div>
     <b>Edição :</b>  {{ $object->category->modality->edition->title }}  <br>

@@ -219,6 +219,36 @@ class Registration extends Model
         }
     }
 
+    public function getTextEvaluationAvg(): string
+    {
+        if ($this->evaluation_avg === null) {
+            return 'Sem Avaliação';
+        }
+
+        if($this->getEvaluationAvgPercentage() <= 30){
+            return 'Não Recomendado';
+        }
+
+        if($this->getEvaluationAvgPercentage() <= 40){
+            return 'Meritório';
+        }
+
+        if($this->getEvaluationAvgPercentage() <= 50){
+            return 'Recomendado';
+        }
+
+        return '';
+    }
+
+    public function getEvaluationAvgPercentage(): ?float
+    {
+        if ($this->evaluation_avg === null) {
+            return null;
+        }
+
+        return round($this->evaluation_avg / 2, 0);
+    }
+
     public static function getStatusArray(): array
     {
         return RegistrationStatusEnum::toArray();

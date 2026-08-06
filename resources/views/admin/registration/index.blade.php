@@ -43,11 +43,18 @@ $formattedData = array_map(function ($registration) {
         'category' => $registrationModel->category->acronym."-".$registrationModel->category->title,
         'title' => $registrationModel->title ?? $registrationModel->name,
         'candidate_name' => $registrationModel->candidate->nome,
-        'rating' => !$registrationModel->category->is_honorific ? sizeof($registrationModel->opinions).' | '.$registrationModel->category->evaluations_count.' ( '.$registrationModel->evaluation_avg.' )' : 'Não se Aplica',
+        'rating' => !$registrationModel->category->is_honorific ? sizeof($registrationModel->opinions).' | '.$registrationModel->category->evaluations_count.' ( '.$registrationModel->getEvaluationAvgPercentage()." ) " : 'Não se Aplica',
         'nominations' => ' 0 | '. $registrationModel->category->modality->edition->applications_per_candidate,
         'status' => $registrationModel->statusName(), // ✅ Usando o método do model
         'id' => $registrationModel->id,
-        'type' => get_class($registration)
+        'type' => get_class($registration),
+        'color' =>  !$registrationModel->category->is_honorific ?
+                  match($registrationModel->getTextEvaluationAvg()) {
+            'Não Recomendado' => 'bg-red-300',
+            'Meritório' => 'bg-yellow-300',
+            'Recomendado' => 'bg-green-300',
+            default => ''
+        }: ''
     ];
 }, $list->items()); // Usar items() ao invés de toArray()['data']
 

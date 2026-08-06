@@ -100,7 +100,7 @@
 
                                     @endphp
                                     @forelse($data  as $item)
-                                        <tr>
+                                        <tr class="{{$item['color'] ?? ''}}">
                                             @foreach ($columns as $label => $field)
                                                 <td>
                                                     {{ $item[$field] ?? '-' }}

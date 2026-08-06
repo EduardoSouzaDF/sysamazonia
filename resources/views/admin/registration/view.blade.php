@@ -51,10 +51,7 @@ use Illuminate\Support\Facades\Auth;
                                 <div class="place-self-center">{{ sizeof($rejeitadas) }}</div>
                             </div>
 
-                            <div class="flex flex-col text-red-500">
-                                <div>Avaliação</div>
-                                <div class="place-self-center">{{ sizeof($rejeitadas) }}</div>
-                            </div>
+
                     </div>
                 </div>
             <sl-details summary="Dados do Candidato">
