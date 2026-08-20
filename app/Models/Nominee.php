@@ -112,4 +112,9 @@ class Nominee extends Model
     {
         return 'Sem Avaliação';
     }
+
+     public function getEvaluationAvgPercentage(): ?float
+    {
+       return '';
+    }
 }
