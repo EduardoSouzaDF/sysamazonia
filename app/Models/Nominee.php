@@ -107,4 +107,9 @@ class Nominee extends Model
     {
         return RegistrationStatusEnum::toArray();
     }
+
+    public function getTextEvaluationAvg(): string
+    {
+        return 'Sem Avaliação';
+    }
 }
