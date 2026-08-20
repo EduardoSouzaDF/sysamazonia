@@ -115,6 +115,6 @@ class Nominee extends Model
 
      public function getEvaluationAvgPercentage(): ?float
     {
-       return '';
+       return 0;
     }
 }
