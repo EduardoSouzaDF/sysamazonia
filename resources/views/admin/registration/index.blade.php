@@ -16,14 +16,6 @@ $columns = [
 
 $user = Auth::user();
 
-/*
-Autor -> candidate name
-Titulo | indicado
-Avaliação
-Indicações = maximo de indicações + indicações
-Status 1 = Inscrito
-*/
-
 
 $actions = [
     'Visualizar' => function($registration){

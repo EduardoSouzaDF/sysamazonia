@@ -12,7 +12,7 @@
     'routeSearch',
     'paginator' => null, // Instância de LengthAwarePaginator para paginação
 ])
-
+ 
 
 <style>
     nav>div {
@@ -96,9 +96,6 @@
                                     </tr>
                                 </thead>
                                 <tbody>
-                                    @php
-
-                                    @endphp
                                     @forelse($data  as $item)
                                         <tr class="{{$item['color'] ?? ''}}">
                                             @foreach ($columns as $label => $field)
@@ -173,14 +170,14 @@
 
                                             @endif
                                         </tr>
-                                        @empty
-                                            <tr>
-                                                <td colspan="{{ count($columns) + (!empty($actions) ? 1 : 0) }}"
-                                                    class="py-4 text-center">
-                                                    Nenhum registro encontrado.
-                                                </td>
-                                            </tr>
-                                        @endforelse
+                                    @empty
+                                        <tr>
+                                            <td colspan="{{ count($columns) + (!empty($actions) ? 1 : 0) }}"
+                                                class="py-4 text-center">
+                                                Nenhum registro encontrado.
+                                            </td>
+                                        </tr>
+                                    @endforelse
                                     </tbody>
                                 </table>
                             </div>

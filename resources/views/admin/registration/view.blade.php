@@ -84,7 +84,7 @@ use Illuminate\Support\Facades\Auth;
                 @include('admin.registration.partial.registration', $object)
 
                 @if($user->isEvaluator())
-                    <div class="kt-card w-[400px]">
+                    <div class="kt-card w-full">
                         <div class="kt-card-content  ">
                             <form
                             method="POST"
@@ -96,7 +96,7 @@ use Illuminate\Support\Facades\Auth;
                                     <br>
                                     <div class="flex flex-col w-full  justify-between text-sm ">
                                         @foreach ($object->evaluationCriteriaList() as $criteria )
-                                            <div class="w-full  space-y-3 " >
+                                            <div class="w-full  space-y-3   " >
                                                 <div class="flex items-center justify-between gap-3 text-sm">
                                                     <span class="text-muted-foreground">
                                                         <b>{{ $criteria->name }}</b>
