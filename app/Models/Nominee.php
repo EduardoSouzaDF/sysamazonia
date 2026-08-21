@@ -2,6 +2,7 @@
 
 namespace App\Models;
 use App\Enum\RegistrationStatusEnum;
+use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -116,5 +117,10 @@ class Nominee extends Model
      public function getEvaluationAvgPercentage(): ?float
     {
        return 0;
+    }
+
+     public function indications(): \Illuminate\Database\Eloquent\Relations\HasMany
+    {
+        return new Collection();
     }
 }

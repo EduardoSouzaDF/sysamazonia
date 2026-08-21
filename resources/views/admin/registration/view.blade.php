@@ -1,6 +1,7 @@
 @php
 use App\Enum\RolesEnum;
 use Illuminate\Support\Facades\Auth;
+use Carbon\Carbon;
 
     $user = Auth::user();
     $titulo = 'Visualização de Inscrição';
@@ -13,13 +14,21 @@ use Illuminate\Support\Facades\Auth;
         $rejeitadas = $registrations->filter(function($reg){
             return $reg->status == 2;
         });
-    }else{
+    }
+    
+    if($user->isEvaluator()){
         $titulo = 'Avaliar Inscrição';
         $qualificadas = [];
         $rejeitadas = [];
     }
 
-    $useForm =  $user->isEvaluator() ? false : true;
+    if($user->isIndicator()){
+        $titulo = 'Indicar Inscrição';
+        $qualificadas = [];
+        $rejeitadas = [];
+    }
+
+    $useForm =  $user->isEvaluator() || $user->isIndicator() ? false : true;
 @endphp
 
 @extends('admin.content')
@@ -77,9 +86,11 @@ use Illuminate\Support\Facades\Auth;
 
         @foreach ($registrations as $object)
             @if ($user->isAdmin())
+               
                 <sl-details summary="{{ $object->category->modality->edition->title }} - {{ $object->category->modality->title }} - {{ $object->category->title }} :  {{ $object->title ?: $object->name }}">
                      @include('admin.registration.partial.registration', $object)
                 </sl-details>
+
             @else
                 @include('admin.registration.partial.registration', $object)
 
@@ -100,16 +111,18 @@ use Illuminate\Support\Facades\Auth;
                                                 <div class="flex items-center justify-between gap-3 text-sm">
                                                     <span class="text-muted-foreground">
                                                         <b>{{ $criteria->name }}</b>
-                                                        &nbsp;&nbsp; Mínimo: {{(int) $criteria->min_score}}
-                                                        &nbsp;&nbsp; Máximo: {{(int) $criteria->max_score}}
-                                                         &nbsp;&nbsp; Peso: {{(int) $criteria->weight}}
+                                                        &nbsp;&nbsp; 
                                                     </span>
                                                 </div>
-                                                <sl-range tooltip="top" name="criteria[{{ $criteria->id }}]"  min="{{(int) $criteria->min_score}}"  max="{{(int) $criteria->max_score}}"  step="1"></sl-range>
-
                                                 <p class="text-xs text-muted-foreground">
                                                     {{ $criteria->description }}
                                                 </p>
+                                                <sl-range label="Pontuação: Mínimo: {{(int) $criteria->min_score}}
+                                                        &nbsp;&nbsp; Máximo: {{(int) $criteria->max_score}}
+                                                         &nbsp;&nbsp; Peso: {{(int) $criteria->weight}}" tooltip="top"   name="criteria[{{ $criteria->id }}]"  min="{{(int) $criteria->min_score}}"  max="{{(int) $criteria->max_score}}"  step="1"></sl-range>
+                                                 
+                                                <sl-textarea label="Justificativa" name="justificativa[{{  $criteria->id }}]"></sl-textarea>
+                                               
                                             </div>
                                             <br><br>
                                         @endforeach
@@ -122,6 +135,8 @@ use Illuminate\Support\Facades\Auth;
                             </form>
                         </div>
                 @endif
+
+                
             @endif
 
         @endforeach

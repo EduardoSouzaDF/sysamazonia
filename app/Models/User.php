@@ -124,6 +124,25 @@ class User extends Authenticatable
     }
 
     /**
+     * Indications (opinions) que este usuário emitiu como júri/autor.
+     *
+     * Caminho: User -> indications (FK `user_id`).
+     */
+    public function indications(): \Illuminate\Database\Eloquent\Relations\HasMany
+    {
+        return $this->hasMany(Indication::class);
+    }
+
+    /**
+     * Coleção de indications (opinions) que este usuário emitiu.
+     * Retorna coleção vazia se o usuário não possui indications.
+     */
+    public function getIndicationsList(): \Illuminate\Database\Eloquent\Collection
+    {
+        return $this->indications()->get();
+    }
+
+    /**
      * Query builder das inscrições que o usuário pode avaliar como avaliador.
      *
      * Caminho: User -> categories (pivô `evaluators`) -> registrations.

@@ -17,10 +17,8 @@ $categoriesEvaluators = $categoriesEvaluators->mapWithKeys(function ($categorie)
     ->toArray();
 
 $indicatorCategories = $object ? $object->indicatorCategories->pluck('id')->implode(' ') : '';
+$evaluatorCategories = $object ? $object->indicatorCategories->pluck('id')->implode(' ') : '';
 
-
-
-$evaluatorCategories = $object ? $object->categoriesEvaluators->pluck('id')->implode(' ') : '';
 
 ?>
 

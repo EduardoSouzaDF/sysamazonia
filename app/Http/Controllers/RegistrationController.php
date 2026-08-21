@@ -34,14 +34,18 @@ class RegistrationController extends Controller
         $registrationQuery = $this->setIndexFilters($registrationQuery, $request);
         $nomineeQuery = $this->setIndexFilters($nomineeQuery, $request);
 
-        if ($user->isEvaluator()) {
+        if ($user->isEvaluator() ) {
             $registrationQuery = $this->filterEvaluatorCategories($registrationQuery, $user);
+        }
+
+        if($user->isIndicator()) {
+            $registrationQuery = $this->filterIndicatorCategories($registrationQuery, $user);
         }
 
         // Obter todos os resultados (ou limitar conforme necessário)
         $registrations = $registrationQuery->get();
         $nominees = $nomineeQuery->get();
-        if ($user->isEvaluator()) {
+        if ($user->isEvaluator() || $user->isIndicator()) {
             $nominees = Collection::empty();
         }
 
@@ -96,6 +100,33 @@ class RegistrationController extends Controller
             });
         }
 
+        return $query;
+    }
+
+    private function filterIndicatorCategories($query, $user){
+        $query->whereHas('category', function ($q) use ($user) {
+            $q->whereIn('id', $user->indicatorCategories()->pluck('categories.id'))
+                ->where('is_honorific', false)
+                ->where(function($cat){
+                    $cat->whereRaw('(
+                            SELECT COUNT(*)
+                            FROM indications
+                            WHERE indications.registration_id = registrations.id
+                        ) < categories.nominations_count');
+                });
+        });
+
+    //     // somente das edições ativar para Avaliador
+        $query->whereHas('category.modality.edition', function ($q) {
+            $q->where('is_registration_active', true);
+        });
+
+    //     // não mostra as inscrições que já avaliou
+       $query->whereDoesntHave('indications', function ($q) use ($user) {
+            $q->where('user_id', $user->id);
+        });
+
+        $query->where('status', RegistrationStatusEnum::Habilitado)->orWhere('status', RegistrationStatusEnum::Avaliado);
         return $query;
     }
 
@@ -230,6 +261,32 @@ class RegistrationController extends Controller
         return response()->json(['message' => 'Usuário sem permissão'], 419);
     }
 
+
+    public function indicar($id)
+    {
+        
+        $registration = Registration::findOrFail($id);
+        $user = auth()->user();
+        if ($user->isIndicator()) {
+            try {
+                $justificativa = request('justificativa');
+                DB::transaction(function () use ($user, $registration,$justificativa) {
+                    $registration->indications()->create([
+                        'user_id' => $user->id,
+                        'descricao' => $justificativa,
+                    ]);
+            });
+
+            return response()->json(['message' => 'Registro Indicado'], 200);
+            } catch (\Throwable $th) {
+                return response()->json(['message' => 'Erro na operação'], 400);
+            }
+
+        }
+
+        return response()->json(['message' => 'Usuário sem permissão'], 419);
+    }
+
     public function rejeitar($id, $type)
     {
 
@@ -265,6 +322,7 @@ class RegistrationController extends Controller
 
         $validated = $request->validate([
             'criteria' => ['required', 'array'],
+            'justificativa' => ['required', 'array'],
             'criteria.*' => ['required', 'integer', 'min:0'],
         ]);
 
@@ -280,6 +338,7 @@ class RegistrationController extends Controller
                         'opinion_id' => $opinion->id,
                         'evaluation_criterion_id' => (int) $criterionId,
                         'valor' => (int) $valor,
+                        'descricao' => $validated['justificativa'][$criterionId],
                     ]);
                 }
             });

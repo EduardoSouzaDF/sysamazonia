@@ -30,7 +30,12 @@ class MenuBuilder
                 $menus = array_merge($menus, self::getAvaliadorMenu());
             }
 
+            if($user->isIndicator()) {
+                $menus = array_merge($menus, self::getIndicadorMenu());
+            }
+
         }
+
 
         return $menus;
     }
@@ -119,10 +124,26 @@ class MenuBuilder
         ];
     }
 
+
+    public static function getIndicadorMenu(): array
+    {
+    return [
+                [
+                    'heading' => 'Indicadores',
+                ],
+
+                [
+                    'title' => 'Indicar Inscrições',
+                    // 'icon' => 'ki-abstract-26',
+                    'icon' => 'ki-scroll',
+                    'route' => 'admin.registration.index',
+                ],
+
+            ];
+    }
     public static function getAvaliadorMenu(): array
     {
 
-        $user = Auth::user();
 
         return [
             [

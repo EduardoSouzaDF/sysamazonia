@@ -197,6 +197,8 @@ class UserController extends Controller
             $query->where('is_registration_active', true);
         })->where('is_honorific', false)->get();
 
+        
+
 
         return view('admin.users.create', ['roles' => $roles, 'categories' => $categories, 'categoriesEvaluators' => $categoriesEvaluators, 'user' => $user]);
     }

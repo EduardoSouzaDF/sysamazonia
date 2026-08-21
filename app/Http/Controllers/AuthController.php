@@ -150,7 +150,7 @@ class AuthController extends Controller
         );
 
         return $status === Password::PasswordReset
-            ? redirect()->route('login')->with('status', __($status))
+            ? redirect()->route('login')->with('status', 'Senha Atualizada')
             : back()->withErrors(['email' => [__($status)]]);
     }
 }

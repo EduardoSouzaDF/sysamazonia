@@ -114,7 +114,7 @@ Route::middleware('auth')->group(function () {
 
         Route::post('/admin/registration/rejeitar/{id}/{type}', [RegistrationController::class, 'rejeitar'])->middleware($middleware)->name('admin.registration.rejeitar');
         Route::post('/admin/registration/habilitar/{id}/{type}', [RegistrationController::class, 'habilitar'])->middleware($middleware)->name('admin.registration.habilitar');
-
+        Route::post('/admin/registration/indicar/{id}', [RegistrationController::class, 'indicar'])->middleware($middlewareListaInscricoes)->name('admin.registration.indicar');
         Route::post('/admin/registration/send-opinion/{registration}', [RegistrationController::class, 'sendOpinion'])->middleware($middlewareListaInscricoes)->name('admin.registration.send.opinion');
 
         Route::get('/admin/registration/file/{file}', [RegistrationController::class, 'file'])->middleware($middlewareListaInscricoes)->name('admin.registration.file');

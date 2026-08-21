@@ -138,6 +138,15 @@ class Registration extends Model
         return $this->hasMany(Opinion::class);
     }
 
+
+     /**
+     * Indicações (indications) emitidos para esta inscrição.
+     */
+    public function indications(): \Illuminate\Database\Eloquent\Relations\HasMany
+    {
+        return $this->hasMany(Indication::class);
+    }
+    
     /**
      * Pareceres já com seus scores (notas) carregados.
      * Útil para listagens e dashboards.

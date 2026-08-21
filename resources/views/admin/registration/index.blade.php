@@ -30,13 +30,14 @@ $formattedData = array_map(function ($registration) {
     /** @var \App\Models\Registration $registrationModel */
     $registrationModel = $registration;
 
+
     return [
         'edition' => $registrationModel->category->modality->edition->title,
         'category' => $registrationModel->category->acronym."-".$registrationModel->category->title,
         'title' => $registrationModel->title ?? $registrationModel->name,
         'candidate_name' => $registrationModel->candidate->nome,
         'rating' => !$registrationModel->category->is_honorific ? sizeof($registrationModel->opinions).' | '.$registrationModel->category->evaluations_count.' ( '.$registrationModel->getEvaluationAvgPercentage()." ) " : 'Não se Aplica',
-        'nominations' => ' 0 | '. $registrationModel->category->modality->edition->applications_per_candidate,
+        'nominations' => !$registrationModel->category->is_honorific ? sizeof($registrationModel->indications).' | '.$registrationModel->category->nominations_count : 'Não se Aplica',
         'status' => $registrationModel->statusName(), // ✅ Usando o método do model
         'id' => $registrationModel->id,
         'type' => get_class($registration),
@@ -77,12 +78,26 @@ if(!$user->isAdmin()){
         return $registration;
     }, $formattedData);
 
-    $actions = [
-    'Avaliar' => function($registration){
-        return  route('admin.registration.show', ['id' => $registration['id'],'type' => $registration['type']]);
-    },
+     $actions = [];
+    
+     if ($user->isEvaluator()) {
+        $actions['Avaliar'] = function ($registration) {
+            return route('admin.registration.show', [
+                'id' => $registration['id'],
+                'type' => $registration['type'],
+            ]);
+        };
+    }
 
-];
+    if ($user->isIndicator()) {
+        $actions['Indicar'] = function ($registration) {
+            return route('admin.registration.show', [
+                'id' => $registration['id'],
+                'type' => $registration['type'],
+            ]);
+        };
+    }
+    
 
 }
 
