@@ -10,9 +10,15 @@ $categories = $categories
     })
     ->toArray();
 
-$indicatorCategories = $object ? $object->indicatorCategories->pluck('id')->implode(' ') : '';
 
-$evaluatorCategories = $object ? $object->evaluatorCategories->pluck('id')->implode(' ') : '';
+$categoriesEvaluators = $categoriesEvaluators->mapWithKeys(function ($categorie) {
+        return [$categorie->id => $categorie->title];
+    })
+    ->toArray();
+
+$indicatorCategories = $object ? $object->indicatorCategories->pluck('id')->implode(' ') : '';
+$evaluatorCategories = $object ? $object->indicatorCategories->pluck('id')->implode(' ') : '';
+
 
 ?>
 
@@ -65,7 +71,7 @@ $evaluatorCategories = $object ? $object->evaluatorCategories->pluck('id')->impl
         <div id="avaliador_" class="hidden  mt-2">
             <x-form-select label="Categorias para Avaliação" nameOld="avaliador" name="avaliador[]" id="avaliador"
                 value="{{ $evaluatorCategories }}" multiple="{{ true }}" required="true" maxSelections="99"
-                :options="$categories" />
+                :options="$categoriesEvaluators" />
         </div>
     </div>
 </div>

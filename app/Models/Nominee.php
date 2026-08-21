@@ -1,7 +1,8 @@
 <?php
 
 namespace App\Models;
-
+use App\Enum\RegistrationStatusEnum;
+use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -76,29 +77,50 @@ class Nominee extends Model
         return $this->hasMany(RegistrationFile::class);
     }
 
-    public function statusName(){
+    public function statusName(): string
+    {
 
-        switch($this->status){
+        switch((string)$this->status){
 
-            case 1:
-                return 'Inscrito';
+            case '1':
+                return RegistrationStatusEnum::Inscrito->label();
                 break;
-            case 2:
-                return 'Rejeitado';
+            case '2':
+                return RegistrationStatusEnum::Rejeitado->label();
                 break;
-            case 3:
-                return 'Habilitado';
+        case '3':
+                return RegistrationStatusEnum::Habilitado->label();
                 break;
-            case 4:
-                return 'Avaliado';
+            case '4':
+                return RegistrationStatusEnum::Avaliado->label();
                 break;
-            case 5:
-                return 'Agraciado';
+            case '5':
+                return RegistrationStatusEnum::Agraciado->label();
                 break;
             default:
-                return 'Inscrito';
-            break;
+                return 'Desconhecido';
 
         }
+    }
+
+
+    public static function getStatusArray(): array
+    {
+        return RegistrationStatusEnum::toArray();
+    }
+
+    public function getTextEvaluationAvg(): string
+    {
+        return 'Sem Avaliação';
+    }
+
+     public function getEvaluationAvgPercentage(): ?float
+    {
+       return 0;
+    }
+
+     public function indications(): \Illuminate\Database\Eloquent\Relations\HasMany
+    {
+        return new Collection();
     }
 }
