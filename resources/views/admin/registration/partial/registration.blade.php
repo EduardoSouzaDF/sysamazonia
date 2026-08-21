@@ -76,6 +76,7 @@ use Carbon\Carbon;
 
     @endif
 
+    @if(sizeof($object->files))
     <sl-details summary="Arquivos">
         @if ($object->files)
             @foreach ($object->files as $file)
@@ -91,8 +92,10 @@ use Carbon\Carbon;
 
         @endif
     </sl-details>
+    @endif
+    
    
-    @if (get_class($object) == "App\Models\Registration" && $object->opinionsWithScores() && $user->isAdmin())
+    @if (get_class($object) == "App\Models\Registration" && $object->opinionsWithScores() && $user->isAdmin() && sizeof($object->opinionsWithScores()))
         <sl-details summary="Avaliações">
             @foreach ($object->opinionsWithScores() as $opinion )
                 <sl-details summary="Avaliado em: {{Carbon::parse( $opinion->created_at)->format('d/m/Y') }} por: {{ $opinion->user->name }}">
@@ -118,8 +121,8 @@ use Carbon\Carbon;
             @endforeach
         </sl-details>
 
+        @if(sizeof($object->indications))
         <sl-details summary="Indicações">
-           
             @foreach ($object->indications as $indication )
                 <sl-details summary="Indicado em: {{Carbon::parse( $indication->created_at)->format('d/m/Y') }} por: {{ $indication->user->name }}">
                      <p class="text-xs text-muted-foreground">
@@ -130,6 +133,8 @@ use Carbon\Carbon;
                 <br><br>
             @endforeach
         </sl-details>
+        @endif
+        
     @endif
 
      
