@@ -49,9 +49,9 @@ Route::middleware('guest')->group(function () {
 
 // Rotas autenticadas
 Route::middleware('auth')->group(function () {
-    Route::get('/', [DashboardController::class, 'index'])->name('dashboard');
+     Route::redirect('/', '/dashboard');
     Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
-    Route::get('/logout', [AuthController::class, 'logout'])->name('logout');
+    Route::get('/logout', [AuthController::class, 'logout'])->name('sair');
 
     Route::prefix('admin')->group(function () {
         $middleware = ['auth', CheckAdmin::class.':admin'];
