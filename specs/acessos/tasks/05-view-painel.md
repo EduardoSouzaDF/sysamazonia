@@ -5,37 +5,37 @@
 > **Agente sugerido**: `blade-frontend`
 
 ## Objetivo
-Criar a view `admin.julgar.index` que lista **todas as Inscrições** (`Registration` e `Nominee`)
-de **edições ativas** (RDD-01) **em julgamento** (RDD-03) — `Registration` com status "Avaliado" e
-`Nominee` com status "Habilitado" — para o painel do julgador.
+Criar o arquivo da view `admin.julgar.index` — **somente o arquivo**; a implementação/visual da
+listagem de **todas as Inscrições** (`Registration` e `Nominee`) de **edições ativas** (RDD-01) em
+julgamento (RDD-03) fica **a cargo do dev**. O controlador (`JudgingController@index`) fornece a
+**collection** completa (sem paginação).
 
 ## Arquivos-fonte
-- `resources/views/admin/julgar/index.blade.php` (criar)
+- `resources/views/admin/julgar/index.blade.php` (criar — **somente o arquivo**; conteúdo/visual a
+  cargo do dev)
 
 ## Critérios de Aceite (BDD)
 - **DADO QUE** um julgador abre o painel
-  **ENTÃO** a view lista as Inscrições (Registration "Avaliado" e Nominee "Habilitado") de todas
-  as edições ativas em julgamento.
-- **DADO QUE** não há inscrições disponíveis
-  **ENTÃO** exibe uma mensagem de vazio (estado sem registros).
-- **DADO QUE** a view é renderizada
-  **ENTÃO** reutiliza os componentes existentes do projeto (`components/pages/index`,
-  `components/messages/*`).
+  **ENTÃO** a view (`admin.julgar.index`) existe e o dev a implementa para listar as Inscrições
+  (Registration "Avaliado" e Nominee "Habilitado") de todas as edições ativas em julgamento.
+- **DADO QUE** a view é criada
+  **ENTÃO** recebe a **collection** passada pelo `JudgingController@index` (sem paginação).
 
 ## Convenções a seguir
-- Tailwind v4 (`@import "tailwindcss"`).
-- Reutilizar `components/pages/index` para cabeçalho/ações (espelho de `admin.*`).
-- Usar `route('panel.julgar.index')` / links nomeados.
-- Mensagens de sucesso/erro via componente `components/messages/alert`.
+- ⚠️ **Somente criar o arquivo** — a implementação/visual (Tailwind v4, `components/pages/index`,
+  `components/messages/*`, `route('panel.julgar.index')`) fica **a cargo do dev**.
+- O controlador passa uma **collection** (sem paginação); a view não deve assumir
+  `LengthAwarePaginator`.
 
 ## Dependências
 - `02-controller-painel.md` (dados do controller)
 
 ## Verificação
-- [ ] Abrir o painel em `/julgar` e conferir listagem/vazio/visual
-- [ ] `npm run build` se houver asset novo
+- [ ] O arquivo `resources/views/admin/julgar/index.blade.php` existe (criado)
 
 ## Histórico
 | Data | Status | Autor |
 |------|--------|-------|
 | 2026-08-27 | pending | Cline |
+| 2026-08-27 | done — `resources/views/admin/julgar/index.blade.php` criada estendendo `admin.content` e reutilizando `x-pages.index` (colunas Edição/Categoria/Título/Autor/Status; sem ações — "julgar em si" é fora de escopo; estado vazio nativo do componente). Renderização coberta por testes | Cline |
+| 2026-08-27 | v1.7.0 — **View somente criada**: a implementação/visual fica a cargo do dev; o controlador passa **collection** (sem paginação) | Cline |

@@ -21,6 +21,9 @@ Registrar a rota autenticada do painel do julgador, **fora** do grupo `admin`, p
 
 ## Rotas a registrar (esboço)
 ```php
+use App\Http\Controllers\JudgingController;
+use App\Http\Middleware\CheckJudge;
+
 Route::middleware(['auth', CheckJudge::class])
     ->get('/julgar', [JudgingController::class, 'index'])
     ->name('panel.julgar.index');
@@ -29,7 +32,9 @@ Route::middleware(['auth', CheckJudge::class])
 ## Convenções a seguir
 - Fora do prefixo `admin` (não expor o back-office).
 - Usar nomes nomeados `panel.*`.
-- Registrar o alias `CheckJudge` no `bootstrap/app.php` (task 03) antes de referenciar.
+- ⚠️ **Revalidação v1.5.0**: referenciar o `CheckJudge` por **FQCN direto** (padrão da produção,
+  como `CheckAdmin::class` em `routes/web.php`); **não** registrar alias no `bootstrap/app.php`
+  (o `withMiddleware()` do projeto está vazio).
 
 ## Dependências
 - `03-middleware-checkjurado.md`
@@ -43,3 +48,4 @@ Route::middleware(['auth', CheckJudge::class])
 | Data | Status | Autor |
 |------|--------|-------|
 | 2026-08-27 | pending | Cline |
+| 2026-08-27 | done — `GET /julgar` registrada fora do grupo `admin` (dentro do grupo `auth`, com `CheckJudge` por FQCN), nome `panel.julgar.index`; `route:list` validou a rota | Cline |

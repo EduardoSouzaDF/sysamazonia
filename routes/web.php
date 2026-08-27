@@ -5,10 +5,12 @@ use App\Http\Controllers\CategoryController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\EditionController;
 use App\Http\Controllers\EvaluationCriterionController;
+use App\Http\Controllers\JudgingController;
 use App\Http\Controllers\ModalityController;
 use App\Http\Controllers\RegistrationController;
 use App\Http\Controllers\UserController;
 use App\Http\Middleware\CheckAdmin;
+use App\Http\Middleware\CheckJudge;
 use Illuminate\Support\Facades\File;
 use Illuminate\Support\Facades\Route;
 
@@ -121,5 +123,10 @@ Route::middleware('auth')->group(function () {
         Route::get('/admin/users/return-to-admin', [UserController::class, 'returnToAdmin'])->name('admin.users.return-to-admin');
 
     });
+
+    // Painel do julgador (fora do back-office admin; acesso por is_judge — spec 0002)
+    Route::middleware([CheckJudge::class])
+        ->get('/julgar', [JudgingController::class, 'index'])
+        ->name('panel.julgar.index');
 
 });

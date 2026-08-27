@@ -40,9 +40,18 @@ painel, filtro de edições ativas (RDD-01) + em julgamento (RDD-03), status por
 
 ## Notas
 - O acesso é gated por `is_judge` (não por papel `Role::JURADO`).
-- Se `UserFactory` não expor `is_judge`, adicionar ao `$definition`/método `judge()`.
+- ⚠️ **Revalidação v1.5.0 (confirmado)**: o `UserFactory` atual **não** expõe `is_judge` — o
+  `$definition` não inclui o campo e não há estado `judge()`. Adicionar método de estado
+  `judge()` (`return $this->state(fn () => ['is_judge' => true]);`) seguindo o padrão de
+  `unverified()`.
+- ⚠️ **Revalidação v1.5.0**: usar `RegistrationStatusEnum::Avaliado->value` (4) e
+  `::Habilitado->value` (3) nos factories/asserções (padrão da produção); observar que
+  `Registration` **não tem cast** de `status` (o `Nominee` tem cast integer) — criar registros
+  passando int explícito.
+- Rodar apenas o teste relacionado com filtro.
 
 ## Histórico
 | Data | Status | Autor |
 |------|--------|-------|
 | 2026-08-27 | pending | Cline |
+| 2026-08-27 | done — `tests/Feature/JudgingAccessTest.php` criado (6 testes / 27 assertions, todos passando): menu julgador (com/sem `is_judge`), painel 200 com Inscrições corretas, exclusões RDD-01/RDD-03/status inválidos, logout+"Perfil sem Acesso!" na tela de login, guest → login. `UserFactory::judge()` adicionado. Obs.: `ExampleTest` falha por 302 em `/` — pré-existente, fora do escopo | Cline |

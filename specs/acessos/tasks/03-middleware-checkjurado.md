@@ -11,7 +11,9 @@ mensagem **"Perfil sem Acesso!"**.
 
 ## Arquivos-fonte
 - `app/Http/Middleware/CheckJudge.php` (criar)
-- `bootstrap/app.php` (editar; registrar alias do middleware)
+
+> ⚠️ Revalidação v1.5.0: **não** editar `bootstrap/app.php` — o projeto não usa aliases de
+> middleware (`withMiddleware()` vazio); o middleware é referenciado por FQCN direto nas rotas.
 
 ## Critérios de Aceite (BDD)
 - **DADO QUE** um usuário autenticado tem `is_judge = true`
@@ -27,8 +29,12 @@ mensagem **"Perfil sem Acesso!"**.
 ## Convenções a seguir
 - Basear-se em `CheckAdmin` para a estrutura, mas checando `isJudge()` e **não** retornando 403
   (logout + redirect com flash `success`/`error` = "Perfil sem Acesso!").
-- Registrar o alias no `bootstrap/app.php` conforme a convenção do projeto (conferir como
-  `CheckAdmin` está aliado).
+- ⚠️ **Revalidação v1.5.0 (produção mudou)**: o `CheckAdmin` **não é aliado** no
+  `bootstrap/app.php` — o `withMiddleware()` está vazio e as rotas usam **FQCN direto**
+  (`CheckAdmin::class.':admin'`). Portanto, **não registrar alias**; o `CheckJudge` deve ser
+  referenciado por FQCN direto nas rotas (como no esboço da task 04), mantendo o
+  `withMiddleware()` vazio. O `CheckAdmin` atual também aceita múltiplos papéis
+  (`string ...$roles`) — o `CheckJudge` não precisa desse parâmetro (gating único por `is_judge`).
 - Explicitar tipo de retorno e parâmetros com PHPDoc.
 
 ## Dependências
@@ -45,3 +51,4 @@ mensagem **"Perfil sem Acesso!"**.
 | Data | Status | Autor |
 |------|--------|-------|
 | 2026-08-27 | pending | Cline |
+| 2026-08-27 | done — `CheckJudge` criado (logout + `session()->invalidate()` + `regenerateToken()` padrão `AuthController::logout`; redirect `login` com flash `error` = "Perfil sem Acesso!"); sem alias (FQCN direto). Ajuste necessário registrado: view de login tinha `{{ $session('error') }}` (erro 500 ao exibir o flash) — corrigido para `{{ session('error') }}` (FR-04). `php -l` OK | Cline |

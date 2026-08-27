@@ -37,8 +37,15 @@ item **"Julgar"**, e ativá-lo no `getMenuStructure()` apenas para usuários com
 ## Notas / Débito técnico
 - `getJuradoMenu()` existia **órfão**; renomear para `getJulgadorMenu()` conforme RD da spec.
 - O critério de acesso do julgador é `is_judge` (não o papel `Role::JURADO`, que não é seedado).
+- ⚠️ **Revalidação v1.5.0 (produção mudou)**: o `getJuradoMenu()` órfão atual tem título
+  **"Incrições"** (typo) e rota `dashboard` — ao reaproveitar/renomear, é **obrigatório** corrigir
+  título → **"Julgar"** (NM-01) e rota → `panel.julgar.index`; não herdar o typo/rota.
+- ⚠️ **Revalidação v1.5.0**: o `getMenuStructure()` agora ativa blocos por papel/vínculo
+  (`Role::ADMIN`, `Role::LEITOR`, `Role::COMISSAO` + `isEvaluator()`/`isIndicator()`); o bloco do
+  julgador (`if ($user->isJudge()) {...}`) deve seguir esse mesmo padrão de ativação.
 
 ## Histórico
 | Data | Status | Autor |
 |------|--------|-------|
 | 2026-08-27 | pending | Cline |
+| 2026-08-27 | done — `getJulgadorMenu()` criado (renomeado do `getJuradoMenu()` órfão; título "Julgar" → `panel.julgar.index`; typo "Incrições" e rota `dashboard` não herdados); ativação `isJudge()` no padrão de blocos do `getMenuStructure()`. `php -l` OK | Cline |
