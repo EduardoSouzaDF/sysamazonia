@@ -100,3 +100,16 @@ php artisan config:clear
 
  
 
+
+---
+## 🧭 Desenvolvimento Orientado a Especificação (SDD) com o Cline
+
+Este projeto usa **SDD (Specification-Driven Development)** para guiar o assistente Cline no VS Code.
+
+- **Visão geral & workflow**: [`docs/sdd/`](docs/sdd/01-visao-geral.md)
+- **Regras do Cline (global + agentes)**: [`.clinerules/`](.clinerules/README.md)
+- **Skills reutilizáveis**: [`.claude/skills/`](.claude/skills/laravel-crud/SKILL.md)
+- **Specs de recursos**: [`specs/`](specs/users/0001-users-crud.md)
+
+> O `CLAUDE.md` (Laravel Boost) permanece como camada superior de regras e deve ser sempre respeitado.
+
