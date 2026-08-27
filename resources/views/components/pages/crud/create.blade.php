@@ -11,6 +11,7 @@
     'space' => true,
     'btnDelete' => false,
     'btnSubmit' => true,
+    'useForm' => true,
     'btnDeleteRoute' => '',
     'btnDeleteId' => 'btnDeleteId',
 ])
@@ -25,13 +26,16 @@
 
         </div>
 
-
-        <form method="POST" id="{{ $formId }}" action="{{ $formAction }}" enctype="multipart/form-data" novalidate
+        @if($useForm)
+            <form method="POST" id="{{ $formId }}" action="{{ $formAction }}" enctype="multipart/form-data" novalidate
             class="kt-form">
             @csrf
             @if ($put)
                 @method('PUT')
             @endif
+        @endif
+
+
 
             @if ($useTabs)
                 <div class="kt-card-content" data-kt-tabs-hidden-class="hidden" data-kt-tabs-active-class="active">
@@ -65,6 +69,10 @@
         @endif
 
     </div>
-    </form>
+
+    @if($useForm)
+        </form>
+    @endif
+
 </div>
 </div>

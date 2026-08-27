@@ -50,7 +50,14 @@ class UserController extends Controller
             $query->where('is_registration_active', true);
         })->get();
 
-        return view('admin.users.create', ['roles' => $roles, 'categories' => $categories]);
+
+        $categoriesEvaluators = Category::whereHas('modality.edition', function ($query) {
+            $query->where('is_registration_active', true);
+        })->where('is_honorific', false)->get();
+
+
+
+        return view('admin.users.create', ['roles' => $roles, 'categories' => $categories , 'categoriesEvaluators' => $categoriesEvaluators]);
     }
 
     /**
@@ -186,7 +193,14 @@ class UserController extends Controller
             $query->where('is_registration_active', true);
         })->get();
 
-        return view('admin.users.create', ['roles' => $roles, 'categories' => $categories, 'user' => $user]);
+        $categoriesEvaluators = Category::whereHas('modality.edition', function ($query) {
+            $query->where('is_registration_active', true);
+        })->where('is_honorific', false)->get();
+
+        
+
+
+        return view('admin.users.create', ['roles' => $roles, 'categories' => $categories, 'categoriesEvaluators' => $categoriesEvaluators, 'user' => $user]);
     }
 
     /**

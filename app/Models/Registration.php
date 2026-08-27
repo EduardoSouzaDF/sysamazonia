@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Enum\RegistrationStatusEnum;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -33,6 +34,7 @@ class Registration extends Model
         'conclusao',
         'status',
         'protocol',
+        'evaluation_avg',
     ];
 
     /**
@@ -41,7 +43,7 @@ class Registration extends Model
      * @var array
      */
     protected $casts = [
-        'status' => 'integer',
+        'evaluation_avg' => 'integer',
     ];
 
     /**
@@ -89,42 +91,248 @@ class Registration extends Model
         return $this->hasMany(RegistrationFile::class);
     }
 
-    public function statusName(){
+    /**
+     * Critérios de avaliação (EvaluationCriteria) da categoria desta inscrição.
+     *
+     * Caminho: Registration -> category -> evaluationCriteria.
+     * Retorna query vazia caso a inscrição não tenha categoria.
+     */
+    public function evaluationCriteria(): \Illuminate\Database\Eloquent\Relations\HasManyThrough
+    {
+        return $this->hasManyThrough(
+            EvaluationCriterion::class,
+            Category::class,
+            'id',          // local key em categories referenciada por registrations.category_id
+            'category_id', // FK em evaluation_criteria referenciando categories.id
+            'category_id', // local key em registrations
+            'id'           // local key em categories
+        );
+    }
 
-        switch($this->status){
+    /**
+     * Coleção de critérios de avaliação da categoria desta inscrição.
+     */
+    public function evaluationCriteriaList(): \Illuminate\Database\Eloquent\Collection
+    {
+        if (! $this->category_id) {
+            return new \Illuminate\Database\Eloquent\Collection;
+        }
 
-            case 1:
-                return 'Inscrito';
+        return $this->evaluationCriteria()->get();
+    }
+
+    /**
+     * Critérios ordenados por peso (decrescente por padrão).
+     * Útil para renderizar formulários de avaliação na ordem de importância.
+     */
+    public function evaluationCriteriaByWeight(string $direction = 'desc'): \Illuminate\Database\Eloquent\Collection
+    {
+        return $this->evaluationCriteriaList()->sortBy('weight', SORT_REGULAR, $direction === 'desc');
+    }
+
+    /**
+     * Pareceres (opinions) emitidos para esta inscrição.
+     */
+    public function opinions(): \Illuminate\Database\Eloquent\Relations\HasMany
+    {
+        return $this->hasMany(Opinion::class);
+    }
+
+
+     /**
+     * Indicações (indications) emitidos para esta inscrição.
+     */
+    public function indications(): \Illuminate\Database\Eloquent\Relations\HasMany
+    {
+        return $this->hasMany(Indication::class);
+    }
+    
+    /**
+     * Pareceres já com seus scores (notas) carregados.
+     * Útil para listagens e dashboards.
+     */
+    public function opinionsWithScores(): \Illuminate\Database\Eloquent\Collection
+    {
+        return $this->opinions()
+            ->with(['scores.evaluationCriterion', 'user'])
+            ->latest()
+            ->get();
+    }
+
+    /**
+     * Média ponderada dos scores desta inscrição,
+     * usando `weight` de cada `evaluation_criteria` como peso.
+     *
+     * Fórmula: Σ(valor × peso) / Σ(peso)
+     *
+     * Critérios com peso 0 ou nulo são desconsiderados.
+     * Retorna null quando não houver notas válidas.
+     */
+    public function averageScore(): ?float
+    {
+        $scores = Score::query()
+            ->whereIn('opinion_id', $this->opinions()->pluck('id'))
+            ->with('evaluationCriterion:id,weight')
+            ->get();
+
+        if ($scores->isEmpty()) {
+            return null;
+        }
+
+        $sumWeighted = 0.0;
+        $sumWeights = 0.0;
+
+        foreach ($scores as $score) {
+            $weight = (float) ($score->evaluationCriterion?->weight ?? 0);
+
+            if ($weight <= 0) {
+                continue;
+            }
+
+            $sumWeighted += ((int) $score->valor) * $weight;
+            $sumWeights += $weight;
+        }
+
+        if ($sumWeights === 0.0) {
+            return null;
+        }
+
+        return round($sumWeighted / $sumWeights, 2);
+    }
+
+
+
+    public function statusName(): string
+    {
+
+        switch((string)$this->status){
+
+            case '1':
+                return RegistrationStatusEnum::Inscrito->label();
                 break;
-            case 2:
-                return 'Rejeitado';
+            case '2':
+                return RegistrationStatusEnum::Rejeitado->label();
                 break;
-            case 3:
-                return 'Habilitado';
+        case '3':
+                return RegistrationStatusEnum::Habilitado->label();
                 break;
-            case 4:
-                return 'Avaliado';
+            case '4':
+                return RegistrationStatusEnum::Avaliado->label();
                 break;
-            case 5:
-                return 'Agraciado';
+            case '5':
+                return RegistrationStatusEnum::Agraciado->label();
                 break;
             default:
-                return 'Inscrito';
-            break;
+                return 'Desconhecido';
 
         }
     }
 
-    static function getStatusArray(){
-        return [
-            1 => 'Inscrito',
-            2 => 'Rejeitado',
-            3 => 'Habilitado',
-            4 => 'Avaliado',
-            5 => 'Agraciado',
-        ];
+    public function getTextEvaluationAvg(): string
+    {
+        if ($this->evaluation_avg === null) {
+            return 'Sem Avaliação';
+        }
+
+        if($this->getEvaluationAvgPercentage() <= 30){
+            return 'Não Recomendado';
+        }
+
+        if($this->getEvaluationAvgPercentage() <= 40){
+            return 'Meritório';
+        }
+
+        if($this->getEvaluationAvgPercentage() <= 50){
+            return 'Recomendado';
+        }
+
+        return '';
     }
 
+    public function getEvaluationAvgPercentage(): ?float
+    {
+        if ($this->evaluation_avg === null) {
+            return null;
+        }
 
+        return round($this->evaluation_avg / 2, 0);
+    }
 
+    public static function getStatusArray(): array
+    {
+        return RegistrationStatusEnum::toArray();
+    }
+
+    public function updateEvaluationsAvg(): void
+    {
+
+        /** @var \Illuminate\Database\Eloquent\Collection<int, Opinion> $opinions */
+        $opinions = $this->opinions()->get();
+
+        // Se não houver opiniões/avaliações, define como null e encerra
+        if ($opinions->isEmpty()) {
+            $this->update(['evaluation_avg' => null]);
+            return;
+        }
+
+        $totalOpinionAverages = 0;
+        $validOpinionsCount = 0;
+
+        /** @var Opinion $opinion */
+        foreach ($opinions as $opinion) {
+            /** @var \Illuminate\Database\Eloquent\Collection<int, Score> $scores */
+            $scores = $opinion->scores;
+
+            if ($scores->isEmpty()) {
+                continue;
+            }
+
+            $weightedSum = 0;
+            $totalWeight = 0;
+
+            /** @var Score $score */
+            foreach ($scores as $score) {
+                /** @var EvaluationCriterion|null $criterio */
+                $criterio = $score->evaluationCriterion;
+
+                if (!$criterio) {
+                    continue;
+                }
+
+                $nota = $score->valor;
+                $minScore = $criterio->min_score;
+                $maxScore = $criterio->max_score;
+                $weight = $criterio->weight ?? 1; // Assume peso 1 caso não esteja definido no critério
+
+                $range = $maxScore - $minScore;
+
+                // Evita divisão por zero se min_score for igual a max_score
+                if ($range > 0) {
+                    // Normaliza a nota para uma porcentagem entre 0.0 e 1.0 (0% a 100%)
+                    $normalizedScore = ($nota - $minScore) / $range;
+
+                    $weightedSum += $normalizedScore * $weight;
+                    $totalWeight += $weight;
+                }
+            }
+
+            // Calcula a porcentagem final desta Opinião específica
+            if ($totalWeight > 0) {
+                $opinionPercentageAvg = $weightedSum / $totalWeight;
+                $totalOpinionAverages += $opinionPercentageAvg;
+                $validOpinionsCount++;
+            }
+        }
+
+        // Se houve opiniões válidas com notas calculadas
+        if ($validOpinionsCount > 0) {
+            // Média de todas as opiniões recebidas (em escala 0.0 a 1.0)
+            $finalPercentage = $totalOpinionAverages / $validOpinionsCount;
+            // Converte para escala de 0 a 100 e arredonda para salvar no unsignedTinyInteger
+            $evaluationAvg = (int) round($finalPercentage * 100);
+            $this->update(['evaluation_avg' => $evaluationAvg, 'status' => RegistrationStatusEnum::Avaliado]);
+        } else {
+            $this->update(['evaluation_avg' => null]);
+        }
+    }
 }
