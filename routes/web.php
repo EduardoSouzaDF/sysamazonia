@@ -51,7 +51,7 @@ Route::middleware('guest')->group(function () {
 
 // Rotas autenticadas
 Route::middleware('auth')->group(function () {
-     Route::redirect('/', '/dashboard');
+    Route::redirect('/', '/dashboard');
     Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
     Route::get('/logout', [AuthController::class, 'logout'])->name('sair');
 
@@ -124,9 +124,14 @@ Route::middleware('auth')->group(function () {
 
     });
 
-    // Painel do julgador (fora do back-office admin; acesso por is_judge — spec 0002)
-    Route::middleware([CheckJudge::class])
-        ->get('/julgar', [JudgingController::class, 'index'])
-        ->name('panel.julgar.index');
+    // Painel do julgador (fora do back-office admin; acesso por is_judge — spec 0002;
+    // wizard categoria a categoria + gravação das seleções — spec 0003)
+    Route::middleware([CheckJudge::class])->group(function (): void {
+        Route::get('/julgar', [JudgingController::class, 'index'])
+            ->name('panel.julgar.index');
+
+        Route::post('/julgar', [JudgingController::class, 'store'])
+            ->name('panel.julgar.store');
+    });
 
 });

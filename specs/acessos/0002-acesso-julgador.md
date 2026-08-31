@@ -46,7 +46,9 @@ levar o usuário à **tela de login** exibindo a mensagem **"Perfil sem Acesso!"
 
 ## 3. Não-escopo / Fora de escopo
 
-- **Emitir nota/parecer/"julgar" em si** (tela de avaliação/nota) — recurso futuro.
+- **Emitir nota/parecer/"julgar" em si** (tela de avaliação/nota) — recurso futuro. A **seleção
+  do julgador para a premiação** (tela de julgamento, wizard por categoria) foi especificada em
+  [../julgamento/0003-tela-julgamento.md](../julgamento/0003-tela-julgamento.md).
 - CRUD de quem é julgador (atribuição de `is_judge`) — permanece no CRUD de usuários
   (`admin.users`).
 - Papel `Role::JURADO` do model `Role` — existe a constante porém **não é semeada**; aqui o
@@ -178,6 +180,7 @@ levar o usuário à **tela de login** exibindo a mensagem **"Perfil sem Acesso!"
 | 2026-08-27 | v1.5.0 — **Revalidação contra o código pós-merge de produção**: `CheckAdmin` multi-papéis (`:admin,comissao`) e sem alias no `bootstrap/app.php` (FQCN direto); `MenuBuilder` com blocos ADMIN/LEITOR/COMISSAO + `isEvaluator()`/`isIndicator()` (menu julgador segue o mesmo padrão); `getJuradoMenu()` órfão contém typo "Incrições" e rota `dashboard` (corrigido ao renomear); status via `RegistrationStatusEnum` (Avaliado=4, Habilitado=3) em vez de ints crus; padrão de listagem referenciado: `RegistrationController@index` | Cline |
 | 2026-08-27 | v1.6.0 — **Implementação concluída** (tasks 01–06 done; testes 6/6 passando): `getJulgadorMenu()` ativado por `isJudge()`; `CheckJudge` (logout + "Perfil sem Acesso!"); `JudgingController` (RDD-01+RDD-03, enum, `toBase()->merge()`); rota `panel.julgar.index`; view `admin.julgar.index`; `UserFactory::judge()`; fix view de login (`$session`→`session`) | Cline |
 | 2026-08-27 | v1.7.0 — **Sem paginação no controlador**: `JudgingController@index` deixa de usar `LengthAwarePaginator`/paginação e passa a retornar a view com a **collection** completa de Inscrições (união `toBase()->merge()`); a view fica **somente criada** (implementação/visual a cargo do dev) | Cline |
+| 2026-08-27 | v1.8.0 — O painel `panel.julgar.index` passa a ser regido pela **spec 0003 — Tela de Julgamento** (`specs/julgamento/0003-tela-julgamento.md`): wizard categoria-a-categoria com seleção do julgador (`JudgeSelection`); o FR-03 (listagem única) será substituído pelo fluxo novo (ver débitos lá) | Cline |
 
 > **Notas de débito técnico**
 > - `MenuBuilder::getJuradoMenu()` existia órfão; renomeado para `getJulgadorMenu()` (título "Julgar"

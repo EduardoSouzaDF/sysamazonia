@@ -66,25 +66,42 @@ class JudgingAccessTest extends TestCase
     /**
      * DADO um usuário autenticado com is_judge = true
      * QUANDO acessa GET /julgar
-     * ENTÃO abre o painel (200) listando as Inscrições de edições ativas (RDD-01)
-     * e em julgamento (RDD-03), com Registration "Avaliado" e Nominee "Habilitado" (RDD-02).
+     * ENTÃO abre o wizard (spec 0003) com a 1ª categoria regular elegível:
+     * header com categoria + edição (RDD-01/03), card NM-05 "{acronym} {id} - {ano}"
+     * da Registration "Avaliado" (RDD-02) com drawer "Avaliações e indicações"
+     * (RF-05) e o rótulo NM-05 da listagem regular; a Nominee "Habilitado" de
+     * outra categoria ainda não aparece (será a vez dela depois — RF-02).
      */
     public function test_julgador_acessa_painel_e_ve_inscricoes_apropriadas(): void
     {
         $edition = $this->createJudgingEdition();
-        $category = $this->createCategoryForEdition($edition);
+        $category = $this->createCategoryForEdition($edition, [
+            'acronym' => 'PAIN',
+            'recipients_count' => 1,
+        ]);
+        $honorific = $this->createCategoryForEdition($edition, [
+            'is_honorific' => true,
+            'recipients_count' => 1,
+        ]);
 
         $registration = $this->createRegistration($category, ['title' => 'Inscricao Avaliada Visivel']);
-        $nominee = $this->createNominee($category, ['name' => 'Homenageado Habilitado Visivel']);
+        $nominee = $this->createNominee($honorific, ['name' => 'Homenageado Habilitado Visivel']);
 
         $judge = User::factory()->judge()->create();
 
         $response = $this->actingAs($judge)->get('/julgar');
 
         $response->assertOk();
-        $response->assertSee('Inscricao Avaliada Visivel');
-        $response->assertSee('Homenageado Habilitado Visivel');
+        // Header: categoria corrente + edição (RDD-01/03).
         $response->assertSee($edition->title);
+        // Wizard RF-02: somente a 1ª categoria regular; Nominee não é a vez.
+        $response->assertSee('Iniciativas selecionadas para esta categoria');
+        $response->assertDontSee('Homenageado Habilitado Visivel');
+        // Card NM-05/RF-04: "{acronym} {id} - {ano do julgamento}".
+        $response->assertSee('data-label="PAIN '.$registration->id.' - '.$edition->judgment_date->format('Y').'"', false);
+        // Drawer RF-05 (conteúdo renderizado em <template>).
+        $response->assertSee('Dados da Inscrição');
+        $response->assertSee('Avaliações e indicações');
 
         $this->assertSame(RegistrationStatusEnum::Avaliado->value, $registration->status);
         $this->assertSame(RegistrationStatusEnum::Habilitado->value, $nominee->status);
@@ -188,18 +205,18 @@ class JudgingAccessTest extends TestCase
     /**
      * Categoria dentro da cadeia Category → Modality → Edition.
      */
-    private function createCategoryForEdition(Edition $edition): Category
+    private function createCategoryForEdition(Edition $edition, array $attributes = []): Category
     {
         $modality = Modality::create([
             'title' => 'Modalidade '.uniqid(),
             'edition_id' => $edition->id,
         ]);
 
-        return Category::create([
+        return Category::create(array_merge([
             'modality_id' => $modality->id,
             'title' => 'Categoria '.uniqid(),
             'acronym' => 'C'.substr(uniqid(), -6),
-        ]);
+        ], $attributes));
     }
 
     /**

@@ -12,6 +12,7 @@ subagentes para segmentar responsabilidades.
 | `architect` | `.clinerules/agents/architect/AGENTS.md` | Revê specs/arquitetura, planeja, detecta débito/rwm |
 | `laravel-backend` | `.clinerules/agents/laravel-backend/AGENTS.md` | Models, Controllers, Form Requests, Services, rotas |
 | `blade-frontend` | `.clinerules/agents/blade-frontend/AGENTS.md` | Views Blade + Tailwind v4, componentes |
+| `ui-ux` | `.clinerules/agents/ui-ux/AGENTS.md` | Protótipos, UX e padrões de interface (Tailwind v4 + Shoelace via CDN) |
 | `database` | `.clinerules/agents/database/AGENTS.md` | Migrações, seeders, factories, relacionamentos |
 | `qa` | `.clinerules/agents/qa/AGENTS.md` | Testes PHPUnit, revisão de aceite, regressão |
 
@@ -47,4 +48,5 @@ Definidas em `.claude/skills/<nome>/SKILL.md`. Pack de instruções + templates 
 | Implementar model/controller/form em PHP | Agente `laravel-backend` |
 | Criar/editar view Blade + Tailwind | Agente `blade-frontend` |
 | Migração/seeder/factory/relacionamento | Agente `database` |
+| Desenhar/validar UI a partir de protótipos | Agente `ui-ux` |
 | Garantir testes e critérios de aceite | Agente `qa` |

@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -74,5 +75,44 @@ class Category extends Model
     public function nominees(): HasMany
     {
         return $this->hasMany(Nominee::class);
+    }
+
+    // SELEÇÕES DO JULGADOR / COTA (spec 0003)
+
+    /**
+     * Quantidade de seleções (JudgeSelection) já registradas pelo julgador
+     * para inscrições (Registration | Nominee) desta categoria.
+     */
+    public function judgeSelectionsBy(User $user): int
+    {
+        $categoryId = $this->getKey();
+
+        return JudgeSelection::query()
+            ->where('user_id', $user->getKey())
+            ->whereHasMorph(
+                'inscription',
+                [Registration::class, Nominee::class],
+                fn (Builder $query) => $query->where('category_id', $categoryId)
+            )
+            ->count();
+    }
+
+    /**
+     * Saldo da cota (`recipients_count`) que o julgador ainda pode
+     * selecionar nesta categoria.
+     */
+    public function remainingQuotaFor(User $user): int
+    {
+        return max(0, (int) ($this->recipients_count ?? 0) - $this->judgeSelectionsBy($user));
+    }
+
+    /**
+     * Informa se o julgador já completou a cota desta categoria.
+     */
+    public function isFullyJudgedBy(User $user): bool
+    {
+        $quota = (int) ($this->recipients_count ?? 0);
+
+        return $quota > 0 && $this->remainingQuotaFor($user) === 0;
     }
 }

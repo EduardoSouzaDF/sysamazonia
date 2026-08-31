@@ -168,4 +168,25 @@ class User extends Authenticatable
 
         return $this->evaluatorRegistrations()->get();
     }
+
+    /**
+     * Seleções (JudgeSelection) que este julgador registrou para a premiação.
+     *
+     * Caminho: User -> judge_selections (FK `user_id`).
+     */
+    public function judgeSelections(): \Illuminate\Database\Eloquent\Relations\HasMany
+    {
+        return $this->hasMany(JudgeSelection::class);
+    }
+
+    /**
+     * Informa se este usuário já selecionou a Inscrição (RDD-02) indicada
+     * (morph `inscription`: `registration` | `nominee`).
+     */
+    public function hasSelected(\Illuminate\Database\Eloquent\Model $inscription): bool
+    {
+        return $this->judgeSelections()
+            ->whereMorphedTo('inscription', $inscription)
+            ->exists();
+    }
 }

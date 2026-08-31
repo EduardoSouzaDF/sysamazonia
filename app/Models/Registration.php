@@ -138,15 +138,14 @@ class Registration extends Model
         return $this->hasMany(Opinion::class);
     }
 
-
-     /**
+    /**
      * Indicações (indications) emitidos para esta inscrição.
      */
     public function indications(): \Illuminate\Database\Eloquent\Relations\HasMany
     {
         return $this->hasMany(Indication::class);
     }
-    
+
     /**
      * Pareceres já com seus scores (notas) carregados.
      * Útil para listagens e dashboards.
@@ -200,12 +199,10 @@ class Registration extends Model
         return round($sumWeighted / $sumWeights, 2);
     }
 
-
-
     public function statusName(): string
     {
 
-        switch((string)$this->status){
+        switch ((string) $this->status) {
 
             case '1':
                 return RegistrationStatusEnum::Inscrito->label();
@@ -213,7 +210,7 @@ class Registration extends Model
             case '2':
                 return RegistrationStatusEnum::Rejeitado->label();
                 break;
-        case '3':
+            case '3':
                 return RegistrationStatusEnum::Habilitado->label();
                 break;
             case '4':
@@ -234,15 +231,15 @@ class Registration extends Model
             return 'Sem Avaliação';
         }
 
-        if($this->getEvaluationAvgPercentage() <= 30){
+        if ($this->getEvaluationAvgPercentage() <= 30) {
             return 'Não Recomendado';
         }
 
-        if($this->getEvaluationAvgPercentage() <= 40){
+        if ($this->getEvaluationAvgPercentage() <= 40) {
             return 'Meritório';
         }
 
-        if($this->getEvaluationAvgPercentage() <= 50){
+        if ($this->getEvaluationAvgPercentage() <= 50) {
             return 'Recomendado';
         }
 
@@ -272,6 +269,7 @@ class Registration extends Model
         // Se não houver opiniões/avaliações, define como null e encerra
         if ($opinions->isEmpty()) {
             $this->update(['evaluation_avg' => null]);
+
             return;
         }
 
@@ -295,7 +293,7 @@ class Registration extends Model
                 /** @var EvaluationCriterion|null $criterio */
                 $criterio = $score->evaluationCriterion;
 
-                if (!$criterio) {
+                if (! $criterio) {
                     continue;
                 }
 
@@ -334,5 +332,15 @@ class Registration extends Model
         } else {
             $this->update(['evaluation_avg' => null]);
         }
+    }
+
+    /**
+     * Seleções (JudgeSelection) dos julgadores para esta inscrição (spec 0003).
+     *
+     * Caminho: Registration -> judge_selections (morph `inscription`).
+     */
+    public function judgeSelections(): \Illuminate\Database\Eloquent\Relations\MorphMany
+    {
+        return $this->morphMany(JudgeSelection::class, 'inscription');
     }
 }

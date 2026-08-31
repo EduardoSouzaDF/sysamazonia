@@ -39,3 +39,4 @@ julgamento (RDD-03) fica **a cargo do dev**. O controlador (`JudgingController@i
 | 2026-08-27 | pending | Cline |
 | 2026-08-27 | done — `resources/views/admin/julgar/index.blade.php` criada estendendo `admin.content` e reutilizando `x-pages.index` (colunas Edição/Categoria/Título/Autor/Status; sem ações — "julgar em si" é fora de escopo; estado vazio nativo do componente). Renderização coberta por testes | Cline |
 | 2026-08-27 | v1.7.0 — **View somente criada**: a implementação/visual fica a cargo do dev; o controlador passa **collection** (sem paginação) | Cline |
+| 2026-08-27 | Complemento — a implementação/visual desta view foi especificada em [../../julgamento/0003-tela-julgamento.md](../../julgamento/0003-tela-julgamento.md) (tela de julgamento em wizard categoria-a-categoria; view atual será implementada pela task 04 de lá) | Cline |

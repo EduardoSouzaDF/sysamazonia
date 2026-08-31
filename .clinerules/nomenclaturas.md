@@ -24,6 +24,19 @@
 - `Nominee`: **"Habilitado"** (`status = 3`).
 - (Ver RDD-02 para o significado do termo "Inscrições".)
 
+## NM-05 — Tela de Julgamento (seleção do julgador para a premiação)
+- Card de Inscrição: **"{acronym} {id} - {ano do julgamento}"** (ex.: "PSD 3232 - 2026"; ano =
+  ano de `Edition->judgment_date`).
+- Listagem de pré-seleção: **"Iniciativas selecionadas para esta categoria"** (categoria regular) /
+  **"Indicação para esta categoria"** (honorífica).
+- Botões: **"Confirmar"** (adicionar no drawer · submeter a categoria), **"Limpar"** (zera as
+  pré-seleções), **"Fechar"** (fecha o drawer).
+- Conclusão: **"Julgamento concluído!"** · Estado vazio: **"Nenhuma categoria disponível para
+  julgamento."**
+- Seção do drawer (Registration): **"Avaliações e indicações"** (somente leitura).
+- Modelo da escolha: **`JudgeSelection`** (tabela `judge_selections`).
+- Nunca: "votar", "votação", "shortlist", "vencedores", "julgamentos".
+
 ## Como adicionar
 
 1. Acrescente uma nova seção aqui, numerada `NM-xx`, com o rótulo oficial e o que **nunca** usar.
