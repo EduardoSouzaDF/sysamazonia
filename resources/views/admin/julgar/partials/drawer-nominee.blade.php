@@ -1,19 +1,7 @@
 <template data-drawer-template data-for-key="{{ $card['key'] }}">
     <div class="space-y-4">
         <sl-details summary="Dados da Indicação" open>
-            <dl class="grid grid-cols-1 gap-3 text-sm sm:grid-cols-2">
-                <div>
-                    <dt class="text-muted-foreground">Indicado</dt>
-                    <dd>{{ $inscription->candidate?->nome ?? $inscription->name }}</dd>
-                </div>
-                <div>
-                    <dt class="text-muted-foreground">Estado</dt>
-                    <dd>{{ $inscription->state ?? '—' }}</dd>
-                </div>
-                <div class="sm:col-span-2">
-                    <dt class="text-muted-foreground">Contato</dt>
-                    <dd>{{ $inscription->contact_data ?? '—' }}</dd>
-                </div>
+            <dl class="grid grid-cols-3 gap-3 text-sm  ">
                 <div>
                     <dt class="text-muted-foreground">Categoria</dt>
                     <dd>{{ $inscription->category?->title }}</dd>
@@ -26,6 +14,15 @@
                     <dt class="text-muted-foreground">Edição</dt>
                     <dd>{{ $inscription->category?->modality?->edition?->title }}</dd>
                 </div>
+                <div>
+                    <dt class="text-muted-foreground">Indicado</dt>
+                    <dd>{{   $inscription->name }}</dd>
+                </div>
+                <div>
+                    <dt class="text-muted-foreground">Estado</dt>
+                    <dd>{{ $inscription->state ?? '—' }}</dd>
+                </div>
+                
             </dl>
         </sl-details>
 

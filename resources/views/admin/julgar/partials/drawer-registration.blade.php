@@ -1,22 +1,10 @@
 <template data-drawer-template data-for-key="{{ $card['key'] }}">
     <div class="space-y-4">
         <sl-details summary="Dados da Inscrição" open>
-            <dl class="grid grid-cols-1 gap-3 text-sm sm:grid-cols-2">
-                <div>
-                    <dt class="text-muted-foreground">Candidato</dt>
-                    <dd>{{ $inscription->candidate?->nome }}</dd>
-                </div>
-                <div>
-                    <dt class="text-muted-foreground">Protocolo</dt>
-                    <dd>{{ $inscription->protocol ?? '—' }}</dd>
-                </div>
-                <div class="sm:col-span-2">
-                    <dt class="text-muted-foreground">Título</dt>
-                    <dd>{{ $inscription->title }}</dd>
-                </div>
-                <div class="sm:col-span-2">
-                    <dt class="text-muted-foreground">Coautores</dt>
-                    <dd>{{ $inscription->coautores ?: '—' }}</dd>
+            <dl class="grid grid-cols-3 gap-3 text-sm sm:grid-cols-3">
+                 <div>
+                    <dt class="text-muted-foreground">Edição</dt> 
+                    <dd>{{ $inscription->category?->modality?->edition?->title }}</dd>
                 </div>
                 <div>
                     <dt class="text-muted-foreground">Categoria</dt>
@@ -26,10 +14,23 @@
                     <dt class="text-muted-foreground">Modalidade</dt>
                     <dd>{{ $inscription->category?->modality?->title }}</dd>
                 </div>
-                <div>
-                    <dt class="text-muted-foreground">Edição</dt>
-                    <dd>{{ $inscription->category?->modality?->edition?->title }}</dd>
+                <div class=" ">
+                    <dt class="text-muted-foreground">Título</dt>
+                    <dd class="text-xl">{{ $inscription->title }}</dd>
                 </div>
+
+                <div class=" ">
+                    <dt class="text-muted-foreground">Avaliação Final:</dt>
+                    <dd class="text-xl">{{ $inscription->evaluation_avg }}</dd>
+                </div>
+                 <div class=" ">
+                    <dt class="text-muted-foreground">Indicações:</dt>
+                    <dd class="text-xl">{{ $inscription->indications()->count() }}</dd>
+                </div>
+                
+                
+                
+                
             </dl>
         </sl-details>
 

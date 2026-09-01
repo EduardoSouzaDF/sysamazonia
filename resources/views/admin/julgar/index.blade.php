@@ -83,7 +83,7 @@
             <div data-inscription-fields></div>
         </form>
 
-        <sl-drawer data-drawer label="Detalhes da Inscrição" class="...">
+        <sl-drawer data-drawer label="Detalhes da Inscrição" class="..." style="--size: 60vw;">
             <div data-drawer-label slot="label" class="font-medium"></div>
             <div data-drawer-body></div>
             <sl-button slot="footer" data-drawer-close>Fechar</sl-button>
