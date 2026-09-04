@@ -25,7 +25,7 @@ class RegistrationController extends Controller
         $user = Auth::user();
         $editions = Edition::all();
         $page = $request->input('page', 1);
-        $perPage = 15;
+        $perPage = 10;
 
         // Query para Registration
         $registrationQuery = Registration::with(['candidate', 'category.modality.edition', 'files','opinions']);

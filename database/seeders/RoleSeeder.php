@@ -11,7 +11,7 @@ class RoleSeeder extends Seeder
     {
         $roles = [
             ['name' => 'admin', 'active' => true],
-            ['name' => 'comission', 'active' => true],
+            ['name' => 'comissao', 'active' => true],
         ];
 
         foreach ($roles as $roleData) {

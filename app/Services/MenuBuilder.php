@@ -37,19 +37,23 @@ class MenuBuilder
         }
 
 
+        if ($user->isJudge()) {
+            $menus = array_merge($menus, self::getJulgadorMenu());
+        }
+
         return $menus;
     }
 
-    public static function getJuradoMenu(): array
+    public static function getJulgadorMenu(): array
     {
         return [
             [
                 'heading' => 'Julgamento',
             ],
             [
-                'title' => 'Incrições',
+                'title' => 'Julgar',
                 'icon' => 'ki-profile-circle',
-                'route' => 'dashboard',
+                'route' => 'panel.julgar.index',
             ],
         ];
     }

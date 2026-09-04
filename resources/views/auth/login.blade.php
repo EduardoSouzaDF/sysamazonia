@@ -79,7 +79,7 @@
                             </svg>
                         </div>
                         <div class="kt-alert-title flex items-center gap-1.5" id="alert_heading">
-                            <span class="font-semibold">{{ $session('error') }}</span>
+                            <span class="font-semibold">{{ session('error') }}</span>
                         </div>
                         <button class="kt-alert-close" data-kt-dismiss="#alert" aria-label="Close alert">
                             <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"
