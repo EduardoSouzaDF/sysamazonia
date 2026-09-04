@@ -343,7 +343,7 @@ class RegistrationController extends Controller
                 }
             });
 
-            if($registration->category->evaluations_count >=  sizeof($registration->opinions)){
+            if($registration->category->evaluations_count  ==  sizeof($registration->opinions)){
                 $registration->updateEvaluationsAvg();
             }
 
