@@ -62,9 +62,11 @@
                 <ul class="list-disc space-y-1 pl-5 text-sm">
                     @foreach ($inscription->files as $file)
                         <li>
-                            {{ $file->file_name }}
+                          
                             @if ($file->document_type)
-                                <span class="text-muted-foreground">({{ $file->document_type }})</span>
+                                <a target="_blank" href="{{ route('admin.registration.file', ['file' => $file->id]) }}" class="text-primary hover:underline">
+                                   {{ $file->file_name }} - ({{ $file->document_type }})
+                                </a>
                             @endif
                         </li>
                     @endforeach

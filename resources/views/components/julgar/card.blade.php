@@ -11,9 +11,7 @@
             <p class="truncate font-medium text-mono">
                 {{ $card['label'] }} <span class="font-normal text-muted-foreground">- {{ $card['year'] }}</span>
             </p>
-            <p class="mt-0.5 truncate text-sm text-muted-foreground">
-                {{ $inscription->candidate?->nome }}
-            </p>
+           
         </div>
         <span data-card-check
               class="mt-0.5 flex size-6 shrink-0 items-center justify-center rounded-full border border-border bg-transparent text-primary-foreground"

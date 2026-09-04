@@ -23,7 +23,7 @@ class UserRoleSeeder extends Seeder
 
         // Obter roles
         $adminRole = Role::where('name', 'admin')->first();
-        $comission = Role::where('name', 'comission')->first();
+        $comission = Role::where('name', 'comissao')->first();
         $userRole = Role::where('name', 'user')->first();
 
         // Associar roles aos usuários

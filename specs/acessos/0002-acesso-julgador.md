@@ -188,7 +188,7 @@ levar o usuário à **tela de login** exibindo a mensagem **"Perfil sem Acesso!"
 > - `Role::JURADO` existe como constante mas não é seedada pelo `RoleSeeder`; **não** é usado
 >   como critério de acesso (julgador = `is_judge`).
 > - ⚠️ **Fora do escopo 0002, registrado na revalidação v1.5.0**: o `RoleSeeder` semeia o papel
->   **`comission`** (com "ss"), mas `Role::COMISSAO = 'comissao'` (com um "s") — o menu da
+>   **`comissao`**  , mas `Role::COMISSAO = 'comissao'` (com um "s") — o menu da
 >   comissão (`getAvaliadorMenu()`/`getIndicadorMenu()`) nunca ativa com o papel seedado.
 >   Não afeta esta spec (gating por `is_judge`); exige correção própria da produção/spec de
 >   usuários (`specs/users/0001-users-crud.md`).
