@@ -18,6 +18,7 @@ class Settings(BaseSettings):
     gemini_api_key: str | None = None
     llm_timeout: int = Field(default=45, ge=1, le=55)
     knowledge_version: str | None = None
+    knowledge_max_chars: int = Field(default=50000, ge=1000, le=200000)
 
 
 @lru_cache

@@ -6,6 +6,7 @@
 .vs/
 .vscode/
 __pycache__/
+.venv/
 *.py[cod]
 _ide_helper.php
 _ide_helper_models.php

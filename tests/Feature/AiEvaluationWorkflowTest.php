@@ -86,7 +86,7 @@ class AiEvaluationWorkflowTest extends TestCase
             'model' => 'gemini-test',
             'criterios' => [[
                 'criterio_id' => $criterion, 'nota' => 4,
-                'justificativa' => 'A proposta apresenta evidências objetivas suficientes para a nota atribuída.',
+                'justificativa' => $this->aiJustification(),
             ]],
         ])]);
 
@@ -134,7 +134,7 @@ class AiEvaluationWorkflowTest extends TestCase
             'model' => 'openai-test',
             'criterios' => [[
                 'criterio_id' => 9999, 'nota' => 11,
-                'justificativa' => 'Justificativa tecnicamente inválida para este critério.',
+                'justificativa' => $this->aiJustification(),
             ]],
         ], $request);
     }
@@ -181,7 +181,7 @@ class AiEvaluationWorkflowTest extends TestCase
             'criterios' => [[
                 'criterio_id' => $request->criteria[0]['criterio_id'],
                 'nota' => 5,
-                'justificativa' => 'Justificativa completa que não deverá ser persistida.',
+                'justificativa' => $this->aiJustification(),
             ]],
         ], $request);
         $registration->update(['status' => RegistrationStatusEnum::Rejeitado]);
@@ -331,7 +331,7 @@ class AiEvaluationWorkflowTest extends TestCase
             'criterios' => [[
                 'criterio_id' => $criterion,
                 'nota' => 5,
-                'justificativa' => 'Justificativa estruturalmente válida para o teste.',
+                'justificativa' => $this->aiJustification(),
             ]],
         ])]);
 
@@ -364,7 +364,7 @@ class AiEvaluationWorkflowTest extends TestCase
             'criterios' => [[
                 'criterio_id' => $criterionId,
                 'nota' => 5,
-                'justificativa' => 'Justificativa que deve ser descartada após mudança do critério.',
+                'justificativa' => $this->aiJustification(),
             ]],
         ], $request);
         DB::table('evaluation_criteria')->where('id', $criterionId)->update(['description' => 'Descrição alterada']);
@@ -399,7 +399,7 @@ class AiEvaluationWorkflowTest extends TestCase
                 'criterios' => [[
                     'criterio_id' => $criterion,
                     'nota' => 5,
-                    'justificativa' => 'Justificativa válida recebida após falhas transitórias.',
+                    'justificativa' => $this->aiJustification(),
                 ]],
             ]);
         $job = new EvaluateRegistrationWithAi($execution->id);
@@ -440,7 +440,7 @@ class AiEvaluationWorkflowTest extends TestCase
             'provider' => 'openai',
             'model' => 'openai-selection-test',
             'indicacao' => 'INDICADA',
-            'justificativa' => 'A análise estratégica sustenta a indicação da proposta.',
+            'justificativa' => $this->aiJustification(),
         ])]);
 
         app()->call([new SelectRegistrationWithAi($execution->id), 'handle']);
@@ -473,11 +473,18 @@ class AiEvaluationWorkflowTest extends TestCase
             'gemini',
             'gemini-test',
             \App\Enum\SelectionDecision::Indicated,
-            'Justificativa estratégica válida que deve ser descartada.',
+            $this->aiJustification(),
         );
         $registration->update(['status' => RegistrationStatusEnum::Rejeitado]);
 
-        app(AiExecutionManager::class)->completeSelection($execution, $result, 10);
+        $request = \App\Data\Ai\SelectionRequestData::fromRegistration(
+            $registration->fresh(),
+            $selector->id,
+            $execution->correlation_id,
+            $execution->prompt_version,
+            $execution->evaluation_configuration_hash,
+        );
+        app(AiExecutionManager::class)->completeSelection($execution, $request, $result, 10);
 
         $this->assertDatabaseCount('indications', 0);
         $this->assertSame(AiExecutionStatus::Failed, $execution->refresh()->status);
@@ -548,5 +555,10 @@ class AiEvaluationWorkflowTest extends TestCase
         ]);
 
         return $evaluator;
+    }
+
+    private function aiJustification(): string
+    {
+        return implode(' ', array_fill(0, 10, 'A proposta apresenta evidências concretas, coerentes e suficientes para sustentar tecnicamente a decisão atribuída.'));
     }
 }

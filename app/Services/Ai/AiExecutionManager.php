@@ -5,6 +5,7 @@ namespace App\Services\Ai;
 use App\Data\Ai\EvaluationRequestData;
 use App\Data\Ai\EvaluationResultData;
 use App\Data\Ai\SelectionResultData;
+use App\Data\Ai\SelectionRequestData;
 use App\Enum\AiExecutionStatus;
 use App\Exceptions\Ai\NonRetryableAiException;
 use App\Models\AiExecution;
@@ -93,9 +94,9 @@ class AiExecutionManager
         });
     }
 
-    public function completeSelection(AiExecution $execution, SelectionResultData $result, int $duration): void
+    public function completeSelection(AiExecution $execution, SelectionRequestData $request, SelectionResultData $result, int $duration): void
     {
-        DB::transaction(function () use ($execution, $result, $duration): void {
+        DB::transaction(function () use ($execution, $request, $result, $duration): void {
             $locked = AiExecution::query()->lockForUpdate()->findOrFail($execution->id);
             if ($locked->status === AiExecutionStatus::Completed) {
                 return;
@@ -107,7 +108,8 @@ class AiExecutionManager
                 ->exists();
             if ($result->registrationId !== $registration->id
                 || (int) $registration->status !== \App\Enum\RegistrationStatusEnum::Avaliado->value
-                || ! $isAuthorized) {
+                || ! $isAuthorized
+                || $this->fingerprint->forSelection($registration) !== $request->configurationHash) {
                 $locked->update([
                     'status' => AiExecutionStatus::Failed,
                     'error_code' => 'AI_SELECTION_CONTEXT_CHANGED',

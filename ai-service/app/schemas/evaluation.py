@@ -2,7 +2,11 @@ from enum import StrEnum
 from typing import Literal
 from uuid import UUID
 
-from pydantic import BaseModel, ConfigDict, Field, model_validator
+from pydantic import BaseModel, ConfigDict, Field, field_validator, model_validator
+
+
+def word_count(value: str) -> int:
+    return len(value.split())
 
 
 class StrictModel(BaseModel):
@@ -37,6 +41,13 @@ class CriterionEvaluation(StrictModel):
     criterio_id: int = Field(gt=0)
     nota: int
     justificativa: str = Field(min_length=10, max_length=2000)
+
+    @field_validator("justificativa")
+    @classmethod
+    def valid_justification_length(cls, value: str) -> str:
+        if not 50 <= word_count(value) <= 150:
+            raise ValueError("justificativa deve conter entre 50 e 150 palavras")
+        return value
 
 
 class TechnicalEvaluationRequest(StrictModel):
@@ -77,6 +88,7 @@ class SelectionRequest(StrictModel):
     avaliador_id: int = Field(gt=0)
     correlation_id: UUID
     prompt_version: Literal["selection_reviewer_v1"]
+    evaluation_configuration_hash: str = Field(pattern=r"^[a-f0-9]{64}$")
     inscricao: Proposal
     avaliacoes: list[PreviousEvaluation] = Field(min_length=1)
 
@@ -93,3 +105,10 @@ class SelectionResult(StrictModel):
     model: str | None = None
     indicacao: SelectionDecision
     justificativa: str = Field(min_length=10, max_length=2000)
+
+    @field_validator("justificativa")
+    @classmethod
+    def valid_justification_length(cls, value: str) -> str:
+        if not 50 <= word_count(value) <= 150:
+            raise ValueError("justificativa deve conter entre 50 e 150 palavras")
+        return value

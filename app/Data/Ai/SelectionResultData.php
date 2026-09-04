@@ -4,6 +4,7 @@ namespace App\Data\Ai;
 
 use App\Enum\SelectionDecision;
 use Illuminate\Support\Facades\Validator;
+use Illuminate\Validation\ValidationException;
 
 final readonly class SelectionResultData
 {
@@ -26,6 +27,11 @@ final readonly class SelectionResultData
             'indicacao' => ['required', 'string', 'in:'.implode(',', array_column(SelectionDecision::cases(), 'value'))],
             'justificativa' => ['required', 'string', 'min:10', 'max:2000'],
         ])->validate();
+
+        $wordCount = preg_match_all('/[\p{L}\p{N}]+(?:[\x{2019}\'\-][\p{L}\p{N}]+)*/u', $validated['justificativa']);
+        if ($wordCount < 50 || $wordCount > 150) {
+            throw ValidationException::withMessages(['justificativa' => 'A justificativa deve conter entre 50 e 150 palavras.']);
+        }
 
         return new self(
             $validated['inscricao_id'],

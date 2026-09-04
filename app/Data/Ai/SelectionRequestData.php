@@ -11,6 +11,7 @@ final readonly class SelectionRequestData
         public int $evaluatorId,
         public string $correlationId,
         public string $promptVersion,
+        public string $configurationHash,
         public array $registration,
         public array $evaluations,
     ) {}
@@ -20,6 +21,7 @@ final readonly class SelectionRequestData
         int $evaluatorId,
         string $correlationId,
         ?string $promptVersion = null,
+        ?string $configurationHash = null,
     ): self {
         $registration->loadMissing('opinions.scores.evaluationCriterion');
 
@@ -28,6 +30,7 @@ final readonly class SelectionRequestData
             $evaluatorId,
             $correlationId,
             $promptVersion ?? (string) config('ai_evaluation.prompts.selection'),
+            $configurationHash ?? app(\App\Services\Ai\EvaluationConfigurationFingerprint::class)->forSelection($registration),
             [
                 'titulo' => $registration->title,
                 'resumo' => $registration->resumo,
@@ -51,6 +54,7 @@ final readonly class SelectionRequestData
             'avaliador_id' => $this->evaluatorId,
             'correlation_id' => $this->correlationId,
             'prompt_version' => $this->promptVersion,
+            'evaluation_configuration_hash' => $this->configurationHash,
             'inscricao' => $this->registration,
             'avaliacoes' => $this->evaluations,
         ];

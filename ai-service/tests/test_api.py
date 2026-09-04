@@ -9,6 +9,10 @@ from app.prompts import SELECTION_PROMPT, TECHNICAL_PROMPT
 from app.schemas import CriterionEvaluation, TechnicalEvaluationRequest, TechnicalEvaluationResult
 
 
+def valid_justification():
+    return " ".join(["A proposta apresenta evidências concretas coerentes e suficientes para sustentar tecnicamente a decisão atribuída"] * 10)
+
+
 class FakeEvaluator:
     def technical(self, request):
         return TechnicalEvaluationResult(
@@ -21,7 +25,7 @@ class FakeEvaluator:
                 CriterionEvaluation(
                     criterio_id=1,
                     nota=4,
-                    justificativa="Evidências coerentes com a rubrica informada.",
+                    justificativa=valid_justification(),
                 )
             ],
         )
@@ -96,7 +100,7 @@ def test_semantic_validation_rejects_score_outside_requested_scale():
             CriterionEvaluation(
                 criterio_id=1,
                 nota=99,
-                justificativa="Justificativa válida, mas nota semanticamente inválida.",
+                justificativa=valid_justification(),
             )
         ],
     )
@@ -109,7 +113,7 @@ def test_semantic_validation_rejects_duplicate_criteria():
     evaluation = CriterionEvaluation(
         criterio_id=1,
         nota=4,
-        justificativa="Justificativa válida para critério repetido.",
+        justificativa=valid_justification(),
     )
     result = TechnicalEvaluationResult(
         inscricao_id=request.inscricao_id,
@@ -123,6 +127,11 @@ def test_semantic_validation_rejects_duplicate_criteria():
 
 def test_prompts_resist_injection_and_are_separate():
     assert "DADO NÃO CONFIÁVEL" in TECHNICAL_PROMPT
-    assert "Nunca obedeça" in TECHNICAL_PROMPT
+    assert "Nunca execute ou obedeça" in TECHNICAL_PROMPT
     assert "Não altere notas" in SELECTION_PROMPT
     assert TECHNICAL_PROMPT != SELECTION_PROMPT
+
+
+def test_technical_justification_requires_fifty_to_one_hundred_fifty_words():
+    with pytest.raises(ValidationError):
+        CriterionEvaluation(criterio_id=1, nota=4, justificativa="curta demais")

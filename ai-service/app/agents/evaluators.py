@@ -5,6 +5,7 @@ from agno.agent import Agent
 from pydantic import BaseModel
 
 from app.config import Settings
+from app.knowledge import approved_knowledge_context
 from app.providers import ConfiguredModel, LlmProviderFactory
 from app.prompts import SELECTION_PROMPT, SELECTION_PROMPT_VERSION, TECHNICAL_PROMPT, TECHNICAL_PROMPT_VERSION
 from app.schemas import SelectionRequest, SelectionResult, TechnicalEvaluationRequest, TechnicalEvaluationResult
@@ -15,12 +16,13 @@ ResultT = TypeVar("ResultT", bound=BaseModel)
 class AgnoEvaluator:
     def __init__(self, settings: Settings, provider_factory: LlmProviderFactory | None = None) -> None:
         self._provider_factory = provider_factory or LlmProviderFactory(settings)
+        self._knowledge_context = approved_knowledge_context(settings.knowledge_version, settings.knowledge_max_chars)
 
     def technical(self, request: TechnicalEvaluationRequest) -> TechnicalEvaluationResult:
         if request.prompt_version != TECHNICAL_PROMPT_VERSION:
             raise ValueError("Versão de prompt técnico não suportada")
         configured_model = self._provider_factory.create("technical")
-        result = self._run(configured_model, TECHNICAL_PROMPT, request, TechnicalEvaluationResult)
+        result = self._run(configured_model, TECHNICAL_PROMPT + self._knowledge_context, request, TechnicalEvaluationResult)
         validated = TechnicalEvaluationResult.model_validate(result)
         validated = validated.model_copy(
             update={"provider": configured_model.provider, "model": configured_model.model_id}
@@ -32,7 +34,7 @@ class AgnoEvaluator:
         if request.prompt_version != SELECTION_PROMPT_VERSION:
             raise ValueError("Versão de prompt estratégico não suportada")
         configured_model = self._provider_factory.create("selection")
-        result = self._run(configured_model, SELECTION_PROMPT, request, SelectionResult)
+        result = self._run(configured_model, SELECTION_PROMPT + self._knowledge_context, request, SelectionResult)
         validated = SelectionResult.model_validate(result)
         validated = validated.model_copy(
             update={"provider": configured_model.provider, "model": configured_model.model_id}

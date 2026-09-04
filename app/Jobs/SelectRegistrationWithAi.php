@@ -43,6 +43,7 @@ class SelectRegistrationWithAi implements ShouldQueue
             $execution->evaluator_id,
             $execution->correlation_id,
             $execution->prompt_version,
+            $execution->evaluation_configuration_hash,
         );
         $startedAt = hrtime(true);
         try {
@@ -53,7 +54,7 @@ class SelectRegistrationWithAi implements ShouldQueue
             return;
         }
         $duration = (int) ((hrtime(true) - $startedAt) / 1_000_000);
-        $manager->completeSelection($execution, $result, $duration);
+        $manager->completeSelection($execution, $request, $result, $duration);
         Log::info('Seleção estratégica por IA concluída.', $this->logContext($execution, $duration));
     }
 

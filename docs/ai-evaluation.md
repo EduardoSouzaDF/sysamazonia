@@ -76,6 +76,8 @@ AI_SELECTION_LLM_MODEL=
 OPENAI_API_KEY=
 GEMINI_API_KEY=
 LLM_TIMEOUT=45
+KNOWLEDGE_VERSION=
+KNOWLEDGE_MAX_CHARS=50000
 ```
 
 Os overrides técnico e estratégico são opcionais e usam os valores globais quando vazios. Credenciais de provider pertencem exclusivamente ao serviço Python. Depois de alterar o Laravel, execute `php artisan config:clear`; depois de alterar o serviço Python, reinicie-o.
@@ -104,7 +106,18 @@ Os endpoints internos são `POST /v1/evaluations/technical` e `POST /v1/evaluati
 
 Os prompts versionados ficam em `app/prompts/technical_evaluator.py` e `app/prompts/selection_reviewer.py`. Alterações semânticas exigem nova constante de versão e atualização correspondente em `config/ai_evaluation.php`, preservando a auditoria/idempotência.
 
-Somente documentos aprovados devem ser colocados em `ai-service/app/knowledge/documents`. O módulo `knowledge` constitui o limite controlado para futura conexão a um reader/vector store do Agno. A versão do acervo deve ser informada em `AI_KNOWLEDGE_VERSION`. **Knowledge/RAG está preparado, mas ainda não está ativado**; a versão atual não injeta documentos automaticamente e não baixa conteúdo externo.
+Somente documentos institucionais aprovados em `.md` ou `.txt` devem ser colocados em `ai-service/app/knowledge/documents`. Quando houver arquivos, `KNOWLEDGE_VERSION` torna-se obrigatória e o conteúdo é anexado aos dois prompts dentro do limite `KNOWLEDGE_MAX_CHARS`. Sem arquivos aprovados, nenhum conhecimento externo é injetado. O serviço não baixa conteúdo automaticamente.
+
+A ausência de documentos é um estado válido e seguro. Nesse caso, mantenha `KNOWLEDGE_VERSION` vazia e preserve apenas o arquivo `.gitkeep`; os prompts versionados continuam sendo utilizados normalmente.
+
+Para inscrições que já estavam habilitadas antes da ativação, primeiro simule e depois despache:
+
+```bash
+php artisan ai:evaluate-habilitados
+php artisan ai:evaluate-habilitados --dispatch
+php artisan ai:select-avaliados
+php artisan ai:select-avaliados --dispatch
+```
 
 ## Testes e teste manual
 

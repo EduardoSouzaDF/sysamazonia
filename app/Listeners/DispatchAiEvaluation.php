@@ -85,7 +85,7 @@ class DispatchAiEvaluation
 
         $configurationHash = $type === AiExecutionType::TechnicalEvaluation
             ? $this->fingerprint->forRegistration($registration)
-            : hash('sha256', $promptVersion);
+            : $this->fingerprint->forSelection($registration);
         $identity = [
             'registration_id' => $event->registrationId,
             'type' => $type,

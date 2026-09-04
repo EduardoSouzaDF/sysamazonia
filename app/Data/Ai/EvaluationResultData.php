@@ -34,6 +34,10 @@ final readonly class EvaluationResultData
 
         $expected = collect($request->criteria)->keyBy('criterio_id');
         foreach ($validated['criterios'] as $result) {
+            $wordCount = preg_match_all('/[\p{L}\p{N}]+(?:[\x{2019}\'\-][\p{L}\p{N}]+)*/u', $result['justificativa']);
+            if ($wordCount < 50 || $wordCount > 150) {
+                throw ValidationException::withMessages(['criterios' => 'Cada justificativa deve conter entre 50 e 150 palavras.']);
+            }
             $criterion = $expected->get($result['criterio_id']);
             if ($criterion === null
                 || $result['nota'] < $criterion['nota_minima']
