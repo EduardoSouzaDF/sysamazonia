@@ -2,13 +2,10 @@
 
 namespace App\Jobs;
 
-use App\Data\Ai\SelectionRequestData;
-use App\Enum\AiExecutionStatus;
-use App\Enum\RegistrationStatusEnum;
-use App\Exceptions\Ai\NonRetryableAiException;
 use App\Models\AiExecution;
 use App\Services\Ai\AiExecutionManager;
-use App\Services\Ai\Contracts\AiEvaluationServiceInterface;
+use App\Services\Ai\AiSettingsService;
+use App\Services\Ai\StrategicSelectionProcessor;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Queue\Queueable;
 use Illuminate\Queue\Middleware\WithoutOverlapping;
@@ -22,40 +19,12 @@ class SelectRegistrationWithAi implements ShouldQueue
 
     public function __construct(public readonly int $executionId)
     {
-        $this->timeout = (int) config('ai_evaluation.timeout') + 10;
+        $this->timeout = app(AiSettingsService::class)->current()->timeout + 10;
     }
 
-    public function handle(AiEvaluationServiceInterface $service, AiExecutionManager $manager): void
+    public function handle(StrategicSelectionProcessor $processor): void
     {
-        if (! config('ai_evaluation.enabled') || ! config('ai_evaluation.selection_enabled')) {
-            return;
-        }
-
-        $execution = AiExecution::query()->with('registration.opinions.scores.evaluationCriterion')->findOrFail($this->executionId);
-        if ($execution->status === AiExecutionStatus::Completed
-            || (int) $execution->registration->status !== RegistrationStatusEnum::Avaliado->value) {
-            return;
-        }
-
-        $manager->begin($execution);
-        $request = SelectionRequestData::fromRegistration(
-            $execution->registration,
-            $execution->evaluator_id,
-            $execution->correlation_id,
-            $execution->prompt_version,
-            $execution->evaluation_configuration_hash,
-        );
-        $startedAt = hrtime(true);
-        try {
-            $result = $service->select($request);
-        } catch (NonRetryableAiException $exception) {
-            $manager->fail($execution, $exception);
-
-            return;
-        }
-        $duration = (int) ((hrtime(true) - $startedAt) / 1_000_000);
-        $manager->completeSelection($execution, $request, $result, $duration);
-        Log::info('Seleção estratégica por IA concluída.', $this->logContext($execution, $duration));
+        $processor->process($this->executionId);
     }
 
     public function middleware(): array
@@ -65,7 +34,7 @@ class SelectRegistrationWithAi implements ShouldQueue
 
     public function tries(): int
     {
-        return (int) config('ai_evaluation.tries');
+        return app(AiSettingsService::class)->current()->tries;
     }
 
     public function backoff(): array

@@ -10,9 +10,9 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 class AiExecution extends Model
 {
     protected $fillable = [
-        'registration_id', 'evaluator_id', 'opinion_id', 'indication_id', 'type',
+        'registration_id', 'evaluator_id', 'ai_setting_version_id', 'opinion_id', 'indication_id', 'type',
         'status', 'correlation_id', 'provider', 'model', 'prompt_version', 'evaluation_configuration_hash',
-        'rubric_version', 'knowledge_version', 'attempts', 'duration_ms',
+        'rubric_version', 'knowledge_version', 'attempts', 'duration_ms', 'service_http_status',
         'response_metadata', 'error_code', 'error_message', 'started_at', 'completed_at',
     ];
 

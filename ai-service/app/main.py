@@ -2,6 +2,7 @@ from hmac import compare_digest
 from typing import Annotated
 
 from fastapi import Depends, FastAPI, Header, HTTPException, Request, status
+from fastapi.exceptions import RequestValidationError
 from fastapi.responses import JSONResponse
 from pydantic import ValidationError
 
@@ -9,8 +10,18 @@ from app.agents import AgnoEvaluator
 from app.config import Settings, get_settings
 from app.providers import LlmConfigurationError, LlmProviderFactory
 from app.schemas import SelectionRequest, SelectionResult, TechnicalEvaluationRequest, TechnicalEvaluationResult
+from app.schemas.evaluation import RuntimeConfiguration
 
 app = FastAPI(title="Sisamazonia AI Evaluation", version="1.0.0", docs_url=None, redoc_url=None)
+
+
+@app.exception_handler(RequestValidationError)
+def request_validation_error(_request: Request, _exception: RequestValidationError) -> JSONResponse:
+    # A resposta padrão inclui o valor de entrada e poderia refletir uma API key inválida.
+    return JSONResponse(
+        status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+        content={"code": "INVALID_REQUEST", "detail": "Requisição inválida."},
+    )
 
 
 @app.exception_handler(LlmConfigurationError)
@@ -54,6 +65,12 @@ def readiness(settings: Settings = Depends(validated_settings)) -> dict[str, str
     factory.create("selection")
 
     return {"status": "ready"}
+
+
+@app.post("/v1/configuration/test", dependencies=[Depends(authorize)])
+def test_configuration(payload: RuntimeConfiguration, settings: Settings = Depends(validated_settings)) -> dict[str, str]:
+    configured = LlmProviderFactory(settings).create("technical", payload)
+    return {"status": "ready", "provider": configured.provider, "model": configured.model_id}
 
 
 @app.post("/v1/evaluations/technical", response_model=TechnicalEvaluationResult, dependencies=[Depends(authorize)])

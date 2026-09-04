@@ -12,6 +12,8 @@ return [
     'tries' => (int) env('AI_EVALUATION_TRIES', 3),
     'queue' => env('AI_EVALUATION_QUEUE', 'ai-evaluations'),
     'knowledge_version' => env('AI_KNOWLEDGE_VERSION'),
+    'provider' => env('AI_LLM_PROVIDER', env('LLM_PROVIDER', 'gemini')),
+    'model' => env('AI_LLM_MODEL', env('LLM_MODEL', '')),
     'prompts' => [
         'technical' => 'technical_evaluator_v1',
         'selection' => 'selection_reviewer_v1',

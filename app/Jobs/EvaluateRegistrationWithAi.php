@@ -2,13 +2,10 @@
 
 namespace App\Jobs;
 
-use App\Data\Ai\EvaluationRequestData;
-use App\Enum\AiExecutionStatus;
-use App\Enum\RegistrationStatusEnum;
-use App\Exceptions\Ai\NonRetryableAiException;
 use App\Models\AiExecution;
 use App\Services\Ai\AiExecutionManager;
-use App\Services\Ai\Contracts\AiEvaluationServiceInterface;
+use App\Services\Ai\AiSettingsService;
+use App\Services\Ai\TechnicalEvaluationProcessor;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Queue\Queueable;
 use Illuminate\Queue\Middleware\WithoutOverlapping;
@@ -22,43 +19,12 @@ class EvaluateRegistrationWithAi implements ShouldQueue
 
     public function __construct(public readonly int $executionId)
     {
-        $this->timeout = (int) config('ai_evaluation.timeout') + 10;
+        $this->timeout = app(AiSettingsService::class)->current()->timeout + 10;
     }
 
-    public function handle(AiEvaluationServiceInterface $service, AiExecutionManager $manager): void
+    public function handle(TechnicalEvaluationProcessor $processor): void
     {
-        if (! config('ai_evaluation.enabled')) {
-            return;
-        }
-
-        $execution = AiExecution::query()->with('registration.category.evaluationCriteria')->findOrFail($this->executionId);
-        if ($execution->status === AiExecutionStatus::Completed
-            || (int) $execution->registration->status !== RegistrationStatusEnum::Habilitado->value) {
-            return;
-        }
-
-        $manager->begin($execution);
-        $request = EvaluationRequestData::fromRegistration(
-            $execution->registration,
-            $execution->evaluator_id,
-            $execution->correlation_id,
-            $execution->prompt_version,
-            $execution->evaluation_configuration_hash,
-        );
-        $startedAt = hrtime(true);
-        try {
-            $result = $service->evaluate($request);
-        } catch (NonRetryableAiException $exception) {
-            $manager->fail($execution, $exception);
-
-            return;
-        }
-        $duration = (int) ((hrtime(true) - $startedAt) / 1_000_000);
-        $persisted = $manager->completeEvaluation($execution, $request, $result, $duration);
-        Log::info(
-            $persisted ? 'Avaliação técnica por IA concluída.' : 'Resultado técnico da IA não foi persistido.',
-            $this->logContext($execution, $duration),
-        );
+        $processor->process($this->executionId);
     }
 
     public function middleware(): array
@@ -68,7 +34,7 @@ class EvaluateRegistrationWithAi implements ShouldQueue
 
     public function tries(): int
     {
-        return (int) config('ai_evaluation.tries');
+        return app(AiSettingsService::class)->current()->tries;
     }
 
     public function backoff(): array

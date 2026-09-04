@@ -7,6 +7,7 @@ use App\Data\Ai\EvaluationResultData;
 use App\Data\Ai\SelectionRequestData;
 use App\Data\Ai\SelectionResultData;
 use App\Exceptions\Ai\NonRetryableAiException;
+use App\Models\AiExecution;
 use App\Services\Ai\Contracts\AiEvaluationServiceInterface;
 use Illuminate\Http\Client\PendingRequest;
 use Illuminate\Support\Facades\Http;
@@ -14,6 +15,8 @@ use Illuminate\Validation\ValidationException;
 
 class AgnoEvaluationService implements AiEvaluationServiceInterface
 {
+    public function __construct(private AiSettingsService $settings) {}
+
     public function evaluate(EvaluationRequestData $request): EvaluationResultData
     {
         $payload = $this->request('/v1/evaluations/technical', $request->toArray());
@@ -38,7 +41,20 @@ class AgnoEvaluationService implements AiEvaluationServiceInterface
 
     private function request(string $path, array $payload): array
     {
+        $settings = $this->settings->forCorrelation((string) ($payload['correlation_id'] ?? ''));
+        $payload['runtime'] = [
+            'provider' => $settings->provider ?: null,
+            'model' => $settings->model ?: null,
+            'api_key' => $settings->apiKey,
+            'prompt' => str_contains($path, '/technical') ? $settings->technicalPrompt : $settings->selectionPrompt,
+            'prompt_version' => str_contains($path, '/technical') ? $settings->technicalPromptVersion : $settings->selectionPromptVersion,
+            'knowledge_version' => $settings->knowledgeVersion,
+            'timeout' => min(55, $settings->timeout),
+        ];
         $response = $this->client()->post($path, $payload);
+        AiExecution::query()
+            ->where('correlation_id', (string) ($payload['correlation_id'] ?? ''))
+            ->update(['service_http_status' => $response->status()]);
         if ($response->serverError() && $response->json('code') === 'LLM_CONFIGURATION_ERROR') {
             throw new NonRetryableAiException(
                 'LLM_CONFIGURATION_ERROR',
@@ -79,7 +95,7 @@ class AgnoEvaluationService implements AiEvaluationServiceInterface
             ->withToken($token)
             ->acceptJson()
             ->asJson()
-            ->connectTimeout((int) config('ai_evaluation.connect_timeout'))
-            ->timeout((int) config('ai_evaluation.timeout'));
+            ->connectTimeout($this->settings->current()->connectTimeout)
+            ->timeout($this->settings->current()->timeout);
     }
 }

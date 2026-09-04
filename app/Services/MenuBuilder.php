@@ -100,7 +100,7 @@ class MenuBuilder
             [
                 'title' => 'Agente IA',
                 'icon' => 'ki-abstract-45',
-                'route' => 'dashboard',
+                'route' => 'admin.ai-settings.index',
             ],
             [
                 'heading' => 'Cache Sistema',

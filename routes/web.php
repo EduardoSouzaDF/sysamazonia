@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\AiSettingsController;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\CategoryController;
 use App\Http\Controllers\DashboardController;
@@ -49,7 +50,7 @@ Route::middleware('guest')->group(function () {
 
 // Rotas autenticadas
 Route::middleware('auth')->group(function () {
-     Route::redirect('/', '/dashboard');
+    Route::redirect('/', '/dashboard');
     Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
     Route::get('/logout', [AuthController::class, 'logout'])->name('sair');
 
@@ -119,6 +120,11 @@ Route::middleware('auth')->group(function () {
         Route::get('/admin/registration/file/{file}', [RegistrationController::class, 'file'])->middleware($middlewareListaInscricoes)->name('admin.registration.file');
         Route::get('/admin/users/{user}/login-as', [UserController::class, 'loginAs'])->middleware($middleware)->name('admin.users.login-as');
         Route::get('/admin/users/return-to-admin', [UserController::class, 'returnToAdmin'])->name('admin.users.return-to-admin');
+
+        Route::get('/ai-settings', [AiSettingsController::class, 'index'])->middleware($middleware)->name('admin.ai-settings.index');
+        Route::put('/ai-settings', [AiSettingsController::class, 'update'])->middleware($middleware)->name('admin.ai-settings.update');
+        Route::post('/ai-settings/test', [AiSettingsController::class, 'testConnection'])->middleware([...$middleware, 'throttle:5,1'])->name('admin.ai-settings.test');
+        Route::post('/ai-settings/process/{type}', [AiSettingsController::class, 'process'])->whereIn('type', ['technical', 'selection'])->middleware($middleware)->name('admin.ai-settings.process');
 
     });
 

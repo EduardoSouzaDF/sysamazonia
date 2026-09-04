@@ -4,6 +4,7 @@ import pytest
 
 from app.config import Settings
 from app.providers import LlmConfigurationError, LlmProviderFactory
+from app.schemas.evaluation import RuntimeConfiguration
 
 
 def settings(**overrides):
@@ -74,3 +75,14 @@ def test_selection_provider_and_model_override_global_values(openai_model):
     openai_model.assert_called_once_with(id="selection-model", api_key="openai-test-key", timeout=45)
     assert configured.provider == "openai"
     assert configured.model_id == "selection-model"
+
+
+@patch("app.providers.OpenAIChat")
+def test_runtime_configuration_safely_overrides_provider_model_key_and_timeout(openai_model):
+    runtime = RuntimeConfiguration(
+        provider="openai", model="runtime-model", api_key="runtime-secret",
+        prompt_version="technical_evaluator_v2", timeout=20,
+    )
+    configured = LlmProviderFactory(settings(llm_provider="gemini")).create("technical", runtime)
+    openai_model.assert_called_once_with(id="runtime-model", api_key="runtime-secret", timeout=20)
+    assert configured.provider == "openai"

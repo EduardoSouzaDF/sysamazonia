@@ -6,6 +6,7 @@ from agno.models.google import Gemini
 from agno.models.openai import OpenAIChat
 
 from app.config import Settings
+from app.schemas.evaluation import RuntimeConfiguration
 
 AgentKind = Literal["technical", "selection"]
 
@@ -25,15 +26,18 @@ class LlmProviderFactory:
     def __init__(self, settings: Settings) -> None:
         self._settings = settings
 
-    def create(self, agent_kind: AgentKind) -> ConfiguredModel:
+    def create(self, agent_kind: AgentKind, runtime: RuntimeConfiguration | None = None) -> ConfiguredModel:
         provider, model_id = self._resolve(agent_kind)
+        if runtime is not None:
+            provider = runtime.provider or provider
+            model_id = runtime.model or model_id
 
         if provider == "openai":
-            api_key = self._required_key(self._settings.openai_api_key, "OPENAI_API_KEY")
-            model = OpenAIChat(id=model_id, api_key=api_key, timeout=self._settings.llm_timeout)
+            api_key = self._required_key(runtime.api_key if runtime and runtime.api_key else self._settings.openai_api_key, "OPENAI_API_KEY")
+            model = OpenAIChat(id=model_id, api_key=api_key, timeout=runtime.timeout if runtime else self._settings.llm_timeout)
         elif provider == "gemini":
-            api_key = self._required_key(self._settings.gemini_api_key, "GEMINI_API_KEY")
-            model = Gemini(id=model_id, api_key=api_key, timeout=self._settings.llm_timeout)
+            api_key = self._required_key(runtime.api_key if runtime and runtime.api_key else self._settings.gemini_api_key, "GEMINI_API_KEY")
+            model = Gemini(id=model_id, api_key=api_key, timeout=runtime.timeout if runtime else self._settings.llm_timeout)
         else:
             raise LlmConfigurationError(f"Unsupported LLM provider: {provider}")
 

@@ -50,14 +50,31 @@ class CriterionEvaluation(StrictModel):
         return value
 
 
+class RuntimeConfiguration(StrictModel):
+    provider: Literal["openai", "gemini"] | None = None
+    model: str | None = Field(default=None, min_length=1, max_length=120)
+    api_key: str | None = Field(default=None, min_length=8, max_length=1000)
+    prompt: str | None = Field(default=None, max_length=100000)
+    prompt_version: str = Field(min_length=1, max_length=80)
+    knowledge_version: str | None = Field(default=None, max_length=80)
+    timeout: int = Field(default=45, ge=1, le=55)
+
+
 class TechnicalEvaluationRequest(StrictModel):
     inscricao_id: int = Field(gt=0)
     avaliador_id: int = Field(gt=0)
     correlation_id: UUID
-    prompt_version: Literal["technical_evaluator_v1"]
+    prompt_version: str = Field(min_length=1, max_length=80)
     evaluation_configuration_hash: str = Field(pattern=r"^[a-f0-9]{64}$")
     inscricao: Proposal
     criterios: list[Criterion] = Field(min_length=1)
+    runtime: RuntimeConfiguration | None = None
+
+    @model_validator(mode="after")
+    def matching_prompt_version(self) -> "TechnicalEvaluationRequest":
+        if self.runtime is not None and self.prompt_version != self.runtime.prompt_version:
+            raise ValueError("versão do prompt não corresponde à configuração")
+        return self
 
     @model_validator(mode="after")
     def unique_criteria(self) -> "TechnicalEvaluationRequest":
@@ -87,10 +104,17 @@ class SelectionRequest(StrictModel):
     inscricao_id: int = Field(gt=0)
     avaliador_id: int = Field(gt=0)
     correlation_id: UUID
-    prompt_version: Literal["selection_reviewer_v1"]
+    prompt_version: str = Field(min_length=1, max_length=80)
     evaluation_configuration_hash: str = Field(pattern=r"^[a-f0-9]{64}$")
     inscricao: Proposal
     avaliacoes: list[PreviousEvaluation] = Field(min_length=1)
+    runtime: RuntimeConfiguration | None = None
+
+    @model_validator(mode="after")
+    def matching_prompt_version(self) -> "SelectionRequest":
+        if self.runtime is not None and self.prompt_version != self.runtime.prompt_version:
+            raise ValueError("versão do prompt não corresponde à configuração")
+        return self
 
 
 class SelectionDecision(StrEnum):
