@@ -1,4 +1,8 @@
-# 🚀 Sisamazonia Instalação e configuração
+# 🚀 App Prêmios — Sisamazonia
+
+Implementação do sistema de avaliação dos Prêmios por IA.
+
+## Instalação e configuração
 --
 
 ## 🛠️ Pré-requisitos
@@ -97,6 +101,3 @@ npm run build
 ```bash
 php artisan config:clear
 ```
-
- 
-
