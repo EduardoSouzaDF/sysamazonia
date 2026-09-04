@@ -1,261 +1,281 @@
-# Manual simples de operação da avaliação por IA
+# Manual do usuário — Ambiente de Avaliação por IA
 
-## 1. Para que serve
+## 1. Objetivo
 
-O sistema utiliza IA em duas etapas:
+Este manual apresenta a operação diária do ambiente de avaliação por inteligência artificial. O sistema possui duas etapas:
 
-1. **Avaliação técnica:** analisa cada critério da categoria, atribui notas e registra justificativas.
-2. **Seleção estratégica:** depois da conclusão dos pareceres técnicos, decide entre `INDICADA` e `NAO_INDICADA` e registra a justificativa.
+1. **Avaliação técnica:** analisa a inscrição conforme os critérios da categoria, atribui notas e registra justificativas.
+2. **Seleção estratégica:** após a conclusão técnica, registra a decisão `INDICADA` ou `NAO_INDICADA` com justificativa.
 
-O Laravel continua responsável pelos dados, permissões, cálculos e mudanças de status. O serviço Python apenas produz as respostas estruturadas da IA.
+A IA auxilia o processo, mas o sistema continua controlando permissões, critérios, escalas, quórum, status e prevenção de duplicidades. Resultados importantes devem ser acompanhados pela equipe responsável.
 
-## 2. O que precisa estar funcionando
+## 2. Perfis envolvidos
 
-Antes de iniciar uma avaliação, confirme:
+| Perfil | Responsabilidade |
+|---|---|
+| Administrador | Configurar a IA, testar a conexão, ativar as etapas e iniciar o processamento de pendências. |
+| Comissão | Conferir inscrições e realizar habilitação ou rejeição conforme as regras do processo. |
+| Avaliador técnico | Perfil usado para registrar pareceres e notas produzidos na avaliação técnica. |
+| Indicador estratégico | Perfil usado para registrar a indicação produzida na seleção estratégica. |
 
-- MySQL em funcionamento;
-- aplicação Laravel configurada;
-- serviço Python/FastAPI ativo na porta configurada;
-- worker da fila Laravel ativo;
-- chave do provedor de IA válida;
-- usuários técnicos vinculados às categorias corretas;
-- critérios e escalas das categorias revisados.
+Apenas administradores têm acesso às configurações da IA.
 
-## 3. Configuração pelo painel
-
-Entre como administrador e abra **Agente IA > Configurações de IA**.
-
-1. Selecione Gemini ou OpenAI e informe o modelo.
-2. Informe a API Key. Depois de salva, ela aparece apenas mascarada. Em edições futuras, deixe o campo vazio para manter a chave atual.
-3. Selecione o avaliador técnico e o indicador estratégico. Eles precisam estar associados às respectivas categorias.
-4. Ajuste timeout, tentativas e, se aplicável, a versão da base de conhecimento.
-5. Revise os dois prompts. Cada alteração gera uma nova versão auditável.
-6. Clique em **Testar conexão**.
-7. Ative a avaliação técnica e a seleção estratégica e salve.
-
-As configurações operacionais passam a valer imediatamente, sem `config:clear`. A chave é criptografada no banco e nunca é exibida integralmente.
-
-## 4. Configuração de infraestrutura
-
-O `.env` do Laravel ainda contém somente a conexão protegida entre Laravel e FastAPI e os fallbacks para uma migração segura:
-
-```dotenv
-AI_EVALUATION_ENABLED=true
-AI_SELECTION_ENABLED=true
-AI_SERVICE_URL=http://127.0.0.1:8000
-AI_SERVICE_TOKEN=<token-seguro>
-AI_EVALUATION_QUEUE=ai-evaluations
-```
-
-No `ai-service/.env`, mantenha o mesmo token. Provider, modelo e chave abaixo funcionam como fallback até a configuração ser salva no painel:
-
-```dotenv
-AI_SERVICE_TOKEN=<mesmo-token-do-laravel>
-LLM_PROVIDER=gemini
-LLM_MODEL=<modelo-configurado>
-GEMINI_API_KEY=<chave-do-provedor>
-LLM_TIMEOUT=45
-KNOWLEDGE_VERSION=
-KNOWLEDGE_MAX_CHARS=50000
-```
-
-Se utilizar OpenAI, configure `LLM_PROVIDER=openai` e `OPENAI_API_KEY`.
-
-Os tokens e chaves nunca devem ser enviados ao Git.
-
-## 5. Manter os processos ativos
-
-### Serviço Python
-
-No diretório `ai-service`, ative o ambiente virtual e execute:
-
-```bash
-uvicorn app.main:app --host 127.0.0.1 --port 8000
-```
-
-Confirme a saúde do serviço:
-
-```bash
-curl http://127.0.0.1:8000/health
-```
-
-Resultado esperado:
-
-```json
-{"status":"ok"}
-```
-
-O painel apenas verifica a saúde do FastAPI; iniciar e reiniciar processos é responsabilidade da infraestrutura.
-
-### Worker da fila
-
-Na raiz do projeto Laravel, execute:
-
-```bash
-php artisan queue:work database --queue=ai-evaluations --tries=3 --timeout=75
-```
-
-Em produção, utilize Supervisor com o modelo disponível em `deploy/supervisor/app-premios.conf.example`.
-
-## 6. Realizar uma avaliação técnica
-
-No painel administrativo:
-
-1. Abra a lista de inscrições.
-2. Confira os dados e documentos da inscrição.
-3. Clique na ação para **habilitar** a inscrição.
-4. A inscrição passará para `Habilitado`.
-5. O sistema criará automaticamente um trabalho na fila.
-6. A IA avaliará os critérios e registrará o parecer.
-7. Quando o quórum da categoria for atingido, a inscrição passará para `Avaliado`.
-
-Não é necessário executar comandos para novas inscrições. O disparo acontece automaticamente pela mudança de status.
-
-## 7. Realizar a seleção estratégica
-
-Quando a inscrição muda para `Avaliado`:
-
-1. o sistema cria automaticamente uma solicitação de seleção;
-2. a IA analisa a proposta e os pareceres técnicos;
-3. a decisão `INDICADA` ou `NAO_INDICADA` é registrada em `indications`;
-4. os pareceres e notas técnicas não são alterados.
-
-A seleção somente ocorre quando `AI_SELECTION_ENABLED=true`.
-
-## 8. Processar registros antigos pelo painel
-
-Em **Agente IA > Configurações de IA**, as seções de avaliações e seleções mostram os registros pendentes:
-
-- **Processar em fila** inicia todo o lote sem manter a requisição web aberta. O worker precisa estar ativo.
-- **Processar 1 agora** executa uma inscrição sincronamente, útil para operação pontual sem depender do worker.
-
-Há confirmação antes do lote e proteção contra duplicação e cliques concorrentes.
-
-### Comandos de manutenção
-
-Os comandos continuam disponíveis para automação e contingência, mas não são necessários na rotina normal.
-
-### Inscrições habilitadas sem avaliação
-
-Primeiro, faça uma simulação:
-
-```bash
-php artisan ai:evaluate-habilitados
-```
-
-Depois, enfileire:
-
-```bash
-php artisan ai:evaluate-habilitados --dispatch
-```
-
-### Inscrições avaliadas sem seleção
-
-Primeiro, faça uma simulação:
-
-```bash
-php artisan ai:select-avaliados
-```
-
-Depois, enfileire:
-
-```bash
-php artisan ai:select-avaliados --dispatch
-```
-
-Esses comandos são idempotentes: execuções já concluídas não geram pareceres duplicados.
-
-## 9. Utilizar documentos institucionais
-
-Quando existirem documentos aprovados, coloque arquivos `.md` ou `.txt` em:
+## 3. Visão geral do fluxo
 
 ```text
-ai-service/app/knowledge/documents
+Inscrição recebida
+        ↓
+Conferência pela comissão
+        ↓
+Inscrição habilitada
+        ↓
+Avaliação técnica por IA
+        ↓
+Quórum técnico atingido
+        ↓
+Inscrição avaliada
+        ↓
+Seleção estratégica por IA
+        ↓
+Indicada ou não indicada
 ```
 
-Depois, informe uma versão no `ai-service/.env`:
+## 4. Acessar o ambiente
 
-```dotenv
-KNOWLEDGE_VERSION=2026-01
-```
+1. Entre no sistema com seu usuário e senha.
+2. No menu administrativo, abra **Agente IA**.
+3. Será exibida a página **Configurações de IA**, dividida em configuração, diagnóstico, operações pendentes e execuções recentes.
 
-Reinicie o FastAPI. Sem documentos, mantenha `KNOWLEDGE_VERSION` vazia. A ausência de documentos é aceita e não impede as avaliações.
+Se o item **Agente IA** não aparecer, solicite a um administrador a revisão do seu perfil.
 
-## 10. Acompanhar o processamento
+## 5. Configurar a IA
 
-Durante o funcionamento, acompanhe:
+### 5.1 Provider e modelo
 
-- saída do worker da fila;
-- logs em `storage/logs/laravel.log`;
-- tabela `jobs`, para itens pendentes;
-- tabela `failed_jobs`, para trabalhos definitivamente interrompidos;
-- tabela `ai_executions`, para auditoria das avaliações;
-- tabelas `opinions`, `scores` e `indications`, para os resultados.
+Na seção **Configuração do LLM**:
 
-Os estados mais importantes de `ai_executions` são:
+1. escolha o provider: **Gemini** ou **OpenAI**;
+2. informe o nome exato do modelo disponibilizado pelo provider;
+3. informe a API Key na primeira configuração;
+4. clique em **Salvar configurações**.
 
-| Estado | Significado |
+Depois de salva, a chave aparece somente de forma mascarada, por exemplo `Configurada ••••AB12`. Ao editar outras opções, deixe o campo da API Key vazio para manter a chave atual.
+
+### 5.2 Avaliadores
+
+Selecione:
+
+- **Avaliador técnico:** usuário que registrará os pareceres e notas gerados pela IA;
+- **Indicador estratégico:** usuário que registrará a decisão da etapa estratégica.
+
+Esses usuários também precisam estar vinculados às categorias correspondentes. Sem esse vínculo, a inscrição não será apresentada como pendente.
+
+### 5.3 Tempo e tentativas
+
+- **Timeout:** tempo máximo de espera pela resposta da IA.
+- **Connect timeout:** tempo máximo para estabelecer conexão com o serviço.
+- **Tentativas:** quantidade máxima de novas tentativas em falhas temporárias.
+
+Mantenha os valores definidos pela equipe técnica, salvo orientação específica.
+
+### 5.4 Prompts
+
+O **Prompt técnico** orienta notas e justificativas. O **Prompt estratégico** orienta a indicação final.
+
+Antes de salvar uma alteração:
+
+- descreva claramente o objetivo da análise;
+- mantenha as regras institucionais e os critérios do edital;
+- evite instruções contraditórias;
+- não inclua senhas, tokens ou informações sigilosas;
+- registre internamente o motivo da mudança.
+
+Cada alteração gera automaticamente uma nova versão. Uma execução já iniciada permanece associada à versão usada naquele momento.
+
+### 5.5 Base de conhecimento
+
+O campo **Knowledge version** identifica a versão dos documentos institucionais disponíveis para consulta da IA. Ele não envia documentos pelo painel.
+
+Enquanto não houver documentos aprovados, deixe esse campo vazio. A inclusão dos arquivos é uma atividade da equipe técnica.
+
+## 6. Testar antes de ativar
+
+Após salvar provider, modelo e API Key:
+
+1. localize a seção **Diagnóstico**;
+2. clique em **Testar conexão**;
+3. aguarde a mensagem de resultado.
+
+Uma resposta positiva confirma que o Laravel alcança o FastAPI e que a configuração do provider pode ser carregada. Esse teste não cria parecer, nota, indicação nem altera a inscrição.
+
+Não ative o processamento se o diagnóstico informar que o FastAPI está indisponível ou que o provider não está pronto.
+
+## 7. Ativar ou interromper o processamento
+
+Na configuração existem duas opções:
+
+- **Avaliação técnica ativa:** permite criar e executar avaliações técnicas;
+- **Seleção estratégica ativa:** permite executar a seleção depois da avaliação.
+
+Para iniciar a rotina normal, marque as opções necessárias e salve. Para uma interrupção emergencial, desmarque a etapa correspondente e salve novamente. A desativação não apaga resultados existentes.
+
+## 8. Avaliar novas inscrições
+
+### 8.1 Conferir e habilitar
+
+1. Abra a lista de inscrições.
+2. Acesse a inscrição desejada.
+3. Confira os dados e documentos disponíveis.
+4. Se estiver regular, use a ação **Habilitar**.
+5. Se não estiver regular, siga o procedimento institucional de rejeição.
+
+A habilitação dispara automaticamente a avaliação técnica quando ela estiver ativa. Não é necessário executar comandos.
+
+### 8.2 Resultado técnico
+
+A IA gera uma justificativa e uma nota para cada critério. O sistema valida:
+
+- identificação da inscrição e do avaliador;
+- critérios esperados;
+- limites mínimo e máximo das notas;
+- versão do prompt;
+- integridade dos dados usados na análise.
+
+Quando o quórum exigido é alcançado, a inscrição muda para **Avaliado**. Se dados relevantes forem alterados durante a chamada, o resultado é descartado por segurança e pode ser processado novamente.
+
+### 8.3 Seleção estratégica
+
+Quando a inscrição chega ao status **Avaliado**, a seleção estratégica é iniciada automaticamente se estiver ativa. Ela considera a proposta e os pareceres técnicos e registra:
+
+- `INDICADA`; ou
+- `NAO_INDICADA`.
+
+A seleção estratégica não altera notas ou pareceres técnicos.
+
+## 9. Processar pendências pelo painel
+
+A página **Agente IA** mostra duas listas:
+
+- **Avaliações técnicas:** inscrições habilitadas que ainda precisam da avaliação configurada;
+- **Seleções estratégicas:** inscrições avaliadas que ainda precisam da indicação configurada.
+
+Antes de processar, confira a quantidade e os registros exibidos.
+
+### Processar em fila
+
+Use **Processar em fila** para iniciar todas as pendências da seção. Confirme a operação quando solicitado. Essa opção é indicada para lotes e depende do serviço de fila mantido pela infraestrutura.
+
+### Processar 1 agora
+
+Use **Processar 1 agora** para executar imediatamente uma única inscrição. Essa opção é útil para teste operacional ou processamento pontual e pode levar alguns segundos.
+
+O sistema utiliza identificação única e bloqueios para evitar duplicidade em cliques repetidos ou solicitações simultâneas.
+
+## 10. Acompanhar as execuções
+
+Na seção **Execuções recentes**, observe:
+
+| Campo | Significado |
 |---|---|
-| `pending` | aguardando processamento |
-| `processing` | chamada em andamento |
-| `completed` | resultado validado e salvo |
-| `failed` | processamento não concluído |
+| ID | Identificador da execução para suporte e auditoria. |
+| Inscrição | Registro avaliado. |
+| Tipo | Avaliação técnica ou seleção estratégica. |
+| Status | Situação atual do processamento. |
+| HTTP | Código retornado pelo serviço de IA, quando disponível. |
+| Atualização | Data e hora da última movimentação. |
 
-## 11. Resolver problemas comuns
+Os status são:
 
-### Serviço de IA indisponível
+| Status | Significado | Ação recomendada |
+|---|---|---|
+| `pending` | Aguardando processamento. | Aguarde; se permanecer assim, acione o suporte. |
+| `processing` | Avaliação em andamento. | Aguarde a conclusão. |
+| `completed` | Resultado validado e salvo. | Nenhuma ação necessária. |
+| `failed` | A execução não foi concluída. | Verifique o diagnóstico e tente novamente após corrigir a causa. |
 
-Sintoma: erro de conexão com a porta 8000.
+## 11. Problemas comuns
 
-1. Confirme `/health`.
-2. Reinicie o FastAPI.
-3. Confirme `AI_SERVICE_URL`.
-4. Reprocesse pelo comando correspondente.
+### FastAPI indisponível
 
-### Erro 401
+- não inicie novos lotes;
+- aguarde alguns minutos e atualize a página;
+- se persistir, informe à equipe técnica que o diagnóstico mostra **FastAPI indisponível**.
 
-Confirme se `AI_SERVICE_TOKEN` é igual nos dois arquivos `.env`. Reinicie o FastAPI e limpe o cache do Laravel.
+### Provider não está pronto
 
-### Limite do provedor, erro 429
+Confira provider, nome do modelo e existência da API Key. Salve e execute **Testar conexão** novamente. Nunca envie a chave em mensagens, chamados ou capturas de tela.
 
-O Laravel realiza retentativas automáticas. Aguarde a liberação da cota. Se todas as tentativas forem consumidas, execute novamente o comando idempotente de seleção ou avaliação.
+### A inscrição não aparece como pendente
 
-### Avaliação não foi criada
+Confira se:
 
-Confira:
+- ela está em **Habilitado** para avaliação técnica ou **Avaliado** para seleção;
+- a etapa está ativa;
+- o avaliador selecionado está associado à categoria;
+- já existe uma execução concluída para a mesma configuração.
 
-- feature flag ativa;
-- ID do avaliador configurado;
-- associação do avaliador à categoria;
-- critérios existentes na categoria;
-- worker da fila ativo;
-- logs do Laravel.
+### Execução permanece em `pending`
 
-### Resultado descartado
+O processamento em fila depende do worker mantido pela infraestrutura. Informe à equipe técnica o ID da execução.
 
-O sistema descarta resultados quando a inscrição, os critérios, pareceres ou notas mudam durante a chamada. Isso é uma proteção de consistência. Execute novamente o comando idempotente depois de confirmar os dados.
+### Execução com `failed`
 
-## 12. Desativar emergencialmente
+Teste a conexão e verifique se a falha é geral. Depois da correção, processe novamente pela seção adequada. A proteção de idempotência impede a criação de resultado duplicado.
 
-No painel, desmarque **Avaliação técnica ativa** para interromper novas avaliações e seleções, ou desmarque apenas **Seleção estratégica ativa** para interromper indicações. Salve a configuração; a alteração é imediata.
+### Resultado foi descartado
 
-Essa desativação não apaga resultados já gravados.
+Isso ocorre quando a inscrição, critérios, escalas, pareceres ou notas mudam durante a chamada. Confira os dados e processe novamente.
 
-## 13. Checklist diário
+## 12. Segurança e boas práticas
 
-- [ ] FastAPI responde em `/health`.
-- [ ] Worker da fila está ativo.
-- [ ] Não existem trabalhos antigos em `failed_jobs`.
+- Nunca compartilhe API Keys, tokens ou senhas.
+- Não coloque credenciais nos prompts.
+- Não altere critérios ou escalas enquanto existirem avaliações em andamento.
+- Revise cuidadosamente qualquer mudança de prompt antes de ativá-la.
+- Confira as pendências antes de confirmar um lote.
+- Não edite notas, pareceres, indicações ou registros de auditoria diretamente no banco.
+- Não trate a IA como única responsável pela decisão institucional.
+
+## 13. Checklist do administrador
+
+### Antes de ativar
+
+- [ ] Provider e modelo conferidos.
+- [ ] API Key indicada como configurada.
+- [ ] Avaliador técnico associado às categorias.
+- [ ] Indicador estratégico associado às categorias.
+- [ ] Critérios e escalas revisados.
+- [ ] Prompts revisados.
+- [ ] Teste de conexão aprovado.
+
+### Durante a operação
+
+- [ ] FastAPI aparece como disponível.
+- [ ] Pendências estão diminuindo.
 - [ ] Execuções recentes chegam a `completed`.
-- [ ] Cota do provedor de IA está disponível.
-- [ ] Avaliadores continuam vinculados às categorias.
-- [ ] Tokens e chaves não aparecem em logs ou no Git.
+- [ ] Não há aumento contínuo de registros `failed`.
 
-## 14. Boas práticas
+### Ao alterar um prompt
 
-- Revise critérios e rubricas antes de habilitar inscrições.
-- Não altere critérios durante uma avaliação em andamento.
-- Confira a lista de pendências no painel antes de iniciar um lote.
-- Não edite diretamente notas, pareceres ou auditorias no banco.
-- Mantenha backup do banco antes de migrations e operações em lote.
-- Mude a versão do prompt ou conhecimento quando houver alteração institucional relevante.
+- [ ] Motivo da alteração registrado.
+- [ ] Texto revisado por responsável institucional.
+- [ ] Nova versão exibida após salvar.
+- [ ] Primeira execução da nova versão acompanhada.
+
+## 14. Informações para solicitar suporte
+
+Ao abrir um chamado, informe:
+
+- ID da execução;
+- ID da inscrição;
+- tipo da operação;
+- status apresentado;
+- data e hora do problema;
+- mensagem exibida na tela;
+- se o teste de conexão foi aprovado.
+
+Não informe a API Key nem o token do serviço.
+
+## 15. Nota para a equipe técnica
+
+O uso cotidiano deve ser realizado integralmente pelo painel. O FastAPI e o worker da fila precisam permanecer ativos pela infraestrutura. Os comandos Artisan continuam disponíveis apenas para manutenção e automação. Os documentos aprovados devem ser colocados em `ai-service/app/knowledge/documents`; o painel administra somente a versão de conhecimento.
