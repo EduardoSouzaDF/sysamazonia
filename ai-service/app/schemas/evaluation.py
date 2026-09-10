@@ -51,9 +51,11 @@ class CriterionEvaluation(StrictModel):
 
 
 class RuntimeConfiguration(StrictModel):
-    provider: Literal["openai", "gemini"] | None = None
-    model: str | None = Field(default=None, min_length=1, max_length=120)
-    api_key: str | None = Field(default=None, min_length=8, max_length=1000)
+    provider: Literal["openai", "gemini", "anthropic", "mistral", "groq", "openai-compatible", "local"] | None = None
+    model: str | None = Field(default=None, min_length=1, max_length=120, pattern=r"^[A-Za-z0-9][A-Za-z0-9._:/-]*$")
+    api_key: str | None = Field(default=None, min_length=1, max_length=1000, repr=False)
+    base_url: str | None = Field(default=None, max_length=500)
+    local_type: Literal["ollama", "openai-compatible"] = "ollama"
     prompt: str | None = Field(default=None, max_length=100000)
     prompt_version: str = Field(min_length=1, max_length=80)
     knowledge_version: str | None = Field(default=None, max_length=80)

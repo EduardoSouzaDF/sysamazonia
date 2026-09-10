@@ -7,7 +7,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class AiSettingVersion extends Model
 {
-    protected $fillable = ['ai_setting_id', 'provider', 'model', 'technical_prompt', 'selection_prompt', 'technical_prompt_version', 'selection_prompt_version', 'knowledge_version', 'changed_by'];
+    protected $fillable = ['ai_setting_id', 'provider', 'model', 'base_url', 'local_type', 'technical_prompt', 'selection_prompt', 'technical_prompt_version', 'selection_prompt_version', 'knowledge_version', 'changed_by'];
 
     public function setting(): BelongsTo
     {

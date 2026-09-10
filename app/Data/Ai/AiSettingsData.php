@@ -11,5 +11,6 @@ final readonly class AiSettingsData
         public bool $evaluationEnabled, public bool $selectionEnabled,
         public int $technicalEvaluatorId, public int $selectionEvaluatorId,
         public int $connectTimeout, public int $timeout, public int $tries, public ?string $knowledgeVersion,
+        public ?string $baseUrl = null, public string $localType = 'ollama',
     ) {}
 }

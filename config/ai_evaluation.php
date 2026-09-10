@@ -1,6 +1,7 @@
 <?php
 
 return [
+    'providers' => ['openai' => 'OpenAI', 'gemini' => 'Google Gemini', 'anthropic' => 'Anthropic Claude', 'mistral' => 'Mistral AI', 'groq' => 'Groq', 'openai-compatible' => 'OpenAI-compatible / custom', 'local' => 'Local'],
     'enabled' => (bool) env('AI_EVALUATION_ENABLED', false),
     'selection_enabled' => (bool) env('AI_SELECTION_ENABLED', false),
     'service_url' => env('AI_SERVICE_URL', 'http://127.0.0.1:8000'),

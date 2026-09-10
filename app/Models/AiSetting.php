@@ -8,7 +8,9 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class AiSetting extends Model
 {
-    protected $fillable = ['provider', 'model', 'api_key', 'technical_prompt', 'selection_prompt', 'technical_prompt_version', 'selection_prompt_version', 'evaluation_enabled', 'selection_enabled', 'technical_evaluator_id', 'selection_evaluator_id', 'connect_timeout', 'timeout', 'tries', 'knowledge_version', 'updated_by'];
+    protected $attributes = ['local_type' => 'ollama'];
+
+    protected $fillable = ['provider', 'model', 'base_url', 'local_type', 'api_key', 'technical_prompt', 'selection_prompt', 'technical_prompt_version', 'selection_prompt_version', 'evaluation_enabled', 'selection_enabled', 'technical_evaluator_id', 'selection_evaluator_id', 'connect_timeout', 'timeout', 'tries', 'knowledge_version', 'updated_by'];
 
     protected $hidden = ['api_key'];
 

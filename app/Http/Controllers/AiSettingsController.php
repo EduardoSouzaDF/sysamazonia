@@ -7,16 +7,18 @@ use App\Http\Requests\UpdateAiSettingsRequest;
 use App\Models\AiExecution;
 use App\Models\AiSetting;
 use App\Models\User;
+use App\Services\Ai\AiDashboardMetrics;
 use App\Services\Ai\AiPendingOperations;
+use App\Services\Ai\AiServiceDiagnostics;
 use App\Services\Ai\AiSettingsService;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Http;
+use Illuminate\Support\Facades\Cache;
 use Illuminate\View\View;
 
 class AiSettingsController extends Controller
 {
-    public function index(AiSettingsService $settings, AiPendingOperations $operations): View
+    public function index(Request $request, AiSettingsService $settings, AiPendingOperations $operations, AiServiceDiagnostics $diagnostics, AiDashboardMetrics $metrics): View
     {
         $resolved = $settings->current();
         $model = AiSetting::query()->first();
@@ -28,7 +30,9 @@ class AiSettingsController extends Controller
             'counts' => $counts, 'recent' => AiExecution::query()->latest()->limit(10)->get(),
             'technicalPending' => $operations->candidates(AiExecutionType::TechnicalEvaluation),
             'selectionPending' => $operations->candidates(AiExecutionType::StrategicSelection),
-            'health' => $this->health($resolved->connectTimeout),
+            'health' => $diagnostics->check($resolved),
+            'metrics' => $metrics->forDays((int) $request->input('days', 30)),
+            'models' => Cache::get('ai.models.'.($resolved->versionId ?? 'fallback'), []),
         ]);
     }
 
@@ -39,21 +43,26 @@ class AiSettingsController extends Controller
         return back()->with('success', 'Configurações de IA atualizadas com segurança.');
     }
 
-    public function testConnection(AiSettingsService $settings): RedirectResponse
+    public function testConnection(AiSettingsService $settings, AiServiceDiagnostics $diagnostics): RedirectResponse
     {
-        $s = $settings->current();
-        try {
-            $response = Http::baseUrl((string) config('ai_evaluation.service_url'))->withToken((string) config('ai_evaluation.token'))
-                ->connectTimeout($s->connectTimeout)->timeout(min($s->timeout, 20))->acceptJson()->post('/v1/configuration/test', [
-                    'provider' => $s->provider, 'model' => $s->model, 'api_key' => $s->apiKey,
-                    'prompt_version' => $s->technicalPromptVersion, 'knowledge_version' => $s->knowledgeVersion,
-                    'timeout' => min(55, $s->timeout),
-                ]);
+        $result = $diagnostics->check($settings->current(), 'test');
 
-            return $response->successful() ? back()->with('success', 'FastAPI e configuração do provider estão prontos.') : back()->with('error', 'FastAPI respondeu, mas o provider não está pronto.');
-        } catch (\Throwable) {
-            return back()->with('error', 'Não foi possível conectar ao serviço de IA.');
+        return back()->with($result['ok'] ? 'success' : 'error', $result['ok'] ? 'Provider conectado; modelo acessível. Teste de metadados sem inferência.' : $result['message']);
+    }
+
+    public function refreshModels(AiSettingsService $settings, AiServiceDiagnostics $diagnostics): RedirectResponse
+    {
+        $resolved = $settings->current();
+        $key = 'ai.models.'.($resolved->versionId ?? 'fallback');
+        if (Cache::has($key)) {
+            return back()->with('success', 'Lista de modelos em cache (5 minutos). Modelo manual continua disponível.');
         }
+        $result = $diagnostics->check($resolved, 'models');
+        if ($result['ok']) {
+            Cache::put($key, $result['models'], 300);
+        }
+
+        return back()->with($result['ok'] ? 'success' : 'error', $result['ok'] ? 'Modelos atualizados. Se necessário, informe outro modelo manualmente.' : $result['message']);
     }
 
     public function process(Request $request, string $type, AiPendingOperations $operations): RedirectResponse
@@ -65,14 +74,5 @@ class AiSettingsController extends Controller
         $result = $operations->start($executionType, $synchronous, $synchronous ? 1 : null);
 
         return back()->with('success', "Operação iniciada: {$result['started']} registro(s); {$result['completed']} concluído(s) sincronamente.");
-    }
-
-    private function health(int $timeout): bool
-    {
-        try {
-            return Http::baseUrl((string) config('ai_evaluation.service_url'))->connectTimeout($timeout)->timeout($timeout)->get('/health')->successful();
-        } catch (\Throwable) {
-            return false;
-        }
     }
 }

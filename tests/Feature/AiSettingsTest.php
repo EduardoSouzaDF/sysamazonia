@@ -14,6 +14,14 @@ class AiSettingsTest extends TestCase
 {
     use RefreshDatabase;
 
+    protected function setUp(): void
+    {
+        parent::setUp();
+        config(['ai_evaluation.token' => str_repeat('t', 48), 'ai_evaluation.service_url' => 'http://127.0.0.1:8000']);
+        Http::preventStrayRequests();
+        Http::fake(['*/v1/diagnostics' => Http::response(['status' => 'ok'])]);
+    }
+
     public function test_only_admin_can_access_ai_settings(): void
     {
         $user = User::factory()->create();

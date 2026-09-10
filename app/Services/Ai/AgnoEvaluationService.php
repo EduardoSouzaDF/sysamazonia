@@ -45,6 +45,7 @@ class AgnoEvaluationService implements AiEvaluationServiceInterface
         $payload['runtime'] = [
             'provider' => $settings->provider ?: null,
             'model' => $settings->model ?: null,
+            'base_url' => $settings->baseUrl, 'local_type' => $settings->localType,
             'api_key' => $settings->apiKey,
             'prompt' => str_contains($path, '/technical') ? $settings->technicalPrompt : $settings->selectionPrompt,
             'prompt_version' => str_contains($path, '/technical') ? $settings->technicalPromptVersion : $settings->selectionPromptVersion,
@@ -55,6 +56,10 @@ class AgnoEvaluationService implements AiEvaluationServiceInterface
         AiExecution::query()
             ->where('correlation_id', (string) ($payload['correlation_id'] ?? ''))
             ->update(['service_http_status' => $response->status()]);
+        $providerCode = $response->json('code');
+        if (is_string($providerCode) && in_array($providerCode, ['PROVIDER_UNAUTHORIZED', 'PROVIDER_FORBIDDEN', 'MODEL_NOT_FOUND', 'PROVIDER_INVALID_RESPONSE'], true)) {
+            throw new NonRetryableAiException($providerCode, AiServiceDiagnostics::MESSAGES[$providerCode]);
+        }
         if ($response->serverError() && $response->json('code') === 'LLM_CONFIGURATION_ERROR') {
             throw new NonRetryableAiException(
                 'LLM_CONFIGURATION_ERROR',

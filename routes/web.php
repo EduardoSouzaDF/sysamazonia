@@ -123,6 +123,7 @@ Route::middleware('auth')->group(function () {
 
         Route::get('/ai-settings', [AiSettingsController::class, 'index'])->middleware($middleware)->name('admin.ai-settings.index');
         Route::put('/ai-settings', [AiSettingsController::class, 'update'])->middleware($middleware)->name('admin.ai-settings.update');
+        Route::post('/ai-settings/models', [AiSettingsController::class, 'refreshModels'])->middleware([...$middleware, 'throttle:5,1'])->name('admin.ai-settings.models');
         Route::post('/ai-settings/test', [AiSettingsController::class, 'testConnection'])->middleware([...$middleware, 'throttle:5,1'])->name('admin.ai-settings.test');
         Route::post('/ai-settings/process/{type}', [AiSettingsController::class, 'process'])->whereIn('type', ['technical', 'selection'])->middleware($middleware)->name('admin.ai-settings.process');
 
