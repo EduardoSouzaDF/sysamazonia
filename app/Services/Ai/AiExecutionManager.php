@@ -121,9 +121,10 @@ class AiExecutionManager
                 return;
             }
 
-            $indication = Indication::query()->create([
+            $indication = Indication::query()->updateOrCreate([
                 'user_id' => $locked->evaluator_id,
                 'registration_id' => $registration->id,
+            ], [
                 'decision' => $result->decision,
                 'descricao' => $result->justification,
             ]);

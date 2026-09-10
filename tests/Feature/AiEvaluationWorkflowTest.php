@@ -454,6 +454,56 @@ class AiEvaluationWorkflowTest extends TestCase
         $this->assertDatabaseCount('scores', 1);
     }
 
+    public function test_strategic_selection_updates_existing_indication_without_duplicates(): void
+    {
+        [$registration, $evaluator, $criterion, $selector] = $this->domain();
+        Queue::fake();
+        config([
+            'ai_evaluation.enabled' => true,
+            'ai_evaluation.selection_enabled' => true,
+            'ai_evaluation.selection_evaluator_id' => $selector->id,
+            'ai_evaluation.token' => 'test-token',
+        ]);
+        $registration->update(['status' => RegistrationStatusEnum::Habilitado]);
+        app(OpinionSubmissionService::class)->submit($registration, $evaluator, [[
+            'criterion_id' => $criterion,
+            'score' => 5,
+            'justification' => 'Justificativa técnica que deve permanecer inalterada.',
+        ]]);
+        $execution = AiExecution::query()->where('type', \App\Enum\AiExecutionType::StrategicSelection)->firstOrFail();
+        Http::fake(['*/v1/evaluations/selection' => Http::response([
+            'inscricao_id' => $registration->id,
+            'prompt_version' => 'selection_reviewer_v1',
+            'provider' => 'openai',
+            'model' => 'openai-selection-test',
+            'indicacao' => 'INDICADA',
+            'justificativa' => $this->aiJustification(),
+        ])]);
+
+        $existing = $registration->indications()->create([
+            'user_id' => $selector->id,
+            'decision' => 'NAO_INDICADA',
+            'descricao' => 'Justificativa anterior.',
+        ]);
+
+        app()->call([new SelectRegistrationWithAi($execution->id), 'handle']);
+        app()->call([new SelectRegistrationWithAi($execution->id), 'handle']);
+
+        $this->assertDatabaseCount('indications', 1);
+        $this->assertSame($existing->id, $execution->refresh()->indication_id);
+        $this->assertSame(AiExecutionStatus::Completed, $execution->status);
+        $this->assertSame($this->aiJustification(), $existing->refresh()->descricao);
+        Http::assertSentCount(1);
+
+        $this->assertDatabaseHas('scores', ['evaluation_criterion_id' => $criterion, 'valor' => 5]);
+        $this->assertDatabaseHas('indications', [
+            'registration_id' => $registration->id,
+            'user_id' => $selector->id,
+            'decision' => 'INDICADA',
+        ]);
+        $this->assertDatabaseCount('scores', 1);
+    }
+
     public function test_strategic_result_is_discarded_after_registration_context_changes(): void
     {
         [$registration, , , $selector] = $this->domain();
