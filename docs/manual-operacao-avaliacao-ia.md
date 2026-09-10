@@ -44,7 +44,7 @@ Indicada ou não indicada
 
 1. Entre no sistema com seu usuário e senha.
 2. No menu administrativo, abra **Agente IA**.
-3. Será exibida a página **Configurações de IA**, dividida em configuração, diagnóstico, operações pendentes e execuções recentes.
+3. Será exibida a página **Configurações de IA**, dividida em configuração, diagnóstico, operações pendentes, gráficos e execuções recentes.
 
 Se o item **Agente IA** não aparecer, solicite a um administrador a revisão do seu perfil.
 
@@ -54,16 +54,16 @@ Se o item **Agente IA** não aparecer, solicite a um administrador a revisão do
 
 Na seção **Configuração do LLM**:
 
-1. escolha o provider: **Gemini** ou **OpenAI**;
+1. escolha o provider: **OpenAI**, **Gemini**, **Anthropic Claude**, **Mistral AI**, **Groq**, **OpenAI-compatible/custom** ou **Local**;
 2. informe o nome exato do modelo disponibilizado pelo provider;
 3. informe a API Key na primeira configuração;
 4. clique em **Salvar configurações**.
 
-Depois de salva, a chave aparece somente de forma mascarada, por exemplo `Configurada ••••AB12`. Ao editar outras opções, deixe o campo da API Key vazio para manter a chave atual.
+Depois de salva, a chave aparece somente de forma mascarada, por exemplo `Configurada ••••AB12`. Ao editar outras opções, deixe o campo da API Key vazio para manter a chave atual somente no mesmo provider e endpoint. Ao trocar de destino, a chave anterior é descartada; informe a credencial correspondente. Local permite chave vazia.
 
 ### 5.2 Avaliadores
 
-Selecione:
+Cada seletor está junto de seu ativador: Avaliador IA no primeiro bloco, Indicador IA logo abaixo. Selecione:
 
 - **Avaliador técnico:** usuário que registrará os pareceres e notas gerados pela IA;
 - **Indicador estratégico:** usuário que registrará a decisão da etapa estratégica.
@@ -106,7 +106,7 @@ Após salvar provider, modelo e API Key:
 2. clique em **Testar conexão**;
 3. aguarde a mensagem de resultado.
 
-Uma resposta positiva confirma que o Laravel alcança o FastAPI e que a configuração do provider pode ser carregada. Esse teste não cria parecer, nota, indicação nem altera a inscrição.
+Uma resposta positiva confirma que o Laravel alcança o FastAPI e que o provider responde e o modelo salvo pode ser consultado por metadados. Esse teste não faz inferência, não consome tokens de geração e não cria parecer, nota, indicação nem altera a inscrição. Ele não garante capacidade de saída estruturada nem qualidade; acompanhe uma inscrição de teste antes de um lote.
 
 Não ative o processamento se o diagnóstico informar que o FastAPI está indisponível ou que o provider não está pronto.
 
@@ -279,3 +279,47 @@ Não informe a API Key nem o token do serviço.
 ## 15. Nota para a equipe técnica
 
 O uso cotidiano deve ser realizado integralmente pelo painel. O FastAPI e o worker da fila precisam permanecer ativos pela infraestrutura. Os comandos Artisan continuam disponíveis apenas para manutenção e automação. Os documentos aprovados devem ser colocados em `ai-service/app/knowledge/documents`; o painel administra somente a versão de conhecimento.
+
+
+## 16. Modelos e LLM local
+
+Depois de salvar o provider/credencial, use **Atualizar modelos**. As sugestões são consultadas pela API e guardadas por cinco minutos; a primeira página é limitada a 1.000 modelos e o campo manual permanece disponível. Use o ID exato e um modelo que suporte geração de texto estruturado. Em falha de listagem, mantenha/informe o ID manual e teste a conexão.
+
+Para Ollama já instalado pela infraestrutura, escolha Local → Ollama, Base URL `http://127.0.0.1:11434` (sem `/v1`), modelo instalado e chave opcional. Para outro servidor OpenAI-compatible, escolha o tipo genérico e informe a URL completa com `/v1`. O painel não instala modelos nem inicia servidores. Salve e teste antes de ativar.
+
+Somente administradores alteram a configuração. A equipe técnica deve autorizar a URL exata na allowlist do FastAPI. Endpoint local usa IP privado/loopback literal; custom remoto exige HTTPS e IP público. Não use credenciais na URL, query ou fragmento. Redirects e endereços de metadata são bloqueados. Em containers, o localhost pertence ao próprio container; peça à infraestrutura o IP correto.
+
+## 17. Gráficos de andamento
+
+Entre pendentes e execuções recentes, selecione 7, 30 ou 90 dias e clique em **Filtrar**. Os gráficos apresentam:
+
+- status das execuções criadas no período: pending, processing, completed, failed;
+- taxa de sucesso: completed / (completed + failed) da mesma população; sem resultados, não há percentual;
+- quantidade concluída por dia, separando técnica e estratégica pela data de conclusão, inclusive quando criadas antes do período.
+
+Datas seguem `America/Sao_Paulo`, configurado na aplicação. O cache dura até 30 segundos. Números, legenda e tabela diária permitem leitura sem cores ou JavaScript. Sem execuções, a tela informa o estado vazio. Uma execução não equivale necessariamente a uma inscrição; tentativas e etapas diferentes permanecem na auditoria. Falhas não são apagadas.
+
+## 18. Inicialização, reinício e diagnóstico técnico
+
+Arquitetura: Laravel → Bearer interno → FastAPI → provider; Laravel mantém MySQL, fila, validação, idempotência, proteção contra resultado desatualizado e transações de opiniões/notas/indicações. API Keys ficam criptografadas nas Settings. Prompts e endpoint são versionados; token interno fica somente no ambiente.
+
+Na configuração inicial, gere um segredo em terminal privado com `php -r 'echo bin2hex(random_bytes(32)), PHP_EOL;'` e copie o mesmo resultado para `AI_SERVICE_TOKEN` nos dois `.env`. Nunca publique esse valor. O FastAPI exige pelo menos 32 caracteres ASCII sem espaços e lê sempre `ai-service/.env`, independentemente do diretório de execução. Ambiente exportado pelo shell/Supervisor prevalece. Laravel usa configuração, que pode estar cacheada.
+
+**Restart não altera o token.** Rotação é administrativa e coordenada: atualizar os dois ambientes, reconstruir o cache Laravel e reiniciar processos. Não tente corrigir connection refused gerando outro segredo.
+
+Após reboot, inicie MySQL e `composer dev` na raiz. Esse comando inicia Laravel na porta 8001, FastAPI na 8000, Vite e worker `ai-evaluations,default`, encerrando os filhos ao sair. Reiniciar apenas Laravel não inicia os demais serviços. Para terminais separados, instalação de venv e configuração completa, consulte o [README](../README.md).
+
+| Diagnóstico | Ação |
+|---|---|
+| Offline / connection refused | Confira processo, host, porta e venv; inicie `bash scripts/ai-service.sh`. |
+| HTTP 401 interno | Confira igualdade dos tokens e precedência de ambiente/cache. |
+| HTTP 403 interno | Confira proxy/permissões de infraestrutura. |
+| Provider rejeitou chave | Corrija a chave do provider, não o segredo Laravel/FastAPI. |
+| Modelo indisponível | Informe ID exato ou atualize sugestões. |
+| Rate limit / 429 | Aguarde quota/janela e tente novamente. |
+| Timeout | Confira rede, carga e capacidade do modelo local; não exceda a hierarquia de timeouts. |
+| Configuração incompleta | Confira provider, model, credencial e allowlist. |
+
+Em desenvolvimento, após alterar `.env` Laravel use `php artisan config:clear`; com cache de deploy, use `php artisan config:cache`. Reinicie o worker (`php artisan queue:restart`) e FastAPI pelo monitor. Em produção use o Supervisor existente como referência, servidor web/PHP apropriado e secrets de ambiente; `php artisan serve` não serve produção.
+
+Logs ficam em `storage/logs/laravel.log` e nos caminhos Supervisor de `deploy/supervisor/app-premios.conf.example`. Compartilhe apenas ID/correlation_id, código e horário. Não habilite dumps de headers, chaves, prompts ou respostas de provider. O teste reproduzível `python3 scripts/test-ai-restart.py` verifica restart, autenticação, offline/401 e cache em processos isolados, sem alterar dados.

@@ -42,9 +42,9 @@ sequenceDiagram
 
 ## Banco e auditoria
 
-As migrations adicionam `rubric` JSON e `rubric_version` aos critérios, `decision` às indicações e criam `ai_executions`. Esta última registra correlação, tipo, status técnico, avaliador, artefato persistido, provedor/modelo, versões, tentativas, duração e erro. A restrição única por inscrição, avaliador, tipo e versão do prompt fornece idempotência. Não são armazenados tokens nem o conteúdo integral da proposta.
+As migrations adicionam `rubric` JSON e `rubric_version` aos critérios, `decision` às indicações e criam `ai_executions`. Esta última registra correlação, tipo, status técnico, avaliador, artefato persistido, provedor/modelo, versões, tentativas, duração e erro. A restrição única por inscrição, avaliador, tipo, versão do prompt e fingerprint da configuração fornece idempotência. Não são armazenados tokens nem o conteúdo integral da proposta.
 
-Cadastre dois usuários técnicos reais e use seus IDs nas configurações. O usuário técnico de avaliação pode também ser associado às categorias pela tabela `evaluators` para ficar coerente com as telas administrativas. Nenhum usuário é criado automaticamente, evitando inventar identidade ou credencial institucional.
+Cadastre dois usuários técnicos reais e use seus IDs nas configurações. O usuário técnico de avaliação precisa ser associado às categorias pela tabela `evaluators` para ficar coerente com as telas administrativas. Nenhum usuário é criado automaticamente, evitando inventar identidade ou credencial institucional.
 
 ## Configuração
 
@@ -80,7 +80,7 @@ KNOWLEDGE_VERSION=
 KNOWLEDGE_MAX_CHARS=50000
 ```
 
-Os overrides técnico e estratégico são opcionais e usam os valores globais quando vazios. Credenciais de provider pertencem exclusivamente ao serviço Python. Depois de alterar o Laravel, execute `php artisan config:clear`; depois de alterar o serviço Python, reinicie-o.
+Os overrides técnico e estratégico são opcionais e usam os valores globais quando vazios. Credenciais são administradas preferencialmente no painel Laravel, criptografadas em Settings, e enviadas apenas na comunicação interna; variáveis Python são fallback legado. Depois de alterar o Laravel, execute `php artisan config:clear`; depois de alterar o serviço Python, reinicie-o.
 
 Os tempos padrão respeitam `LLM 45s < HTTP Laravel 60s < Job 70s < retry_after 90s`; o lock concorrente expira em 120s. Se qualquer timeout for alterado, preserve essa ordem.
 
@@ -100,7 +100,7 @@ php artisan queue:work --queue=ai-evaluations --tries=3
 
 Mantenha `DB_QUEUE_RETRY_AFTER` acima do timeout do job (por exemplo, `90` para o timeout padrão de `70` segundos) para impedir que um trabalho lento seja reservado duas vezes.
 
-Os endpoints internos são `POST /v1/evaluations/technical` e `POST /v1/evaluations/selection`, autenticados por `Authorization: Bearer`. `/health` não executa inferência. OpenAI e Gemini são selecionados pela factory do serviço; ambos retornam o mesmo contrato institucional. O FastAPI anexa provider e modelo efetivamente usados, e o Laravel os registra em `ai_executions` sem confiar em configuração local.
+Os endpoints internos são `POST /v1/evaluations/technical` e `POST /v1/evaluations/selection`, autenticados por `Authorization: Bearer`. `/health` não executa inferência. OpenAI, Gemini, Anthropic, Mistral, Groq, custom OpenAI-compatible e Local são selecionados pela factory do serviço; todos retornam o mesmo contrato institucional. O FastAPI anexa provider e modelo efetivamente usados, e o Laravel os registra em `ai_executions` sem confiar em configuração local.
 
 ## Prompts e conhecimento institucional
 
@@ -130,7 +130,7 @@ cd ai-service && PYTHONPATH=. pytest
 
 Para um ensaio controlado, use uma inscrição fictícia em ambiente não produtivo, confirme os dois usuários técnicos e critérios, ative a flag, altere a inscrição para `Habilitado`, confira o job, rode o worker e inspecione `ai_executions`, `opinions` e `scores`. Confirme que `evaluation_avg` foi calculado pelo Laravel. Ao atingir `Avaliado`, confira o segundo job e a nova `indication`, sem mudanças nos scores anteriores.
 
-Falhas HTTP, timeout, payload inválido ou nota fora da escala impedem persistência parcial e permitem retry do job. Após a última tentativa, a execução fica `failed`; o status de negócio da inscrição não é alterado pela falha. Consulte os logs pelo `correlation_id`, sem registrar proposta ou segredo. Para desativar imediatamente novas chamadas, defina `AI_EVALUATION_ENABLED=false` e limpe o cache de configuração.
+Falhas HTTP, timeout, payload inválido ou nota fora da escala impedem persistência parcial e permitem retry do job. Após a última tentativa, a execução fica `failed`; o status de negócio da inscrição não é alterado pela falha. Consulte os logs pelo `correlation_id`, sem registrar proposta ou segredo. Para desativar novas chamadas, desmarque a avaliação no painel e salve. A flag de ambiente é fallback somente enquanto não existem Settings.
 
 | Erro | Retry | Comportamento |
 |---|---:|---|
@@ -145,3 +145,12 @@ Falhas HTTP, timeout, payload inválido ou nota fora da escala impedem persistê
 Cada avaliação técnica usa um SHA-256 determinístico dos IDs, descrições, escalas e rubricas, sem incluir pesos. A idempotência no banco combina inscrição, avaliador, tipo, versão do prompt e esse fingerprint. Provider e modelo ficam na auditoria do resultado efetivo, mas não alteram essa identidade: uma troca de inferência não sobrescreve o parecer único já concluído; uma reavaliação deliberada exige nova versão institucional/configuração.
 
 Em produção, endpoints remotos precisam usar HTTPS; HTTP é aceito somente para `localhost`, `127.0.0.1` ou `::1`. Os riscos de retenção permanecem sujeitos a decisão institucional: apagar uma inscrição remove `ai_executions`, e apagar um critério remove seus scores por cascade.
+
+
+## Operação e evolução de configuração
+
+O [README principal](../README.md) é a referência de instalação, precedência de Settings/ambiente, providers, allowlists, timeouts e restart. O [manual operacional](manual-operacao-avaliacao-ia.md) documenta a interface atual e os gráficos. FastAPI resolve `.env` por caminho absoluto; token é persistente e validado no startup, nunca gerado silenciosamente.
+
+`GET /v1/diagnostics` valida autenticação interna. `POST /v1/configuration/test` verifica metadados do modelo sem inferência e `POST /v1/configuration/models` lista sugestões. `/ready` mantém somente o contrato legado de configuração do ambiente; não substitui os diagnósticos das Settings do painel.
+
+Base URL e tipo local são versionados junto do provider/modelo. API Keys não são copiadas para versões nem cacheadas em claro. Uma chave atual não é enviada a destino de outra versão. Erros internos 401/403 são diferenciados de erros de provider; schemas Pydantic e validações Laravel continuam obrigatórios. Os gráficos agregam `ai_executions` sem editar histórico e não tratam execução como inscrição.
