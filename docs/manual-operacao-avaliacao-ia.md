@@ -323,3 +323,10 @@ Após reboot, inicie MySQL e `composer dev` na raiz. Esse comando inicia Laravel
 Em desenvolvimento, após alterar `.env` Laravel use `php artisan config:clear`; com cache de deploy, use `php artisan config:cache`. Reinicie o worker (`php artisan queue:restart`) e FastAPI pelo monitor. Em produção use o Supervisor existente como referência, servidor web/PHP apropriado e secrets de ambiente; `php artisan serve` não serve produção.
 
 Logs ficam em `storage/logs/laravel.log` e nos caminhos Supervisor de `deploy/supervisor/app-premios.conf.example`. Compartilhe apenas ID/correlation_id, código e horário. Não habilite dumps de headers, chaves, prompts ou respostas de provider. O teste reproduzível `python3 scripts/test-ai-restart.py` verifica restart, autenticação, offline/401 e cache em processos isolados, sem alterar dados.
+
+
+## 19. FastAPI no ambiente Apache local
+
+Se Laravel é servido por Apache/PHP-FPM, iniciar ou reiniciar Apache não inicia FastAPI. A unidade `sisamazonia-ai.service` mantém o serviço separado e reinicia falhas. Use `systemctl --user status sisamazonia-ai.service` e `systemctl --user restart sisamazonia-ai.service` no usuário que instalou a unidade.
+
+Na verificação deste ambiente, o erro de indisponibilidade foi causado pela ausência de processo na porta 8000; os tokens já eram iguais. A unidade foi instalada e iniciada, e o Laravel confirmou autenticação antes e depois do restart. Para garantir início após reboot sem login, falta o administrador executar `sudo loginctl enable-linger dmuller` e confirmar `Linger=yes`. Veja os comandos de instalação e operação no [README](../README.md#ambiente-local-com-apachephp-fpm).

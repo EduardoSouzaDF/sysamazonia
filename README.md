@@ -84,6 +84,37 @@ curl --fail http://127.0.0.1:8000/health
 
 `/health` confirma somente o processo. `/v1/diagnostics` verifica o Bearer interno sem consultar providers. `/ready` preserva a verificação das configurações legadas do ambiente. O painel usa as Settings salvas, não `/ready`.
 
+## Ambiente local com Apache/PHP-FPM
+
+Apache/PHP-FPM não inicia FastAPI. Para manter o serviço ativo independentemente de um terminal, este ambiente usa a unidade de usuário em `deploy/systemd/sisamazonia-ai.service`. Ela usa o virtualenv existente e reinicia o processo se ele falhar; não contém credenciais.
+
+Os caminhos da unidade correspondem a `/var/www/projetos/app_amazonia.local`. Ajuste-os antes de instalar em outro checkout:
+
+```bash
+mkdir -p ~/.config/systemd/user
+cp deploy/systemd/sisamazonia-ai.service ~/.config/systemd/user/
+systemctl --user daemon-reload
+systemctl --user enable --now sisamazonia-ai.service
+systemctl --user status sisamazonia-ai.service
+```
+
+Para iniciar após reboot mesmo sem login e continuar após logout, um administrador deve habilitar linger para o usuário que instalou a unidade. Neste ambiente:
+
+```bash
+sudo loginctl enable-linger dmuller
+loginctl show-user dmuller -p Linger
+```
+
+O resultado deve ser `Linger=yes`. Sem isso, a unidade habilitada inicia com a sessão do usuário, mas não garante disponibilidade antes do login ou após logout.
+
+```bash
+systemctl --user restart sisamazonia-ai.service
+journalctl --user -u sisamazonia-ai.service -n 50 --no-pager
+curl --fail http://127.0.0.1:8000/health
+```
+
+Neste modo, Apache serve Laravel; o worker e os assets são administrados separadamente. Não inicie outra cópia do FastAPI na porta 8000. Para trocar para `composer dev`, pare antes a unidade com `systemctl --user stop sisamazonia-ai.service`; ao voltar ao Apache, use `systemctl --user start sisamazonia-ai.service`.
+
 ## Providers e modelos
 
 Acesse **Agente IA** como administrador. Salve provider, modelo e credencial antes de usar **Testar conexão** ou **Atualizar modelos**.

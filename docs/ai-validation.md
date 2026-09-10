@@ -74,3 +74,12 @@ A finalização foi retomada após a liberação da revisão automática. Branch
 A migration local foi concluída com `php artisan migrate --path=database/migrations/2026_09_10_120000_add_provider_endpoints_to_ai_settings.php --force`. Na conferência final, `php artisan test --compact` repetiu 36 testes e 142 assertions aprovados; `git diff --check` e a busca por secrets conhecidos nos arquivos alterados não identificaram problemas. Os hashes e o resultado do push são informados na entrega.
 
 Uma cópia de revisão fora do repositório, montada a partir de HEAD mais apenas as mudanças desta tarefa, executou a suíte Laravel sem incluir as duas alterações prévias: 35 testes sem falhas, 134 assertions, exit 0. Na cópia sem .env, o runner marcou 34 testes com warnings; a primeira execução também mostrou depreciações por APP_URL ausente no config/filesystems.php preexistente. A suíte do workspace original teve 36 testes aprovados sem esses avisos. Isso verifica o conjunto destinado aos futuros commits separadamente do workspace original.
+
+
+## Correção operacional no ambiente Apache
+
+Após relato de indisponibilidade persistente, a inspeção fora do sandbox confirmou ausência de listener na porta 8000 e nenhum processo Uvicorn. Laravel apontava para `http://127.0.0.1:8000`; tokens dos dois arquivos coincidiam. Apache/PHP-FPM estavam ativos, mas o script `composer dev` não estava sendo usado. Os ensaios anteriores usavam processos temporários e não haviam instalado um serviço permanente.
+
+Foi instalada a unidade de usuário `sisamazonia-ai.service`, versionada em `deploy/systemd/`, com restart automático em falha. `/health` retornou 200 e `AiServiceDiagnostics` executado pelo Laravel real retornou `ok=true`, `online=true`, `code=OK`. Nenhum segredo foi alterado. A unidade ficou habilitada para a sessão do usuário.
+
+A tentativa de habilitar linger foi negada pelo sistema (`Access denied`), e sudo exige senha administrativa. Portanto, a disponibilidade atual está corrigida, mas a garantia de início antes do login após reboot requer `sudo loginctl enable-linger dmuller`. Sem essa etapa, não se deve afirmar que o serviço ficará ativo sem sessão do usuário. Os processos de teste anteriores não foram confundidos com o serviço permanente.
