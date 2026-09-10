@@ -6,6 +6,7 @@
     $titulo = isset($object) ? 'Gerenciamento de Usuário' : 'Criação de Usuário';
     $deleteRoute = isset($object) ? route('admin.users.destroy', $object->id) : '';
 
+
     $tabs = [
         [
             'buttonId' => 'inf_btn',
@@ -29,6 +30,7 @@
             'includeData' => [
                 'errors' => $errors->getMessages(),
                 'categories' => $categories,
+                'categoriesEvaluators' => $categoriesEvaluators,
                 'object' => $object,
             ],
         ],

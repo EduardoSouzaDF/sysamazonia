@@ -2,14 +2,18 @@
 
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\CategoryController;
+use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\EditionController;
 use App\Http\Controllers\EvaluationCriterionController;
+use App\Http\Controllers\JudgingController;
 use App\Http\Controllers\ModalityController;
 use App\Http\Controllers\RegistrationController;
 use App\Http\Controllers\UserController;
 use App\Http\Middleware\CheckAdmin;
-use Illuminate\Support\Facades\Route;
+use App\Http\Middleware\CheckJudge;
 use Illuminate\Support\Facades\File;
+use Illuminate\Support\Facades\Route;
+
 // Rotas públicas
 // Route::get('/', function () {
 //     return view('welcome');
@@ -25,11 +29,11 @@ Route::get('/forms/edition', [EditionController::class, 'formEdition'])
 Route::get('/json/estados-cidades', function () {
     $path = public_path('json/estados_cidades.json');
     $content = File::get($path);
+
     return response($content, 200)
         ->header('Content-Type', 'application/json')
         ->header('Access-Control-Allow-Origin', '*');
 });
-
 
 // Rotas de autenticação
 Route::middleware('guest')->group(function () {
@@ -41,15 +45,15 @@ Route::middleware('guest')->group(function () {
 
     // password.reset
     Route::get('/reset-password/{token}', [AuthController::class, 'showReset'])->name('password.reset');
-    Route::post('/reset-password/{token}', [AuthController::class, 'reset'])->name('password.reset');
+    Route::post('/reset-password/{token}', [AuthController::class, 'reset'])->name('password.resetpost');
 
 });
 
 // Rotas autenticadas
 Route::middleware('auth')->group(function () {
-    Route::get('/', [AuthController::class, 'dashboard'])->name('dashboard');
-    Route::get('/dashboard', [AuthController::class, 'dashboard'])->name('dashboard');
-    Route::get('/logout', [AuthController::class, 'logout'])->name('logout');
+    Route::redirect('/', '/dashboard');
+    Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
+    Route::get('/logout', [AuthController::class, 'logout'])->name('sair');
 
     Route::prefix('admin')->group(function () {
         $middleware = ['auth', CheckAdmin::class.':admin'];
@@ -103,20 +107,31 @@ Route::middleware('auth')->group(function () {
             'destroy' => 'admin.criteria.destroy',
         ]);
 
-
-        Route::resource('registration', RegistrationController::class)->middleware($middleware)->names([
+        $middlewareListaInscricoes = ['auth', CheckAdmin::class.':admin,comissao'];
+        Route::resource('registration', RegistrationController::class)->middleware($middlewareListaInscricoes)->names([
             'index' => 'admin.registration.index',
         ]);
+        Route::get('/admin/registration/show/{id}/{type}', [RegistrationController::class, 'show'])->middleware($middlewareListaInscricoes)->name('admin.registration.show');
 
         Route::post('/admin/registration/rejeitar/{id}/{type}', [RegistrationController::class, 'rejeitar'])->middleware($middleware)->name('admin.registration.rejeitar');
         Route::post('/admin/registration/habilitar/{id}/{type}', [RegistrationController::class, 'habilitar'])->middleware($middleware)->name('admin.registration.habilitar');
-        Route::get('/admin/registration/show/{id}/{type}', [RegistrationController::class, 'show'])->middleware($middleware)->name('admin.registration.show');
-        Route::get('/admin/registration/file/{file}', [RegistrationController::class, 'file'])->middleware($middleware)->name('admin.registration.file');
+        Route::post('/admin/registration/indicar/{id}', [RegistrationController::class, 'indicar'])->middleware($middlewareListaInscricoes)->name('admin.registration.indicar');
+        Route::post('/admin/registration/send-opinion/{registration}', [RegistrationController::class, 'sendOpinion'])->middleware($middlewareListaInscricoes)->name('admin.registration.send.opinion');
+
+        Route::get('/admin/registration/file/{file}', [RegistrationController::class, 'file'])->middleware($middlewareListaInscricoes)->name('admin.registration.file');
         Route::get('/admin/users/{user}/login-as', [UserController::class, 'loginAs'])->middleware($middleware)->name('admin.users.login-as');
         Route::get('/admin/users/return-to-admin', [UserController::class, 'returnToAdmin'])->name('admin.users.return-to-admin');
 
     });
 
+    // Painel do julgador (fora do back-office admin; acesso por is_judge — spec 0002;
+    // wizard categoria a categoria + gravação das seleções — spec 0003)
+    Route::middleware([CheckJudge::class])->group(function (): void {
+        Route::get('/julgar', [JudgingController::class, 'index'])
+            ->name('panel.julgar.index');
 
+        Route::post('/julgar', [JudgingController::class, 'store'])
+            ->name('panel.julgar.store');
+    });
 
 });

@@ -1,33 +1,50 @@
 
 @extends('admin.content')
 
-@vite([
+<!-- @vite([
     'resources/comp_themes/apexcharts/apexcharts.min.js',
     'resources/comp_themes/apexcharts/apexcharts.css',
-     ])
+     ]) -->
 @section('maincontent')
+     <div class="flex flex-row w-full gap-2 px-4 justify-center " style="max-height: 200px;">
 
-     <!-- Container -->
-     <div class="kt-container-fixed" id="contentContainer">
+               <div class="  p-6 m-20 bg-white min-h-max">
+                    {!! $chartEditions->container() !!}
+               </div>
+               <div class="  p-6 m-20 bg-white min-h-max">
+                    {!! $chartModalities->container() !!}
+               </div>
+ 
+
      </div>
-     <!-- End of Container -->
-     <!-- Container -->
-     <div class="kt-container-fixed">
-      <div class="flex flex-wrap items-center lg:items-end justify-between gap-5 pb-7.5">
-       <div class="flex flex-col justify-center gap-2">
-        <h1 class="text-xl font-medium leading-none text-mono">
-         Dashboard
-        </h1>
-        <div class="flex items-center gap-2 text-sm font-normal text-secondary-foreground">
-         Central Hub for Personal Customization
-        </div>
-       </div>
-        
-      </div>
+
+     <div class="flex flex-row w-full gap-2 px-4 mt-4 justify-center" style="max-height: 200px;">
+
+               <div class="  p-6 m-20 bg-white min-h-max">
+                    {!! $chartStateUser->container() !!}
+               </div>
+ 
+               <div class="  p-6 m-20 bg-white min-h-max">
+                    {!! $chartRegistrationBySex->container() !!}
+               </div>
+
      </div>
-    
-     </div>
+
+      
 
      
 @endsection
 
+@push('scripts')
+<script src="{{ $chartEditions->cdn() }}"></script>
+<script src="{{ $chartModalities->cdn() }}"></script>
+<script src="{{ $chartStateUser->cdn() }}"></script>
+<script src="{{ $chartRegistrationBySex->cdn() }}"></script>
+{{ $chartEditions->script() }}
+{{ $chartModalities->script() }}
+{{ $chartStateUser->script() }}
+{{ $chartRegistrationBySex->script() }}
+
+
+
+@endpush

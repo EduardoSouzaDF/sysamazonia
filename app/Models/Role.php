@@ -8,25 +8,29 @@ use Illuminate\Database\Eloquent\Model;
 class Role extends Model
 {
     use HasFactory;
-     const ADMIN = 'admin';
-     const JURADO = 'jurado';
-     const LEITOR = 'leitor';
 
+    const ADMIN = 'admin';
+
+    const JURADO = 'jurado';
+
+    const LEITOR = 'leitor';
+
+    const COMISSAO = 'comissao';
 
     protected $fillable = [
         'name',
-        'active'
+        'active',
     ];
 
     protected $casts = [
-        'active' => 'boolean'
+        'active' => 'boolean',
     ];
 
     // Relacionamentos
     public function users()
     {
         return $this->belongsToMany(User::class, 'user_role')
-                    ->withTimestamps();
+            ->withTimestamps();
     }
 
     // Scopes

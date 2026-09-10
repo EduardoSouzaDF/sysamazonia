@@ -34,13 +34,7 @@
                   </div>
               </li>
 
-              <li>
-                  <a class="kt-dropdown-menu-link" href="html/demo1/account/home/user-profile.html">
-                      <i class="ki-filled ki-profile-circle">
-                      </i>
-                      My Profile
-                  </a>
-              </li>
+               
 
               @if (session()->has('admin_user_id'))
                   <a class="kt-dropdown-menu-link" href="{{ route('admin.users.return-to-admin') }}">
@@ -54,7 +48,7 @@
           <div class="px-2.5 pt-1.5 mb-2.5 flex flex-col gap-3.5">
 
               <a class="kt-btn kt-btn-outline justify-center w-full"
-                 href="{{ route('logout') }}">
+                 href="{{ route('sair') }}">
                  Sair
               </a>
           </div>

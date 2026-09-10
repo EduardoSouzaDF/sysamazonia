@@ -10,7 +10,7 @@ class MenuBuilder
     public static function getMenuStructure(): array
     {
         $user = Auth::user();
-        if(!$user){
+        if (! $user) {
             return [];
         }
 
@@ -25,19 +25,35 @@ class MenuBuilder
             $menus = array_merge($menus, self::getLeitorMenu());
         }
 
+        if ($user->hasRole(Role::COMISSAO)) {
+            if ($user->isEvaluator()) {
+                $menus = array_merge($menus, self::getAvaliadorMenu());
+            }
+
+            if($user->isIndicator()) {
+                $menus = array_merge($menus, self::getIndicadorMenu());
+            }
+
+        }
+
+
+        if ($user->isJudge()) {
+            $menus = array_merge($menus, self::getJulgadorMenu());
+        }
+
         return $menus;
     }
 
-    public static function getJuradoMenu(): array
+    public static function getJulgadorMenu(): array
     {
         return [
             [
                 'heading' => 'Julgamento',
             ],
             [
-                'title' => 'Incrições',
+                'title' => 'Julgar',
                 'icon' => 'ki-profile-circle',
-                'route' => 'dashboard',
+                'route' => 'panel.julgar.index',
             ],
         ];
     }
@@ -112,6 +128,42 @@ class MenuBuilder
         ];
     }
 
+
+    public static function getIndicadorMenu(): array
+    {
+    return [
+                [
+                    'heading' => 'Indicadores',
+                ],
+
+                [
+                    'title' => 'Indicar Inscrições',
+                    // 'icon' => 'ki-abstract-26',
+                    'icon' => 'ki-scroll',
+                    'route' => 'admin.registration.index',
+                ],
+
+            ];
+    }
+    public static function getAvaliadorMenu(): array
+    {
+
+
+        return [
+            [
+                'heading' => 'Avalliadores',
+            ],
+
+            [
+                'title' => 'Avaliar Inscrições',
+                // 'icon' => 'ki-abstract-26',
+                'icon' => 'ki-scroll',
+                'route' => 'admin.registration.index',
+            ],
+
+        ];
+    }
+
     public static function getLeitorMenu(): array
     {
         return [
@@ -123,7 +175,6 @@ class MenuBuilder
                 'icon' => 'ki-abstract-45',
                 'route' => 'dashboard',
             ],
-
 
         ];
     }
