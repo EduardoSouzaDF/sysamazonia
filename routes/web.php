@@ -130,3 +130,9 @@ Route::middleware('auth')->group(function () {
     });
 
 });
+
+Route::middleware(['auth', CheckAdmin::class.':admin'])->prefix('admin/analytics')->name('admin.analytics.')->group(function () {
+    Route::get('/', [\App\Http\Controllers\AnalyticsController::class, 'index'])->name('index');
+    Route::post('/query', [\App\Http\Controllers\AnalyticsController::class, 'query'])->middleware('throttle:20,1')->name('query');
+    Route::delete('/context', [\App\Http\Controllers\AnalyticsController::class, 'clear'])->name('clear');
+});

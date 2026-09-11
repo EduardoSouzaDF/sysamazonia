@@ -59,6 +59,7 @@ class MenuBuilder
             [
                 'heading' => 'Relatórios',
             ],
+            ['title' => 'Assistente de Dados', 'icon' => 'ki-abstract-45', 'route' => 'admin.analytics.index'],
             [
                 'title' => 'Dashboard',
                 'icon' => 'ki-abstract-45',
