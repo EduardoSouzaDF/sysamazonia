@@ -42,3 +42,9 @@ Referências oficiais usadas nos adapters:
 - [Ollama OpenAI compatibility](https://docs.ollama.com/api/openai-compatibility).
 
 A compatibilidade do protocolo não garante que todo modelo cumpra o schema institucional; respostas inválidas nunca viram avaliações válidas.
+
+## Interpretador analítico
+
+`POST /v1/analytics/plan`, autenticado com o mesmo Bearer interno, recebe `AnalyticsRequest` (pergunta, contexto estruturado, catálogo e configuração runtime) e retorna `AnalyticsPlan`. Schema explícito em `app/schemas/analytics.py`, prompt independente `analytics_v1`. Usa o provider existente sem ferramentas de banco; nunca executa SQL nem calcula valores oficiais.
+
+A validação Laravel permanece obrigatória. Pedidos ambíguos retornam clarification; pedidos de SQL/PII retornam refusal. Veja [manual do dashboard](../docs/dashboard-analitico.md) para permissões, limites, privacidade e operação.

@@ -210,3 +210,9 @@ Logs Laravel: `storage/logs/laravel.log`; Supervisor: caminhos do arquivo de dep
 `php artisan serve` é apenas para desenvolvimento. Use o servidor PHP/web da infraestrutura, `APP_DEBUG=false`, TLS e secrets de ambiente/secret manager. Adapte caminhos/usuário de `deploy/supervisor/app-premios.conf.example`; ele monitora FastAPI e worker, encerra grupos de processos e reinicia após falhas/reboot. Não execute Uvicorn a partir de requests HTTP.
 
 Após instalar dependências/build, aplique migrations, reconstrua cache e reinicie processos pelo Supervisor. Mantenha `DB_QUEUE_RETRY_AFTER` acima do timeout do job. Proteja `APP_KEY`, backups e banco: ela é necessária para descriptografar as API Keys existentes. Não reescreva histórico nem publique `.env`.
+
+## Dashboard Analítico / Assistente de Dados
+
+Administradores acessam **Relatórios → Assistente de Dados** para perguntas sobre inscrições, avaliações, indicações, qualidade dos dados e execuções IA. O FastAPI interpreta um `AnalyticsPlan`; Laravel valida e calcula agregações no banco real. Não há text-to-SQL ou acesso do provider ao MySQL.
+
+Consulte [arquitetura, métricas, permissões, exemplos, limites e troubleshooting](docs/dashboard-analitico.md). Após atualização, compile os assets e reinicie o FastAPI conforme a rotina de implantação existente. Nenhuma migration nova é necessária.
