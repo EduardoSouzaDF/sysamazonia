@@ -1,16 +1,15 @@
 <?php
 
+use App\Http\Controllers\AiSettingsController;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\CategoryController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\EditionController;
 use App\Http\Controllers\EvaluationCriterionController;
-use App\Http\Controllers\JudgingController;
 use App\Http\Controllers\ModalityController;
 use App\Http\Controllers\RegistrationController;
 use App\Http\Controllers\UserController;
 use App\Http\Middleware\CheckAdmin;
-use App\Http\Middleware\CheckJudge;
 use Illuminate\Support\Facades\File;
 use Illuminate\Support\Facades\Route;
 
@@ -107,7 +106,7 @@ Route::middleware('auth')->group(function () {
             'destroy' => 'admin.criteria.destroy',
         ]);
 
-        $middlewareListaInscricoes = ['auth', CheckAdmin::class.':admin,comissao'];
+        $middlewareListaInscricoes = ['auth', CheckAdmin::class.':admin,comission'];
         Route::resource('registration', RegistrationController::class)->middleware($middlewareListaInscricoes)->names([
             'index' => 'admin.registration.index',
         ]);
@@ -122,16 +121,12 @@ Route::middleware('auth')->group(function () {
         Route::get('/admin/users/{user}/login-as', [UserController::class, 'loginAs'])->middleware($middleware)->name('admin.users.login-as');
         Route::get('/admin/users/return-to-admin', [UserController::class, 'returnToAdmin'])->name('admin.users.return-to-admin');
 
-    });
+        Route::get('/ai-settings', [AiSettingsController::class, 'index'])->middleware($middleware)->name('admin.ai-settings.index');
+        Route::put('/ai-settings', [AiSettingsController::class, 'update'])->middleware($middleware)->name('admin.ai-settings.update');
+        Route::post('/ai-settings/models', [AiSettingsController::class, 'refreshModels'])->middleware([...$middleware, 'throttle:5,1'])->name('admin.ai-settings.models');
+        Route::post('/ai-settings/test', [AiSettingsController::class, 'testConnection'])->middleware([...$middleware, 'throttle:5,1'])->name('admin.ai-settings.test');
+        Route::post('/ai-settings/process/{type}', [AiSettingsController::class, 'process'])->whereIn('type', ['technical', 'selection'])->middleware($middleware)->name('admin.ai-settings.process');
 
-    // Painel do julgador (fora do back-office admin; acesso por is_judge — spec 0002;
-    // wizard categoria a categoria + gravação das seleções — spec 0003)
-    Route::middleware([CheckJudge::class])->group(function (): void {
-        Route::get('/julgar', [JudgingController::class, 'index'])
-            ->name('panel.julgar.index');
-
-        Route::post('/julgar', [JudgingController::class, 'store'])
-            ->name('panel.julgar.store');
     });
 
 });

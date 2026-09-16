@@ -30,7 +30,7 @@ class MenuBuilder
                 $menus = array_merge($menus, self::getAvaliadorMenu());
             }
 
-            if($user->isIndicator()) {
+            if ($user->isIndicator()) {
                 $menus = array_merge($menus, self::getIndicadorMenu());
             }
 
@@ -105,7 +105,7 @@ class MenuBuilder
             [
                 'title' => 'Agente IA',
                 'icon' => 'ki-abstract-45',
-                'route' => 'dashboard',
+                'route' => 'admin.ai-settings.index',
             ],
             [
                 'heading' => 'Cache Sistema',
@@ -128,26 +128,25 @@ class MenuBuilder
         ];
     }
 
-
     public static function getIndicadorMenu(): array
     {
-    return [
-                [
-                    'heading' => 'Indicadores',
-                ],
+        return [
+            [
+                'heading' => 'Indicadores',
+            ],
 
-                [
-                    'title' => 'Indicar Inscrições',
-                    // 'icon' => 'ki-abstract-26',
-                    'icon' => 'ki-scroll',
-                    'route' => 'admin.registration.index',
-                ],
+            [
+                'title' => 'Indicar Inscrições',
+                // 'icon' => 'ki-abstract-26',
+                'icon' => 'ki-scroll',
+                'route' => 'admin.registration.index',
+            ],
 
-            ];
+        ];
     }
+
     public static function getAvaliadorMenu(): array
     {
-
 
         return [
             [

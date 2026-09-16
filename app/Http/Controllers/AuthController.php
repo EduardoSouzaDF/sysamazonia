@@ -2,11 +2,7 @@
 
 namespace App\Http\Controllers;
 
-use App\Http\Controllers\Controller;
-use App\Models\Candidate;
 use App\Models\User;
-use App\Models\Registration;
-use App\Models\Edition;
 use Illuminate\Auth\Events\PasswordReset;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -39,7 +35,6 @@ class AuthController extends Controller
             $request->session()->regenerate();
             return redirect()->intended('dashboard')->with('success', 'Login realizado com sucesso!');
         }
-        // ed89b3b6c8676aea612ee68dd1d3316c
 
         return back()->withErrors([
             'login' => 'As credenciais fornecidas não correspondem aos nossos registros.',

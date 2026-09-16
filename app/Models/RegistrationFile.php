@@ -32,7 +32,6 @@ class RegistrationFile extends Model
         return $this->belongsTo(Registration::class);
     }
 
-
     /**
      * Obter a inscrição relacionada a este arquivo
      */

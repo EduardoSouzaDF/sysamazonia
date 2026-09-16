@@ -56,8 +56,8 @@ class EvaluationCriterionController extends Controller
             'name' => 'required|string|max:255',
             'description' => 'required|string',
             'weight' => 'required|numeric|min:0.01',
-            'min_score' => 'required|numeric|min:1',
-            'max_score' => 'required|numeric|gt:min_score|min:2',
+            'min_score' => 'required|integer|min:1|max:254',
+            'max_score' => 'required|integer|gt:min_score|max:255',
         ];
 
         $request->validate($rules, $messages);

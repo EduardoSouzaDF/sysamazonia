@@ -18,12 +18,15 @@ class EvaluationCriterion extends Model
         'weight',
         'min_score',
         'max_score',
+        'rubric',
+        'rubric_version',
     ];
 
     protected $casts = [
         'weight' => 'decimal:2',
         'min_score' => 'decimal:2',
         'max_score' => 'decimal:2',
+        'rubric' => 'array',
     ];
 
     public function category()

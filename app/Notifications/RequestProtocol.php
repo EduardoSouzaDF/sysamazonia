@@ -14,8 +14,11 @@ class RequestProtocol extends Notification implements ShouldQueue
     use Queueable;
 
     private $token;
+
     private $protocol;
+
     private $name;
+
     private $expire;
 
     /**
@@ -23,7 +26,7 @@ class RequestProtocol extends Notification implements ShouldQueue
      *
      * @return void
      */
-    public function __construct($token, $name,$protocol,$expire)
+    public function __construct($token, $name, $protocol, $expire)
     {
         $this->token = $token;
         $this->name = $name;

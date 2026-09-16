@@ -3,11 +3,11 @@
 namespace App\Http\Requests;
 
 use Carbon\Carbon;
+use App\Rules\WordCountRule;
 use Illuminate\Contracts\Validation\Validator;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Http\Exceptions\HttpResponseException;
 use Illuminate\Support\Facades\Crypt;
-use App\Rules\WordCountRule;
 
 class CandidateRequest extends FormRequest
 {

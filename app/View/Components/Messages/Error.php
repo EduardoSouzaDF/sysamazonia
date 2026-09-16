@@ -4,7 +4,6 @@ namespace App\View\Components\Messages;
 
 use Closure;
 use Illuminate\Contracts\View\View;
-use Illuminate\Support\Str;
 use Illuminate\View\Component;
 
 class Error extends Component

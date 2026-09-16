@@ -6,6 +6,7 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use App\Enum\SelectionDecision;
 
 class Indication extends Model
 {
@@ -27,7 +28,13 @@ class Indication extends Model
         'user_id',
         'descricao',
         'registration_id',
+        'decision',
     ];
+
+    protected function casts(): array
+    {
+        return ['decision' => SelectionDecision::class];
+    }
 
     /**
      * Get the judge (user) that authored the opinion.

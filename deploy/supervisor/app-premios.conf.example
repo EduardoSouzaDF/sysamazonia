@@ -1,0 +1,21 @@
+[program:app-premios-queue]
+command=php /var/www/app-premios/artisan queue:work database --queue=ai-evaluations --sleep=3 --tries=3 --timeout=70 --max-time=3600
+directory=/var/www/app-premios
+autostart=true
+autorestart=true
+stopasgroup=true
+killasgroup=true
+user=www-data
+redirect_stderr=true
+stdout_logfile=/var/log/supervisor/app-premios-queue.log
+
+[program:app-premios-ai]
+command=/var/www/app-premios/ai-service/.venv/bin/uvicorn app.main:app --host 127.0.0.1 --port 8000
+directory=/var/www/app-premios/ai-service
+autostart=true
+autorestart=true
+stopasgroup=true
+killasgroup=true
+user=www-data
+redirect_stderr=true
+stdout_logfile=/var/log/supervisor/app-premios-ai.log

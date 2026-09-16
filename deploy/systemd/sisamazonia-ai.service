@@ -1,0 +1,18 @@
+[Unit]
+Description=Sisamazonia FastAPI (desenvolvimento local)
+After=network.target
+
+[Service]
+Type=simple
+WorkingDirectory=/var/www/projetos/app_amazonia.local/ai-service
+ExecStart=/usr/bin/bash /var/www/projetos/app_amazonia.local/scripts/ai-service.sh
+Environment=PYTHONUNBUFFERED=1
+Environment=AI_SERVICE_PORT=8000
+Restart=on-failure
+RestartSec=3
+KillMode=control-group
+TimeoutStopSec=20
+NoNewPrivileges=true
+
+[Install]
+WantedBy=default.target

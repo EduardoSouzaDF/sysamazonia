@@ -101,8 +101,7 @@ class Candidate extends Model
     {
         return $query->where('nome', 'like', "%{$name}%");
     }
-
-      /**
+    /**
      * Get the registrations for the candidate.
      */
     public function registrations(): HasMany

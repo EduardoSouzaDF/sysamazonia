@@ -9,7 +9,7 @@ class UpdateTabelaIndicationsAddDescricao extends Migration
     public function up()
     {
         Schema::table('indications', function (Blueprint $table) {
-             $table->text('descricao')->nullable();
+            $table->text('descricao')->nullable();
 
         });
     }

@@ -10,15 +10,14 @@ use Illuminate\Support\Facades\Storage;
 
 class EditionController extends Controller
 {
+    public function formEdition(Request $request)
+    {
 
-
-    public function formEdition(Request $request){
-
-         return response()
-        ->view('forms.edition.register')
-        ->withHeaders([
-            'Access-Control-Allow-Origin' => '*',
-        ]);
+        return response()
+            ->view('forms.edition.register')
+            ->withHeaders([
+                'Access-Control-Allow-Origin' => '*',
+            ]);
 
     }
 

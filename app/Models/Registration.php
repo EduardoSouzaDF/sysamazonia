@@ -6,10 +6,26 @@ use App\Enum\RegistrationStatusEnum;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class Registration extends Model
 {
     use HasFactory;
+
+    protected static function booted(): void
+    {
+        static::updated(function (Registration $registration): void {
+            if ($registration->wasChanged('status')) {
+                $previousStatus = $registration->getRawOriginal('status');
+                $currentStatus = $registration->status;
+                event(new \App\Events\RegistrationStatusChanged(
+                    $registration->id,
+                    $previousStatus instanceof RegistrationStatusEnum ? $previousStatus->value : (int) $previousStatus,
+                    $currentStatus instanceof RegistrationStatusEnum ? $currentStatus->value : (int) $currentStatus,
+                ));
+            }
+        });
+    }
 
     /**
      * The table associated with the model.
@@ -144,6 +160,11 @@ class Registration extends Model
     public function indications(): \Illuminate\Database\Eloquent\Relations\HasMany
     {
         return $this->hasMany(Indication::class);
+    }
+
+    public function aiExecutions(): HasMany
+    {
+        return $this->hasMany(AiExecution::class);
     }
 
     /**
@@ -342,5 +363,6 @@ class Registration extends Model
     public function judgeSelections(): \Illuminate\Database\Eloquent\Relations\MorphMany
     {
         return $this->morphMany(JudgeSelection::class, 'inscription');
+        app(\App\Services\EvaluationCompletionService::class)->recalculate($this);
     }
 }

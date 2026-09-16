@@ -11,28 +11,26 @@ class DashboardController extends Controller
     public function index()
     {
 
-    $dataEditions = $this->getDataRegistrationsByEditions();
-    $dataModalities = $this->getDataRegistrationsByModalities();
-    $dataStateUser = $this->getDataRegistrationsByEstateUser();
-    $dataStateUserBySex = $this->getDataStateUserBySex();
+        $dataEditions = $this->getDataRegistrationsByEditions();
+        $dataModalities = $this->getDataRegistrationsByModalities();
+        $dataStateUser = $this->getDataRegistrationsByEstateUser();
+        $dataStateUserBySex = $this->getDataStateUserBySex();
 
-    
-    $chart = new PieChart;
-
+        $chart = new PieChart;
 
         return view('dashboard', [
             'user' => Auth::user(),
-            'chartEditions' => $chart->build('Registros por Edição','',$dataEditions),
-            'chartModalities' => $chart->build('Registros por Modalidade','',$dataModalities,'polarArea'),
-            'chartStateUser' => $chart->build('Registros por Estado','',$dataStateUser, 'donut'),
-            'chartRegistrationBySex' => $chart->build('Registros por Sexo','',$dataStateUserBySex),
+            'chartEditions' => $chart->build('Registros por Edição', '', $dataEditions),
+            'chartModalities' => $chart->build('Registros por Modalidade', '', $dataModalities, 'polarArea'),
+            'chartStateUser' => $chart->build('Registros por Estado', '', $dataStateUser, 'donut'),
+            'chartRegistrationBySex' => $chart->build('Registros por Sexo', '', $dataStateUserBySex),
         ]);
     }
 
+    public function getDataRegistrationsByEditions()
+    {
 
-    public function getDataRegistrationsByEditions(){
- 
-       $data = DB::select('SELECT
+        $data = DB::select('SELECT
                                 e.title AS title,
                                 COALESCE(r.registrations_count, 0) + COALESCE(n.nominees_count, 0) AS total
                                 FROM editions e
@@ -55,12 +53,13 @@ class DashboardController extends Controller
                                 GROUP BY m.edition_id
                                 ) n ON n.edition_id = e.id
                                 ORDER BY e.title;');
+
         return $data;
     }
 
+    private function getDataRegistrationsByModalities()
+    {
 
-    private function getDataRegistrationsByModalities(){
- 
         $data = DB::select('    SELECT
                                 m.title AS title,
                                 COALESCE(r.registrations_count, 0) + COALESCE(n.nominees_count, 0) AS total
@@ -89,7 +88,7 @@ class DashboardController extends Controller
     private function getDataRegistrationsByEstateUser()
     {
 
-     $data = DB::select('SELECT 
+        $data = DB::select('SELECT 
                         candidates.rg_uf as title,
                         count(candidates.rg_uf) as total
                         from candidates
@@ -101,7 +100,7 @@ class DashboardController extends Controller
     private function getDataStateUserBySex()
     {
 
-      $data = DB::select('SELECT 
+        $data = DB::select('SELECT 
                         candidates.sexo as title,
                         count(candidates.sexo) as total
                         from candidates

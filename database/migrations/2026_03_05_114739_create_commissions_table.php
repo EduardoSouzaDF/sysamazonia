@@ -21,9 +21,9 @@ return new class extends Migration
 
             // 📌 Chave estrangeira para categories
             $table->foreign('category_id')
-                  ->references('id')
-                  ->on('categories')
-                  ->onDelete('set null'); // ou 'cascade', 'restrict', etc.
+                ->references('id')
+                ->on('categories')
+                ->onDelete('set null'); // ou 'cascade', 'restrict', etc.
         });
     }
 

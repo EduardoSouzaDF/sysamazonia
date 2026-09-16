@@ -108,7 +108,6 @@ class RegistrationRequest extends FormRequest
             'contact_data.required' => 'O campo Dados de Contato é obrigatório.',
             'contact_data.string' => 'O campo Dados de Contato deve ser um texto válido.',
 
-
             'presentation.required' => 'O campo Apresentação do(a) Indicado(a) é obrigatório.',
             'presentation.string' => 'O campo Apresentação do(a) Indicado(a) deve ser um texto válido.',
             'presentation.max' => 'O campo Apresentação do(a) Indicado(a) não pode exceder 1000 caracteres.',

@@ -16,11 +16,10 @@ use App\Notifications\RegistrationProtocol;
 use App\Notifications\RequestProtocol;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
+use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\Crypt;
 use Illuminate\Support\Facades\Notification;
 use Illuminate\Support\Facades\Storage;
-use Illuminate\Support\Arr;
-
 
 class EditionController extends Controller
 {
@@ -35,11 +34,9 @@ class EditionController extends Controller
 
             $registrationRequest = app(RegistrationRequest::class);
 
-
-
             $candidate = $this->candidate($data);
 
-            //valida forms
+            // valida forms
 
             $data['edition'] = Crypt::decryptString($data['edition']);
             $data['candidate_id'] = Crypt::decryptString($candidate['id']);
@@ -48,8 +45,7 @@ class EditionController extends Controller
             $request->merge(['data' => json_encode($data)]);
             $value1 = $this->checkRulesforRegistration($candidate);
             $registration = $this->registrationSave($candidate);
-            $this->saveFiles($registration,$request);
-
+            $this->saveFiles($registration, $request);
 
         } catch (\InvalidArgumentException $e) {
             return response()->json([
@@ -65,15 +61,16 @@ class EditionController extends Controller
 
     }
 
-    public function saveFiles($registration, Request $request){
+    public function saveFiles($registration, Request $request)
+    {
         if (isset($_FILES['files']) && ! empty($_FILES['files'])) {
             if ($request->hasFile('files')) {
-               foreach (Arr::wrap($request->file('files')) as $file) {
+                foreach (Arr::wrap($request->file('files')) as $file) {
 
                     try {
                         // Verifica se o arquivo é válido
                         if (! $file->isValid()) {
-                            throw new \InvalidArgumentException( $file->getError());
+                            throw new \InvalidArgumentException($file->getError());
                         }
 
                         // Valida tamanho do arquivo
@@ -94,9 +91,9 @@ class EditionController extends Controller
 
                         // Registra no banco
                         $registrationFile = new RegistrationFile;
-                        if(isset($registration['name'])){
+                        if (isset($registration['name'])) {
                             $registrationFile->nominee_id = Crypt::decryptString($registration['id']);
-                        }else{
+                        } else {
                             $registrationFile->registration_id = Crypt::decryptString($registration['id']);
                         }
 
@@ -122,15 +119,14 @@ class EditionController extends Controller
     {
         $registrationRequest = app(RegistrationRequest::class);
 
-
         $categoryId = $this->decript(request()->input('category'));
 
         $category = Category::with(['modality.edition'])->find($categoryId);
 
-        if($category && !$category->is_honorific){
-             $registration = new Registration($registrationRequest->validated());
-        }else{
-             $registration = new Nominee($registrationRequest->validated());
+        if ($category && ! $category->is_honorific) {
+            $registration = new Registration($registrationRequest->validated());
+        } else {
+            $registration = new Nominee($registrationRequest->validated());
         }
 
         $registration->status = 1;
@@ -142,7 +138,7 @@ class EditionController extends Controller
         $email = $candidate['email'];
         $protocolToken = $registration->protocol;
 
-         Notification::route('mail', $email)->notify(new RegistrationProtocol($protocolToken,$candidate['nome']));
+        Notification::route('mail', $email)->notify(new RegistrationProtocol($protocolToken, $candidate['nome']));
 
         $response = $registration->toArray();
         $response['id'] = $this->encrypt($response['id']);
@@ -243,19 +239,20 @@ class EditionController extends Controller
             $reponse['id'] = $this->encrypt($reponse['id']);
 
             $candidatures = [];
-            $registrations = Registration::where('candidate_id',$candidate['id'])->get();
-            $nominees = Nominee::where('candidate_id',$candidate['id'])->get();
+            $registrations = Registration::where('candidate_id', $candidate['id'])->get();
+            $nominees = Nominee::where('candidate_id', $candidate['id'])->get();
 
-            if($registrations->count()){
-               $dados = $registrations->toArray();
+            if ($registrations->count()) {
+                $dados = $registrations->toArray();
 
                 $dados = array_map(function ($item) {
                     $item['id'] = $this->encrypt($item['id']);
+
                     return $item;
                 }, $dados);
                 $candidatures = array_merge($candidatures, $dados);
             }
-            if($nominees->count()){
+            if ($nominees->count()) {
                 $dados = $nominees->toArray();
 
                 $dados = array_map(function ($item) {
@@ -264,10 +261,11 @@ class EditionController extends Controller
                 }, $dados);
                 $candidatures = array_merge($candidatures, $dados);
             }
+
             return response()->json([
                 'status' => 'success',
                 'candidate' => $reponse,
-                'candidatures' => $candidatures
+                'candidatures' => $candidatures,
             ]);
         }
 
@@ -301,74 +299,80 @@ class EditionController extends Controller
         return false;
     }
 
-    public function requestTokenAction( $protocol,$actionType){
+    public function requestTokenAction($protocol, $actionType)
+    {
         $token = bin2hex(random_bytes(32));
-        $expiresAt =  now()->addHours(2);
+        $expiresAt = now()->addHours(2);
 
         try {
             $model = $this->getRegistrationModelByPrtocol($protocol);
-            if($model){
+            if ($model) {
                 $candidate = Candidate::findOrFail($model->candidate_id);
-                $newToken =    ActionToken::create([
-                                'token' => $token,
-                                'action' => $actionType,
-                                'protocol' => $protocol,
-                                'expires_at' => $expiresAt
-                                ]);
+                $newToken = ActionToken::create([
+                    'token' => $token,
+                    'action' => $actionType,
+                    'protocol' => $protocol,
+                    'expires_at' => $expiresAt,
+                ]);
 
-                Notification::route('mail', $candidate->email)->notify(new RequestProtocol($newToken->token,$candidate->nome,$model->protocol,$newToken->expires_at));
+                Notification::route('mail', $candidate->email)->notify(new RequestProtocol($newToken->token, $candidate->nome, $model->protocol, $newToken->expires_at));
+
                 return response()->json(['message' => 'Verifique seu e-mail para confirmar a ação.'])->setEncodingOptions(JSON_UNESCAPED_UNICODE);
-            }else{
-                return response()->json(['status' => 'error',], 404);
+            } else {
+                return response()->json(['status' => 'error'], 404);
             }
 
         } catch (\Throwable $th) {
-                return response()->json(['status' => $th->getMessage(),], 204);
+            return response()->json(['status' => $th->getMessage()], 204);
         }
 
     }
 
+    private function getRegistrationModelByPrtocol($protocol)
+    {
+        $model = Registration::where('protocol', $protocol)->get()->first() ?? Nominee::where('protocol', $protocol)->get()->first();
 
-    private function getRegistrationModelByPrtocol($protocol){
-        $model = Registration::where('protocol',$protocol)->get()->first() ?? Nominee::where('protocol',$protocol)->get()->first();
         return $model;
     }
 
-    public function consumeTokenPost($token,Request $request){
+    public function consumeTokenPost($token, Request $request)
+    {
 
-    try {
-         $action = ActionToken::where('token',$token)->first();
-        if($action->isValid()){
-
-            $model = $this->getRegistrationModelByPrtocol($action->protocol);
-            $data = $this->checkJsonDecode();
-            $data['candidate_id'] = $model->candidate_id;
-            $data['category_id'] = $model->category_id;
-            $request->merge(['data' => json_encode($data)]);
-            $registrationRequest = app(RegistrationRequest::class);
-            $model->fill($data);
-            $model->save();
-
-            $this->deleteRegistrationFiles($model);
-            $dataSaveFiles = $model->toArray();
-            $dataSaveFiles['id'] = $this->encrypt($dataSaveFiles['id']);
-            $this->saveFiles($dataSaveFiles, $request);
-
-             $action->activate();
-             $action->consume();
-            return response()->json(['status' => 'success','message' => 'Registro Alterado.'], 200);
-        }
-    } catch (\Throwable $th) {
-         return response()->json(['status' => 'error','message' => $th->getMessage()], 204);
-    }
-
-    }
-
-    public function consumeToken($token){
         try {
-            $action = ActionToken::where('token',$token)->first();
-            if($action->isValid()){
-                if($action->action == 'delete'){
+            $action = ActionToken::where('token', $token)->first();
+            if ($action->isValid()) {
+
+                $model = $this->getRegistrationModelByPrtocol($action->protocol);
+                $data = $this->checkJsonDecode();
+                $data['candidate_id'] = $model->candidate_id;
+                $data['category_id'] = $model->category_id;
+                $request->merge(['data' => json_encode($data)]);
+                $registrationRequest = app(RegistrationRequest::class);
+                $model->fill($data);
+                $model->save();
+
+                $this->deleteRegistrationFiles($model);
+                $dataSaveFiles = $model->toArray();
+                $dataSaveFiles['id'] = $this->encrypt($dataSaveFiles['id']);
+                $this->saveFiles($dataSaveFiles, $request);
+
+                $action->activate();
+                $action->consume();
+
+                return response()->json(['status' => 'success', 'message' => 'Registro Alterado.'], 200);
+            }
+        } catch (\Throwable $th) {
+            return response()->json(['status' => 'error', 'message' => $th->getMessage()], 204);
+        }
+
+    }
+
+    public function consumeToken($token)
+    {
+        try {
+            $action = ActionToken::where('token', $token)->first();
+            if ($action->isValid()) {
+                if ($action->action == 'delete') {
                     $action->activate();
                     $action->consume();
                     $model = $this->getRegistrationModelByPrtocol($action->protocol);
@@ -376,20 +380,22 @@ class EditionController extends Controller
                         $this->deleteRegistrationFiles($model);
                     }
                     $model->delete();
-                    return response()->json(['status' => 'success','message' => 'Registro deletado.'], 200);
-                }else if($action->action == "edit"){
+
+                    return response()->json(['status' => 'success', 'message' => 'Registro deletado.'], 200);
+                } elseif ($action->action == 'edit') {
                     $model = $this->getRegistrationModelByPrtocol($action->protocol);
                     $model->candidate_id = $this->encrypt($model->candidate_id);
                     $model->category_id = $this->encrypt($model->category_id);
                     $model->id = $this->encrypt($model->id);
                     $model->candidate_id = $this->encrypt($model->candidate_id);
-                    return response()->json(['status' => 'edit','message' => 'Atualização de Inscrição', 'candidature' => $model], 200);
+
+                    return response()->json(['status' => 'edit', 'message' => 'Atualização de Inscrição', 'candidature' => $model], 200);
                 }
-            }else{
-                return response()->json(['status' => 'error','message' => 'Token Expirado !'], 204);
+            } else {
+                return response()->json(['status' => 'error', 'message' => 'Token Expirado !'], 204);
             }
         } catch (\Throwable $th) {
-        return response()->json(['status' => 'error','message' => $th->getMessage()], 204);
+            return response()->json(['status' => 'error', 'message' => $th->getMessage()], 204);
         }
 
     }

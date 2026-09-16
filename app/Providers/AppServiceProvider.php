@@ -5,6 +5,8 @@ namespace App\Providers;
 use App\Models\Nominee;
 use App\Models\Registration;
 use Illuminate\Database\Eloquent\Relations\Relation;
+use App\Services\Ai\AgnoEvaluationService;
+use App\Services\Ai\Contracts\AiEvaluationServiceInterface;
 use Illuminate\Support\ServiceProvider;
 
 class AppServiceProvider extends ServiceProvider
@@ -14,7 +16,7 @@ class AppServiceProvider extends ServiceProvider
      */
     public function register(): void
     {
-        //
+        $this->app->bind(AiEvaluationServiceInterface::class, AgnoEvaluationService::class);
     }
 
     /**
