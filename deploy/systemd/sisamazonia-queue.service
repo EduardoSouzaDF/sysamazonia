@@ -1,0 +1,16 @@
+[Unit]
+Description=Sisamazonia Laravel queue worker
+After=network.target
+
+[Service]
+Type=simple
+WorkingDirectory=/var/www/projetos/app_amazonia.local
+ExecStart=/usr/bin/php artisan queue:work database --queue=ai-evaluations,default --sleep=3 --tries=3 --timeout=70 --max-time=3600
+Restart=always
+RestartSec=3
+KillMode=control-group
+TimeoutStopSec=90
+NoNewPrivileges=true
+
+[Install]
+WantedBy=default.target

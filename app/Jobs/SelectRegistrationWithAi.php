@@ -6,12 +6,13 @@ use App\Models\AiExecution;
 use App\Services\Ai\AiExecutionManager;
 use App\Services\Ai\AiSettingsService;
 use App\Services\Ai\StrategicSelectionProcessor;
+use Illuminate\Contracts\Queue\ShouldBeUnique;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Queue\Queueable;
 use Illuminate\Queue\Middleware\WithoutOverlapping;
 use Illuminate\Support\Facades\Log;
 
-class SelectRegistrationWithAi implements ShouldQueue
+class SelectRegistrationWithAi implements ShouldBeUnique, ShouldQueue
 {
     use Queueable;
 
@@ -25,6 +26,11 @@ class SelectRegistrationWithAi implements ShouldQueue
     public function handle(StrategicSelectionProcessor $processor): void
     {
         $processor->process($this->executionId);
+    }
+
+    public function uniqueId(): string
+    {
+        return (string) $this->executionId;
     }
 
     public function middleware(): array

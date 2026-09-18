@@ -36,7 +36,20 @@ class AiPendingOperations
                 }
                 $hash = $type === AiExecutionType::TechnicalEvaluation ? $this->fingerprint->forRegistration($registration) : $this->fingerprint->forSelection($registration);
 
-                return ! AiExecution::query()->where(['registration_id' => $registration->id, 'evaluator_id' => $evaluatorId, 'type' => $type, 'prompt_version' => $promptVersion, 'evaluation_configuration_hash' => $hash, 'status' => \App\Enum\AiExecutionStatus::Completed])->exists();
+                return ! AiExecution::query()
+                    ->where([
+                        'registration_id' => $registration->id,
+                        'evaluator_id' => $evaluatorId,
+                        'type' => $type,
+                        'prompt_version' => $promptVersion,
+                        'evaluation_configuration_hash' => $hash,
+                    ])
+                    ->whereIn('status', [
+                        \App\Enum\AiExecutionStatus::Pending,
+                        \App\Enum\AiExecutionStatus::Processing,
+                        \App\Enum\AiExecutionStatus::Completed,
+                    ])
+                    ->exists();
             })->values();
     }
 

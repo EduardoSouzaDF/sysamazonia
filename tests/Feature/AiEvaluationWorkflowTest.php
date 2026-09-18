@@ -66,7 +66,7 @@ class AiEvaluationWorkflowTest extends TestCase
         $registration->update(['status' => RegistrationStatusEnum::Habilitado]);
         $registration->update(['status' => RegistrationStatusEnum::Inscrito]);
         $registration->update(['status' => RegistrationStatusEnum::Habilitado]);
-        Queue::assertPushed(EvaluateRegistrationWithAi::class, 2);
+        Queue::assertPushed(EvaluateRegistrationWithAi::class, 1);
         $this->assertDatabaseCount('ai_executions', 1);
     }
 

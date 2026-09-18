@@ -6,12 +6,13 @@ use App\Models\AiExecution;
 use App\Services\Ai\AiExecutionManager;
 use App\Services\Ai\AiSettingsService;
 use App\Services\Ai\TechnicalEvaluationProcessor;
+use Illuminate\Contracts\Queue\ShouldBeUnique;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Queue\Queueable;
 use Illuminate\Queue\Middleware\WithoutOverlapping;
 use Illuminate\Support\Facades\Log;
 
-class EvaluateRegistrationWithAi implements ShouldQueue
+class EvaluateRegistrationWithAi implements ShouldBeUnique, ShouldQueue
 {
     use Queueable;
 
@@ -25,6 +26,11 @@ class EvaluateRegistrationWithAi implements ShouldQueue
     public function handle(TechnicalEvaluationProcessor $processor): void
     {
         $processor->process($this->executionId);
+    }
+
+    public function uniqueId(): string
+    {
+        return (string) $this->executionId;
     }
 
     public function middleware(): array
