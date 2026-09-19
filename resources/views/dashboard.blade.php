@@ -1,50 +1,24 @@
-
 @extends('admin.content')
 
-<!-- @vite([
-    'resources/comp_themes/apexcharts/apexcharts.min.js',
-    'resources/comp_themes/apexcharts/apexcharts.css',
-     ]) -->
 @section('maincontent')
-     <div class="flex flex-row w-full gap-2 px-4 justify-center " style="max-height: 200px;">
-
-               <div class="  p-6 m-20 bg-white min-h-max">
-                    {!! $chartEditions->container() !!}
-               </div>
-               <div class="  p-6 m-20 bg-white min-h-max">
-                    {!! $chartModalities->container() !!}
-               </div>
- 
-
-     </div>
-
-     <div class="flex flex-row w-full gap-2 px-4 mt-4 justify-center" style="max-height: 200px;">
-
-               <div class="  p-6 m-20 bg-white min-h-max">
-                    {!! $chartStateUser->container() !!}
-               </div>
- 
-               <div class="  p-6 m-20 bg-white min-h-max">
-                    {!! $chartRegistrationBySex->container() !!}
-               </div>
-
-     </div>
-
-      
-
-     
+<div id="statistics-dashboard" class="kt-container-fixed py-8 space-y-6">
+    <header class="dashboard-heading">
+        <div><h1 class="text-2xl font-semibold">Dashboard estatístico</h1><p class="text-secondary-foreground mt-2">Inscrições regulares e indicações honoríficas, em uma visão consolidada.</p></div>
+        <span class="kt-badge kt-badge-outline">Dados agregados</span>
+    </header>
+    <x-elements.tabs :tabs="[
+        ['titulo' => 'Estatísticas Globais', 'tabId' => 'dashboard-panel-global', 'buttonId' => 'dashboard-tab-global', 'active' => true, 'include' => 'dashboard.global', 'includeData' => ['statistics' => $statistics]],
+        ['titulo' => 'Edição Atual', 'tabId' => 'dashboard-panel-current', 'buttonId' => 'dashboard-tab-current', 'active' => false, 'include' => 'dashboard.current', 'includeData' => ['statistics' => $statistics, 'mapPaths' => $mapPaths]],
+    ]" />
+    <p class="dashboard-footnote">Cada registro representa uma inscrição, inclusive quando o mesmo candidato participa mais de uma vez. Dados demográficos são do responsável pela inscrição. A idade é calculada na data da inscrição.</p>
+    <noscript><style>#statistics-dashboard #dashboard-panel-current { display: block !important; }</style><p>JavaScript desativado: consulte os indicadores, o mapa e as tabelas de dados abaixo de cada gráfico.</p></noscript>
+</div>
 @endsection
 
+@push('styles')
+    @vite('resources/css/dashboard.css')
+@endpush
 @push('scripts')
-<script src="{{ $chartEditions->cdn() }}"></script>
-<script src="{{ $chartModalities->cdn() }}"></script>
-<script src="{{ $chartStateUser->cdn() }}"></script>
-<script src="{{ $chartRegistrationBySex->cdn() }}"></script>
-{{ $chartEditions->script() }}
-{{ $chartModalities->script() }}
-{{ $chartStateUser->script() }}
-{{ $chartRegistrationBySex->script() }}
-
-
-
+    <script>window.dashboardStatistics = {{ Illuminate\Support\Js::from($statistics) }};</script>
+    @vite('resources/js/dashboard.js')
 @endpush

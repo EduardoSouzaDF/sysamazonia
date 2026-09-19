@@ -16,6 +16,8 @@ export default defineConfig({
         laravel({
             input: [
                 'resources/css/app.css',
+                'resources/css/dashboard.css',
+                'resources/js/dashboard.js',
                     'resources/comp_themes/keenicons/styles.bundle.css',
                     'resources/css/styles.css',
                     'resources/comp_themes/apexcharts/apexcharts.css',
