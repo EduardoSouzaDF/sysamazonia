@@ -5,9 +5,9 @@
 namespace App\Notifications;
 
 use Illuminate\Bus\Queueable;
+use Illuminate\Notifications\Notification;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Notifications\Messages\MailMessage;
-use Illuminate\Notifications\Notification;
 
 class CustomResetPassword extends Notification implements ShouldQueue
 {
@@ -45,13 +45,13 @@ class CustomResetPassword extends Notification implements ShouldQueue
     public function toMail($notifiable)
     {
         return (new MailMessage)
-            ->subject('Seja Bem vindo ! Defina sua nova senha')
-            ->greeting('Olá, '.$notifiable->name.'!')
-            ->line('Sua conta foi criada com sucesso!')
-            ->line('Para acessar sua conta, por favor clique no link abaixo:')
-            ->action('Alterar senha', route('password.reset', $this->token).'?email='.$notifiable->email)
-            ->line('Se você tiver alguma dúvida, por favor não hesite em entrar em contato conosco.')
-            ->salutation('Atenciosamente,');
+                    ->subject('Seja Bem vindo ! Defina sua nova senha')
+                    ->greeting('Olá, ' . $notifiable->name . '!')
+                    ->line('Sua conta foi criada com sucesso!')
+                    ->line('Para acessar sua conta, por favor clique no link abaixo:')
+                    ->action('Alterar senha', route('password.reset', $this->token).'?email=' . $notifiable->email)
+                    ->line('Se você tiver alguma dúvida, por favor não hesite em entrar em contato conosco.')
+                    ->salutation('Atenciosamente,');
     }
 
     /**

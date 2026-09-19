@@ -285,4 +285,14 @@ class Registration extends Model
     {
         app(\App\Services\EvaluationCompletionService::class)->recalculate($this);
     }
+
+    /**
+     * Seleções (JudgeSelection) dos julgadores para esta inscrição (spec 0003).
+     *
+     * Caminho: Registration -> judge_selections (morph `inscription`).
+     */
+    public function judgeSelections(): \Illuminate\Database\Eloquent\Relations\MorphMany
+    {
+        return $this->morphMany(JudgeSelection::class, 'inscription');
+    }
 }

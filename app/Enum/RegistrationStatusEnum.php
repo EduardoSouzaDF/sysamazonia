@@ -29,17 +29,17 @@ enum RegistrationStatusEnum: int
         );
     }
 
-    public static function geLabel($status): string
+     static function geLabel($status): string
     {
 
-        switch ((string) $status) {
+        switch ((String) $status) {
             case self::Inscrito:
                 return 'Inscrito';
                 break;
             case self::Rejeitado:
                 return 'Rejeitado';
                 break;
-            case (string) self::Habilitado:
+            case (String) self::Habilitado:
                 return 'Habilitado';
                 break;
             case self::Avaliado:

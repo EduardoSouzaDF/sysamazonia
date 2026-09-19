@@ -1,18 +1,18 @@
 <?php
 
+
 namespace App\Notifications;
 
 use Illuminate\Bus\Queueable;
+use Illuminate\Notifications\Notification;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Notifications\Messages\MailMessage;
-use Illuminate\Notifications\Notification;
 
 class RegistrationProtocol extends Notification implements ShouldQueue
 {
     use Queueable;
 
     private $token;
-
     private $name;
 
     /**
@@ -46,12 +46,12 @@ class RegistrationProtocol extends Notification implements ShouldQueue
     public function toMail($notifiable)
     {
         return (new MailMessage)
-            ->subject('Inscrição Realizada !')
-            ->greeting('Olá, '.$this->name.'!')
-            ->line('Sua Inscrição foi realizada com sucesso!')
-            ->line('Favor guardar o número do   protocolo: '.$this->token.' ')
-            ->line('Se você tiver alguma dúvida, por favor não hesite em entrar em contato conosco.')
-            ->salutation('Atenciosamente,');
+                    ->subject('Inscrição Realizada !')
+                    ->greeting('Olá, ' . $this->name . '!')
+                    ->line('Sua Inscrição foi realizada com sucesso!')
+                    ->line('Favor guardar o número do   protocolo: '.$this->token.' ')
+                    ->line('Se você tiver alguma dúvida, por favor não hesite em entrar em contato conosco.')
+                    ->salutation('Atenciosamente,');
     }
 
     /**

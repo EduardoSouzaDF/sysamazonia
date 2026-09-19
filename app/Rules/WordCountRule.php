@@ -8,7 +8,6 @@ use Illuminate\Contracts\Validation\ValidationRule;
 class WordCountRule implements ValidationRule
 {
     protected int $min;
-
     protected int $max;
 
     public function __construct(int $min, int $max)

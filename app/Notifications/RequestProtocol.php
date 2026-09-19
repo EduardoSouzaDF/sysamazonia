@@ -1,22 +1,21 @@
 <?php
 
+
 namespace App\Notifications;
 
+use Carbon\Carbon;
 use Illuminate\Bus\Queueable;
+use Illuminate\Notifications\Notification;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Notifications\Messages\MailMessage;
-use Illuminate\Notifications\Notification;
 
 class RequestProtocol extends Notification implements ShouldQueue
 {
     use Queueable;
 
     private $token;
-
     private $protocol;
-
     private $name;
-
     private $expire;
 
     /**
@@ -24,7 +23,7 @@ class RequestProtocol extends Notification implements ShouldQueue
      *
      * @return void
      */
-    public function __construct($token, $name, $protocol, $expire)
+    public function __construct($token, $name,$protocol,$expire)
     {
         $this->token = $token;
         $this->name = $name;
@@ -53,18 +52,17 @@ class RequestProtocol extends Notification implements ShouldQueue
     {
 
         $expireFormatted = $this->expire->format('d/m/Y H:i:s');
-
         return (new MailMessage)
-            ->subject('Pedido de Alteração/Exlusão Recebida!')
-            ->greeting('Olá, '.$this->name.'!')
-            ->line('Para garantir maior segurança ao seu registro confirme o pedido abaixo:')
-            ->line('Alteração ou exclusão da inscrição de protocolo: '.$this->protocol)
-            ->line('Este pedido expira em: **'.$expireFormatted.'**') // Linha adicionada
-            ->line('Para confirmar a ação por favor clique no link abaixo')
+                    ->subject('Pedido de Alteração/Exlusão Recebida!')
+                    ->greeting('Olá, ' . $this->name . '!')
+                    ->line('Para garantir maior segurança ao seu registro confirme o pedido abaixo:')
+                    ->line('Alteração ou exclusão da inscrição de protocolo: '.$this->protocol)
+                    ->line('Este pedido expira em: **' . $expireFormatted . '**') // Linha adicionada
+                    ->line('Para confirmar a ação por favor clique no link abaixo')
                     // ->action('Alterar / Excluir Registro', route('consume.token', $this->token))
-            ->action('Alterar / Excluir Registro', 'https://hmamazonia.ibict.br/novo-sistema/?token='.$this->token)
-            ->line('Se você tiver alguma dúvida, por favor não hesite em entrar em contato conosco.')
-            ->salutation('Atenciosamente,');
+                    ->action('Alterar / Excluir Registro', 'https://hmamazonia.ibict.br/novo-sistema/?token='.$this->token)
+                    ->line('Se você tiver alguma dúvida, por favor não hesite em entrar em contato conosco.')
+                    ->salutation('Atenciosamente,');
     }
 
     /**

@@ -7,9 +7,11 @@ use Illuminate\Database\Eloquent\Model;
 
 class RegistrationFile extends Model
 {
-    use HasFactory;
 
+
+    use HasFactory;
     protected $table = 'registrations_files';
+
 
     protected $fillable = [
         'registration_id',
@@ -29,6 +31,7 @@ class RegistrationFile extends Model
     {
         return $this->belongsTo(Registration::class);
     }
+
 
     /**
      * Obter a inscrição relacionada a este arquivo

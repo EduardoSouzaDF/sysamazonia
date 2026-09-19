@@ -2,7 +2,11 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Controllers\Controller;
+use App\Models\Candidate;
 use App\Models\User;
+use App\Models\Registration;
+use App\Models\Edition;
 use Illuminate\Auth\Events\PasswordReset;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -33,7 +37,6 @@ class AuthController extends Controller
 
         if (Auth::attempt($credentials)) {
             $request->session()->regenerate();
-
             return redirect()->intended('dashboard')->with('success', 'Login realizado com sucesso!');
         }
         // ed89b3b6c8676aea612ee68dd1d3316c
@@ -137,7 +140,7 @@ class AuthController extends Controller
             $request->only('email', 'password', 'password_confirmation', 'token'),
             function (User $user, string $password) {
                 $user->forceFill([
-                    'password' => Hash::make($password),
+                    'password' => Hash::make($password)
                 ])->setRememberToken(Str::random(60));
 
                 $user->save();

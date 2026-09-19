@@ -1,9 +1,9 @@
 <?php
-
 namespace App\Http\Requests;
 
 use App\Models\Category;
 use App\Rules\WordCountRule;
+use Carbon\Carbon;
 use Illuminate\Contracts\Validation\Validator;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Http\Exceptions\HttpResponseException;
@@ -44,40 +44,44 @@ class RegistrationRequest extends FormRequest
     public function rules()
     {
 
-        $categoryId = Str::length($this->input('category_id')) > 10 ? Crypt::decryptString($this->input('category_id')) : $this->input('category_id');
+        $categoryId = Str::length($this->input('category_id'))  > 10  ? Crypt::decryptString($this->input('category_id')) : $this->input('category_id');
         $category = Category::find($categoryId);
 
-        if ($category && ! $category->is_honorific) {
-            // Nao horifico
+        if($category && !$category->is_honorific){
+            //Nao horifico
             return [
-                // 'candidate_id' => 'required|exists:candidates,id',
-                // 'category_id' => 'required|exists:categories,id',
-                'title' => 'required|string|max:255',
-                'coautores' => 'nullable|string|max:1000',
-                'resumo' => ['required', 'string', new WordCountRule(100, 1000)],
-                'desenvolvimento' => ['required', 'string', new WordCountRule(100, 2000)],
-                'objetivo' => ['required', 'string', new WordCountRule(100, 500)],
-                'conclusao' => ['required', 'string', new WordCountRule(100, 500)],
+                        // 'candidate_id' => 'required|exists:candidates,id',
+                        // 'category_id' => 'required|exists:categories,id',
+                        'title' => 'required|string|max:255',
+                        'coautores' => 'nullable|string|max:1000',
+                        'resumo' => ['required','string',new WordCountRule(100, 1000)],
+                        'desenvolvimento' => ['required','string',new WordCountRule(100, 2000)],
+                        'objetivo' => ['required','string',new WordCountRule(100, 500)],
+                        'conclusao' => ['required','string',new WordCountRule(100, 500)],
 
-                'status' => 'nullable|integer',
-            ];
-        } else {
-            return [
-                // 'candidate_id' => 'required|exists:candidates,id',
-                // 'category_id' => 'required|exists:categories,id',
-                'name' => 'required|string|max:255',
-                'state' => 'required|string|max:255',
-                'contact_data' => 'required|string|max:255',
 
-                // 'presentation' => ['required','string',new WordCountRule(200, 1000)],
-                // 'activities' => ['required','string',new WordCountRule(200, 1000)],677.795.380-9500
-                // 'justification' => ['required','string',new WordCountRule(200, 1000)],
+                        'status' => 'nullable|integer',
+                    ];
+        }else{
+                return [
+                            // 'candidate_id' => 'required|exists:candidates,id',
+                            // 'category_id' => 'required|exists:categories,id',
+                            'name' => 'required|string|max:255',
+                            'state' => 'required|string|max:255',
+                            'contact_data' => 'required|string|max:255',
 
-                'presentation' => ['required', 'string', new WordCountRule(100, 2000)],
-                'activities' => ['required', 'string', new WordCountRule(100, 1000)],
-                'justification' => ['required', 'string', new WordCountRule(100, 1000)],
-            ];
+
+                            // 'presentation' => ['required','string',new WordCountRule(200, 1000)],
+                            // 'activities' => ['required','string',new WordCountRule(200, 1000)],677.795.380-9500
+                            // 'justification' => ['required','string',new WordCountRule(200, 1000)],
+
+                            'presentation' => ['required','string',new WordCountRule(100, 2000)],
+                            'activities' => ['required','string',new WordCountRule(100, 1000)],
+                            'justification' => ['required','string',new WordCountRule(100, 1000)],
+                        ];
         }
+
+
 
     }
 
@@ -104,6 +108,7 @@ class RegistrationRequest extends FormRequest
             'contact_data.required' => 'O campo Dados de Contato é obrigatório.',
             'contact_data.string' => 'O campo Dados de Contato deve ser um texto válido.',
 
+
             'presentation.required' => 'O campo Apresentação do(a) Indicado(a) é obrigatório.',
             'presentation.string' => 'O campo Apresentação do(a) Indicado(a) deve ser um texto válido.',
             'presentation.max' => 'O campo Apresentação do(a) Indicado(a) não pode exceder 1000 caracteres.',
@@ -117,8 +122,8 @@ class RegistrationRequest extends FormRequest
         throw new HttpResponseException(response()->json([
             'sucesso' => false,
             'status' => 'error',
-            'erros' => $validator->errors(),
-            'codigo' => 'VAL001',
+            'erros'   => $validator->errors(),
+            'codigo'  => 'VAL001'
         ], 422)->setEncodingOptions(JSON_UNESCAPED_UNICODE));
     }
 }

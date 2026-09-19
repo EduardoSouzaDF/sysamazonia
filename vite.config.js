@@ -9,9 +9,7 @@ export default defineConfig({
             enforce: 'pre',
             transform(code, id) {
                 if (!id.endsWith('/resources/js/core.bundle.js')) return;
-                // The shipped webpack development bundle hides module sources in eval.
-                // Rollup renames exports, but cannot update identifiers inside strings.
-                // Decode static JSON literals before bundling, preserving the vendor file.
+
                 return code.replace(/^eval\((".*")\);?$/gm, (_match, source) => JSON.parse(source));
             },
         },

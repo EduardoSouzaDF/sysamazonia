@@ -15,7 +15,7 @@ class Role extends Model
 
     const LEITOR = 'leitor';
 
-    const COMISSAO = 'comission';
+    const COMISSAO = 'comissao';
 
     protected $fillable = [
         'name',

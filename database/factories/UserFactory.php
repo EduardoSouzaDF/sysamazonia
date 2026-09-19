@@ -41,4 +41,14 @@ class UserFactory extends Factory
             'email_verified_at' => null,
         ]);
     }
+
+    /**
+     * Indica que o usuário é julgador (`is_judge = true`).
+     */
+    public function judge(): static
+    {
+        return $this->state(fn (array $attributes) => [
+            'is_judge' => true,
+        ]);
+    }
 }

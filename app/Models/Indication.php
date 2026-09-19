@@ -43,6 +43,7 @@ class Indication extends Model
         return $this->belongsTo(User::class);
     }
 
+    
     /**
      * Get the registration that is being evaluated.
      */
@@ -50,4 +51,6 @@ class Indication extends Model
     {
         return $this->belongsTo(Registration::class);
     }
+
+   
 }

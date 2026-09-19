@@ -1,5 +1,4 @@
 <?php
-
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
@@ -13,7 +12,7 @@ class ActionToken extends Model
         'action',
         'activated_at',
         'expires_at',
-        'consumed_at',
+        'consumed_at'
     ];
 
     protected $casts = [
@@ -22,13 +21,14 @@ class ActionToken extends Model
         'consumed_at' => 'datetime',
     ];
 
+
     /**
      * Escopo para buscar apenas tokens válidos
      */
     public function scopeValid($query)
     {
         return $query->where('expires_at', '>', now())
-            ->whereNull('consumed_at');
+                     ->whereNull('consumed_at');
     }
 
     /**
@@ -36,7 +36,7 @@ class ActionToken extends Model
      */
     public function isActivated(): bool
     {
-        return ! is_null($this->activated_at);
+        return !is_null($this->activated_at);
     }
 
     /**
@@ -53,7 +53,7 @@ class ActionToken extends Model
     public function activate(): bool
     {
         return $this->update([
-            'activated_at' => now(),
+            'activated_at' => now()
         ]);
     }
 

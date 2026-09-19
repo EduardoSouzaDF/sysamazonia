@@ -2,16 +2,17 @@
 
 namespace App\Http\Requests;
 
-use App\Rules\WordCountRule;
+use Carbon\Carbon;
 use Illuminate\Contracts\Validation\Validator;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Http\Exceptions\HttpResponseException;
 use Illuminate\Support\Facades\Crypt;
+use App\Rules\WordCountRule;
 
 class CandidateRequest extends FormRequest
 {
-    private $decodedData = [];
 
+    private $decodedData = [];
     /**
      * Determine if the user is authorized to make this request.
      *
@@ -66,15 +67,15 @@ class CandidateRequest extends FormRequest
             'instagram' => 'nullable|string|max:100',
             'facebook' => 'nullable|string|max:100',
             'outra_rede_social' => 'nullable|string|max:100',
-            'resumo_curricular' => ['nullable', 'required', 'string', new WordCountRule(100, 1000)],
+            'resumo_curricular' =>  ['nullable','required','string',new WordCountRule(100, 1000)],
             'nullable|string|max:1000',
         ];
 
-        if (! empty($this->decodedData['candidate_id'])) {
-            $candidateId = Crypt::decryptString($this->decodedData['candidate_id']);
-            $rules['email'] = 'required|email|unique:candidates,email,'.$candidateId;
-            $rules['cpf'] = 'required|string|unique:candidates,cpf,'.$candidateId;
-        }
+        if (!empty($this->decodedData['candidate_id'])) {
+                $candidateId =   Crypt::decryptString($this->decodedData['candidate_id']);
+                $rules['email'] = 'required|email|unique:candidates,email,' . $candidateId;
+                $rules['cpf'] = 'required|string|unique:candidates,cpf,' . $candidateId;
+            }
 
         return $rules;
     }
@@ -127,8 +128,8 @@ class CandidateRequest extends FormRequest
         throw new HttpResponseException(response()->json([
             'sucesso' => false,
             'status' => 'error',
-            'erros' => $validator->errors(),
-            'codigo' => 'VAL001',
+            'erros'   => $validator->errors(),
+            'codigo'  => 'VAL001'
         ], 422)->setEncodingOptions(JSON_UNESCAPED_UNICODE));
     }
 }

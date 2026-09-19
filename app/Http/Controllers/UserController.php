@@ -33,7 +33,7 @@ class UserController extends Controller
             });
         }
 
-        $users = $query->paginate(15);
+        $users = $query->paginate(10)->withQueryString();
 
         return view('admin.users.index', compact('users'));
     }
@@ -50,11 +50,14 @@ class UserController extends Controller
             $query->where('is_registration_active', true);
         })->get();
 
+
         $categoriesEvaluators = Category::whereHas('modality.edition', function ($query) {
             $query->where('is_registration_active', true);
         })->where('is_honorific', false)->get();
 
-        return view('admin.users.create', ['roles' => $roles, 'categories' => $categories, 'categoriesEvaluators' => $categoriesEvaluators]);
+
+
+        return view('admin.users.create', ['roles' => $roles, 'categories' => $categories , 'categoriesEvaluators' => $categoriesEvaluators]);
     }
 
     /**
@@ -115,11 +118,11 @@ class UserController extends Controller
 
         $user->roles()->attach($request->roles);
 
-        $anyExtraDataCollumn = array_filter($extra_data_collumns, function ($column) use ($request) {
+        $anyExtraDataCollumn = array_filter($extra_data_collumns,function($column)use($request){
             return $request[$column] !== null;
         });
 
-        if (count($anyExtraDataCollumn)) {
+        if (sizeof($anyExtraDataCollumn)) {
             $user->extraData()->create([
                 'whatsapp' => $request['whatsapp'] ?? null,
                 'area_atuacao' => $request['area_atuacao'] ?? null,
@@ -193,6 +196,9 @@ class UserController extends Controller
         $categoriesEvaluators = Category::whereHas('modality.edition', function ($query) {
             $query->where('is_registration_active', true);
         })->where('is_honorific', false)->get();
+
+        
+
 
         return view('admin.users.create', ['roles' => $roles, 'categories' => $categories, 'categoriesEvaluators' => $categoriesEvaluators, 'user' => $user]);
     }

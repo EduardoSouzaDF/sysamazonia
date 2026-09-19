@@ -120,4 +120,14 @@ class Nominee extends Model
     {
         return new Collection;
     }
+
+    /**
+     * Seleções (JudgeSelection) dos julgadores para esta inscrição honorífica (spec 0003).
+     *
+     * Caminho: Nominee -> judge_selections (morph `inscription`).
+     */
+    public function judgeSelections(): \Illuminate\Database\Eloquent\Relations\MorphMany
+    {
+        return $this->morphMany(JudgeSelection::class, 'inscription');
+    }
 }

@@ -1,0 +1,20 @@
+{
+    "servers": {
+        "laravel-boost": {
+            "command": "php",
+            "args": [
+                "artisan",
+                "boost:mcp"
+            ]
+        },
+        "herd": {
+            "command": "php",
+            "args": [
+                "C:/Users/Eduardo/.config/herd/bin/herd-mcp.phar"
+            ],
+            "env": {
+                "SITE_PATH": "D:\\DEV\\laravel11-docker\\ibict\\sysamazonia"
+            }
+        }
+    }
+}

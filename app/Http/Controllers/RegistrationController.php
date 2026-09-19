@@ -21,23 +21,24 @@ class RegistrationController extends Controller
     public function index(Request $request)
     {
 
+
         $user = Auth::user();
         $editions = Edition::all();
         $page = $request->input('page', 1);
-        $perPage = 15;
+        $perPage = 10;
 
         // Query para Registration
-        $registrationQuery = Registration::with(['candidate', 'category.modality.edition', 'files', 'opinions']);
+        $registrationQuery = Registration::with(['candidate', 'category.modality.edition', 'files','opinions']);
         $nomineeQuery = Nominee::with(['candidate', 'category.modality.edition', 'files']);
 
         $registrationQuery = $this->setIndexFilters($registrationQuery, $request);
         $nomineeQuery = $this->setIndexFilters($nomineeQuery, $request);
 
-        if ($user->isEvaluator()) {
+        if ($user->isEvaluator() ) {
             $registrationQuery = $this->filterEvaluatorCategories($registrationQuery, $user);
         }
 
-        if ($user->isIndicator()) {
+        if($user->isIndicator()) {
             $registrationQuery = $this->filterIndicatorCategories($registrationQuery, $user);
         }
 
@@ -47,6 +48,7 @@ class RegistrationController extends Controller
         if ($user->isEvaluator() || $user->isIndicator()) {
             $nominees = Collection::empty();
         }
+
 
         // Combinar os resultados
         $allItems = $registrations->merge($nominees);
@@ -101,12 +103,11 @@ class RegistrationController extends Controller
         return $query;
     }
 
-    private function filterIndicatorCategories($query, $user)
-    {
+    private function filterIndicatorCategories($query, $user){
         $query->whereHas('category', function ($q) use ($user) {
             $q->whereIn('id', $user->indicatorCategories()->pluck('categories.id'))
                 ->where('is_honorific', false)
-                ->where(function ($cat) {
+                ->where(function($cat){
                     $cat->whereRaw('(
                             SELECT COUNT(*)
                             FROM indications
@@ -115,28 +116,27 @@ class RegistrationController extends Controller
                 });
         });
 
-        //     // somente das edições ativar para Avaliador
+    //     // somente das edições ativar para Avaliador
         $query->whereHas('category.modality.edition', function ($q) {
             $q->where('is_registration_active', true);
         });
 
-        //     // não mostra as inscrições que já avaliou
-        $query->whereDoesntHave('indications', function ($q) use ($user) {
+    //     // não mostra as inscrições que já avaliou
+       $query->whereDoesntHave('indications', function ($q) use ($user) {
             $q->where('user_id', $user->id);
         });
 
         $query->where('status', RegistrationStatusEnum::Habilitado)->orWhere('status', RegistrationStatusEnum::Avaliado);
-
         return $query;
     }
 
     private function filterEvaluatorCategories($query, $user)
     {
-        // somente das categorias do usuário logado
+        //somente das categorias do usuário logado
         $query->whereHas('category', function ($q) use ($user) {
             $q->whereIn('id', $user->evaluatorCategories()->pluck('categories.id'))
                 ->where('is_honorific', false)
-                ->where(function ($cat) {
+                ->where(function($cat){
                     $cat->whereRaw('(
                             SELECT COUNT(*)
                             FROM opinions
@@ -151,7 +151,7 @@ class RegistrationController extends Controller
         });
 
         // não mostra as inscrições que já avaliou
-        $query->whereDoesntHave('opinions', function ($q) use ($user) {
+       $query->whereDoesntHave('opinions', function ($q) use ($user) {
             $q->where('user_id', $user->id);
         });
 
@@ -261,22 +261,23 @@ class RegistrationController extends Controller
         return response()->json(['message' => 'Usuário sem permissão'], 419);
     }
 
+
     public function indicar($id)
     {
-
+        
         $registration = Registration::findOrFail($id);
         $user = auth()->user();
         if ($user->isIndicator()) {
             try {
                 $justificativa = request('justificativa');
-                DB::transaction(function () use ($user, $registration, $justificativa) {
+                DB::transaction(function () use ($user, $registration,$justificativa) {
                     $registration->indications()->create([
                         'user_id' => $user->id,
                         'descricao' => $justificativa,
                     ]);
-                });
+            });
 
-                return response()->json(['message' => 'Registro Indicado'], 200);
+            return response()->json(['message' => 'Registro Indicado'], 200);
             } catch (\Throwable $th) {
                 return response()->json(['message' => 'Erro na operação'], 400);
             }
