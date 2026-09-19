@@ -85,6 +85,17 @@ class AiSettingsController extends Controller
         $synchronous = $validated['mode'] === 'sync';
         $result = $operations->start($executionType, $synchronous, $synchronous ? 1 : null);
 
-        return back()->with('success', "Operação iniciada: {$result['started']} registro(s); {$result['completed']} concluído(s) sincronamente.");
+        $redirect = to_route('admin.ai-settings.index', ['tab' => 'operations']);
+        if ($result['started'] === 0) {
+            return $redirect->with('success', 'Nenhum registro disponível para processamento.');
+        }
+        if (! $synchronous) {
+            return $redirect->with('success', "{$result['started']} registro(s) encaminhado(s) à fila. Acompanhe em Execuções recentes.");
+        }
+        if ($result['completed'] < $result['started']) {
+            return $redirect->with('error', 'A avaliação não foi concluída. Consulte o status e o motivo em Execuções recentes.');
+        }
+
+        return $redirect->with('success', "{$result['completed']} avaliação(ões) concluída(s).");
     }
 }

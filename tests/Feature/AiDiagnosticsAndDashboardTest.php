@@ -142,6 +142,20 @@ class AiDiagnosticsAndDashboardTest extends TestCase
         $this->get(route('admin.ai-settings.index'))->assertOk()->assertViewHas('tab', 'configuration');
     }
 
+    public function test_processing_feedback_distinguishes_queue_success_and_incomplete_result(): void
+    {
+        $this->actingAs($this->admin())->withSession(['_token' => 'csrf-test']);
+        foreach ([['sync', 1, 0, 'error'], ['sync', 1, 1, 'success'], ['async', 1, 0, 'success'], ['sync', 0, 0, 'success']] as [$mode, $started, $completed, $flash]) {
+            $this->mock(\App\Services\Ai\AiPendingOperations::class, function ($mock) use ($mode, $started, $completed) {
+                $mock->shouldReceive('start')->once()->with(\App\Enum\AiExecutionType::TechnicalEvaluation, $mode === 'sync', $mode === 'sync' ? 1 : null)
+                    ->andReturn(compact('started', 'completed'));
+            });
+            $response = $this->post(route('admin.ai-settings.process', 'technical'), ['mode' => $mode, '_token' => 'csrf-test']);
+            $response->assertRedirect(route('admin.ai-settings.index', ['tab' => 'operations']))->assertSessionHas($flash);
+            $this->assertStringNotContainsString('sincronamente', $response->getSession()->get($flash));
+        }
+    }
+
     public function test_invalid_settings_never_flash_api_key(): void
     {
         $admin = $this->admin();
