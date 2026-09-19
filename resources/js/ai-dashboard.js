@@ -1,3 +1,5 @@
+import './ai-settings';
+
 async function renderAiDashboard() {
     const data = document.getElementById('ai-metrics-data');
     if (!data) return;

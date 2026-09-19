@@ -22,16 +22,28 @@ class AiSettingsController extends Controller
     {
         $resolved = $settings->current();
         $model = AiSetting::query()->first();
-        $counts = AiExecution::query()->selectRaw('status, count(*) total')->groupBy('status')->pluck('total', 'status');
+        $tab = $request->query('tab', 'progress');
+        if (! in_array($tab, ['progress', 'configuration', 'operations', 'executions'], true)) {
+            $tab = 'progress';
+        }
+        if ($request->session()->get('errors')?->any()) {
+            $tab = 'configuration';
+        }
+        $statusFilter = in_array($request->query('status'), ['pending', 'processing', 'completed', 'failed'], true) ? $request->query('status') : '';
+        $typeFilter = in_array($request->query('type'), ['technical_evaluation', 'strategic_selection'], true) ? $request->query('type') : '';
+        $recent = $tab === 'executions' ? AiExecution::query()
+            ->when($statusFilter, fn ($query) => $query->where('status', $statusFilter))
+            ->when($typeFilter, fn ($query) => $query->where('type', $typeFilter))
+            ->orderByDesc('updated_at')->orderByDesc('id')->paginate(15)->withQueryString() : null;
 
         return view('admin.ai-settings.index', [
             'settings' => $resolved, 'keyStatus' => $settings->maskedKey($model),
-            'users' => User::query()->orderBy('name')->get(['id', 'name', 'email']),
-            'counts' => $counts, 'recent' => AiExecution::query()->latest()->limit(10)->get(),
-            'technicalPending' => $operations->candidates(AiExecutionType::TechnicalEvaluation),
-            'selectionPending' => $operations->candidates(AiExecutionType::StrategicSelection),
-            'health' => $diagnostics->check($resolved),
-            'metrics' => $metrics->forDays((int) $request->input('days', 30)),
+            'users' => $tab === 'configuration' ? User::query()->orderBy('name')->get(['id', 'name', 'email']) : collect(),
+            'tab' => $tab, 'recent' => $recent, 'statusFilter' => $statusFilter, 'typeFilter' => $typeFilter,
+            'technicalPending' => $tab === 'operations' ? $operations->candidates(AiExecutionType::TechnicalEvaluation) : collect(),
+            'selectionPending' => $tab === 'operations' ? $operations->candidates(AiExecutionType::StrategicSelection) : collect(),
+            'health' => $tab === 'operations' ? $diagnostics->check($resolved) : null,
+            'metrics' => $tab === 'progress' ? $metrics->forDays((int) $request->input('days', 30)) : null,
             'models' => Cache::get('ai.models.'.($resolved->versionId ?? 'fallback'), []),
         ]);
     }
@@ -40,14 +52,14 @@ class AiSettingsController extends Controller
     {
         $settings->update($request->validated(), $request->user());
 
-        return back()->with('success', 'Configurações de IA atualizadas com segurança.');
+        return to_route('admin.ai-settings.index', ['tab' => 'configuration'])->with('success', 'Configurações de IA atualizadas com segurança.');
     }
 
     public function testConnection(AiSettingsService $settings, AiServiceDiagnostics $diagnostics): RedirectResponse
     {
         $result = $diagnostics->check($settings->current(), 'test');
 
-        return back()->with($result['ok'] ? 'success' : 'error', $result['ok'] ? 'Provider conectado; modelo acessível. Teste de metadados sem inferência.' : $result['message']);
+        return to_route('admin.ai-settings.index', ['tab' => 'operations'])->with($result['ok'] ? 'success' : 'error', $result['ok'] ? 'Provedor conectado; modelo acessível. Teste de metadados sem inferência.' : $result['message']);
     }
 
     public function refreshModels(AiSettingsService $settings, AiServiceDiagnostics $diagnostics): RedirectResponse
@@ -55,14 +67,14 @@ class AiSettingsController extends Controller
         $resolved = $settings->current();
         $key = 'ai.models.'.($resolved->versionId ?? 'fallback');
         if (Cache::has($key)) {
-            return back()->with('success', 'Lista de modelos em cache (5 minutos). Modelo manual continua disponível.');
+            return to_route('admin.ai-settings.index', ['tab' => 'configuration'])->with('success', 'Lista de modelos em cache (5 minutos). Modelo manual continua disponível.');
         }
         $result = $diagnostics->check($resolved, 'models');
         if ($result['ok']) {
             Cache::put($key, $result['models'], 300);
         }
 
-        return back()->with($result['ok'] ? 'success' : 'error', $result['ok'] ? 'Modelos atualizados. Se necessário, informe outro modelo manualmente.' : $result['message']);
+        return to_route('admin.ai-settings.index', ['tab' => 'configuration'])->with($result['ok'] ? 'success' : 'error', $result['ok'] ? 'Modelos atualizados. Se necessário, informe outro modelo manualmente.' : $result['message']);
     }
 
     public function process(Request $request, string $type, AiPendingOperations $operations): RedirectResponse

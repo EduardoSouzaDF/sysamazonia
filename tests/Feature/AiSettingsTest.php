@@ -39,7 +39,7 @@ class AiSettingsTest extends TestCase
         $setting = AiSetting::query()->firstOrFail();
         $this->assertSame($secret, $setting->api_key);
         $this->assertNotSame($secret, DB::table('ai_settings')->value('api_key'));
-        $this->actingAs($admin)->get(route('admin.ai-settings.index'))->assertOk()->assertDontSee($secret)->assertSee('••••AB12', false);
+        $this->actingAs($admin)->get(route('admin.ai-settings.index', ['tab' => 'configuration']))->assertOk()->assertDontSee($secret)->assertSee('••••AB12', false);
     }
 
     public function test_blank_key_keeps_existing_key_and_prompt_changes_create_versions(): void

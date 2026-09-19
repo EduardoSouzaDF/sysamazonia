@@ -88,16 +88,58 @@ class AiDiagnosticsAndDashboardTest extends TestCase
         $this->travelBack();
     }
 
-    public function test_ui_smoke_has_provider_options_separate_automation_blocks_and_chart_order(): void
+    public function test_tabs_load_only_their_content_and_diagnostics_on_demand(): void
     {
         $admin = $this->admin();
         Http::fake(['*' => Http::response(['status' => 'ok'])]);
         $this->actingAs($admin)->get(route('admin.ai-settings.index'))->assertOk()
+            ->assertViewHas('tab', 'progress')->assertSee('ai-metrics-data')
+            ->assertDontSee('name="technical_prompt"', false);
+        $this->get(route('admin.ai-settings.index', ['tab' => 'configuration']))->assertOk()
             ->assertSeeInOrder(['Avaliador IA', 'Avaliação técnica por IA', 'Indicador IA', 'Indicação estratégica por IA'])
-            ->assertSeeInOrder(['Pendentes por status', 'Andamento das avaliações', 'Execuções recentes'])
-            ->assertSee('Anthropic Claude')->assertSee('Groq')->assertSee('Base URL')
-            ->assertDontSee(str_repeat('t', 48));
+            ->assertSee('Anthropic Claude')->assertSee('Groq')->assertSee('URL do serviço')
+            ->assertDontSee('ai-metrics-data')->assertDontSee(str_repeat('t', 48));
+        $this->get(route('admin.ai-settings.index', ['tab' => 'executions']))->assertOk()
+            ->assertSee('Nenhuma execução encontrada');
+        Http::assertNothingSent();
+        $this->get(route('admin.ai-settings.index', ['tab' => 'operations']))->assertOk()
+            ->assertSee('Diagnóstico da conexão')->assertSee('Avaliações técnicas')->assertSee('Seleção estratégica');
+        Http::assertSentCount(1);
         $this->actingAs(User::factory()->create())->withSession(['_token' => 'csrf-test'])->post(route('admin.ai-settings.models'), ['_token' => 'csrf-test'])->assertForbidden();
+    }
+
+    public function test_execution_history_filters_paginates_and_escapes_errors(): void
+    {
+        $this->createExecutionFixtures();
+        $failed = DB::table('ai_executions')->where('status', 'failed')->first();
+        DB::table('ai_executions')->where('id', $failed->id)->update([
+            'error_code' => 'PROVIDER_INVALID_RESPONSE', 'error_message' => '<script>alert(1)</script>',
+        ]);
+        for ($i = 0; $i < 16; $i++) {
+            $row = (array) $failed;
+            unset($row['id']);
+            $row['correlation_id'] = (string) str()->uuid();
+            $row['prompt_version'] = 'pagination_'.$i;
+            DB::table('ai_executions')->insert($row);
+        }
+        $response = $this->actingAs($this->admin())->get(route('admin.ai-settings.index', [
+            'tab' => 'executions', 'status' => 'failed', 'type' => 'technical_evaluation',
+        ]))->assertOk()->assertViewHas('recent', fn ($recent) => $recent->total() === 17 && $recent->count() === 15);
+        $this->assertStringContainsString('status=failed', $response->viewData('recent')->nextPageUrl());
+        $this->assertStringContainsString('tab=executions', $response->viewData('recent')->nextPageUrl());
+        $this->get(route('admin.ai-settings.index', ['tab' => 'executions', 'status' => 'failed', 'page' => 2]))
+            ->assertOk()->assertSee('PROVIDER_INVALID_RESPONSE')->assertSee('<script>alert(1)</script>')
+            ->assertDontSee('<script>alert(1)</script>', false);
+    }
+
+    public function test_invalid_tab_falls_back_and_validation_errors_open_configuration(): void
+    {
+        $this->actingAs($this->admin())->get(route('admin.ai-settings.index', ['tab' => 'unknown']))
+            ->assertOk()->assertViewHas('tab', 'progress');
+        $this->withSession(['_token' => 'csrf-test'])->from(route('admin.ai-settings.index'))
+            ->put(route('admin.ai-settings.update'), ['_token' => 'csrf-test', 'provider' => 'invalid'])
+            ->assertSessionHasErrors('provider');
+        $this->get(route('admin.ai-settings.index'))->assertOk()->assertViewHas('tab', 'configuration');
     }
 
     public function test_invalid_settings_never_flash_api_key(): void
