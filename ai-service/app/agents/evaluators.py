@@ -49,6 +49,7 @@ class AgnoEvaluator:
     def selection(self, request: SelectionRequest) -> SelectionResult:
         configured_model = self._provider_factory.create("selection", request.runtime)
         instructions = self._instructions(SELECTION_PROMPT, request.runtime.prompt if request.runtime else None)
+        instructions += "\n- A justificativa da decisão deve conter entre 50 e 150 palavras e no máximo 2000 caracteres."
         instructions += self._knowledge(request.runtime.knowledge_version if request.runtime else None)
         result = self._run(configured_model, instructions, request, SelectionResult)
         validated = SelectionResult.model_validate(result)
