@@ -1,4 +1,5 @@
 import json
+import logging
 from typing import TypeVar
 
 from agno.agent import Agent
@@ -6,7 +7,7 @@ from agno.exceptions import ModelProviderError
 from app.provider_diagnostics import ProviderError
 from app.safe_logging import configure_safe_logging
 
-from pydantic import BaseModel
+from pydantic import BaseModel, ValidationError
 
 from app.config import Settings
 from app.knowledge import approved_knowledge_context
@@ -15,6 +16,7 @@ from app.prompts import SELECTION_PROMPT, SELECTION_PROMPT_VERSION, TECHNICAL_PR
 from app.schemas import SelectionRequest, SelectionResult, TechnicalEvaluationRequest, TechnicalEvaluationResult
 
 configure_safe_logging()
+logger = logging.getLogger(__name__)
 
 ResultT = TypeVar("ResultT", bound=BaseModel)
 
@@ -91,11 +93,26 @@ class AgnoEvaluator:
         )
         try:
             response = agent.run(message)
+            if isinstance(response.content, str):
+                return schema.model_validate_json(response.content)
             return schema.model_validate(response.content)
         except ModelProviderError as error:
             codes = {401: 'PROVIDER_UNAUTHORIZED', 403: 'PROVIDER_FORBIDDEN', 404: 'MODEL_NOT_FOUND', 429: 'PROVIDER_RATE_LIMIT'}
             raise ProviderError(codes.get(getattr(error, 'status_code', None), 'PROVIDER_UNAVAILABLE')) from None
-        except Exception:
+        except ValidationError as error:
+            # Never log input, messages, context or unknown field names supplied by the provider.
+            fields = set(schema.model_fields) | {"criterio_id", "nota", "justificativa"}
+            failures = [
+                {
+                    "field": ".".join(str(part) if isinstance(part, int) or part in fields else "unknown" for part in item["loc"]),
+                    "type": item["type"],
+                }
+                for item in error.errors(include_input=False, include_context=False, include_url=False)
+            ]
+            logger.warning("AI response validation failed schema=%s correlation_id=%s errors=%s", schema.__name__, request.correlation_id, failures)
+            raise ProviderError('PROVIDER_INVALID_RESPONSE') from None
+        except Exception as error:
+            logger.warning("AI response processing failed schema=%s correlation_id=%s exception_type=%s", schema.__name__, request.correlation_id, type(error).__name__)
             raise ProviderError('PROVIDER_INVALID_RESPONSE') from None
         finally:
             client = getattr(configured_model.model, 'http_client', None)

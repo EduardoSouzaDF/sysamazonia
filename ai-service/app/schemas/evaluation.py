@@ -3,6 +3,7 @@ from typing import Literal
 from uuid import UUID
 
 from pydantic import BaseModel, ConfigDict, Field, field_validator, model_validator
+from pydantic_core import PydanticCustomError
 
 
 def word_count(value: str) -> int:
@@ -46,7 +47,7 @@ class CriterionEvaluation(StrictModel):
     @classmethod
     def valid_justification_length(cls, value: str) -> str:
         if not 50 <= word_count(value) <= 150:
-            raise ValueError("justificativa deve conter entre 50 e 150 palavras")
+            raise PydanticCustomError("justification_word_count", "justificativa deve conter entre 50 e 150 palavras")
         return value
 
 
@@ -136,5 +137,5 @@ class SelectionResult(StrictModel):
     @classmethod
     def valid_justification_length(cls, value: str) -> str:
         if not 50 <= word_count(value) <= 150:
-            raise ValueError("justificativa deve conter entre 50 e 150 palavras")
+            raise PydanticCustomError("justification_word_count", "justificativa deve conter entre 50 e 150 palavras")
         return value
