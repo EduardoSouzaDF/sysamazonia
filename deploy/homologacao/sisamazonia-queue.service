@@ -1,0 +1,22 @@
+[Unit]
+Description=Sisamazonia homologacao - filas Laravel
+After=network-online.target sisamazonia-ai.service
+Wants=network-online.target
+
+[Service]
+Type=simple
+User=www-data
+Group=www-data
+WorkingDirectory=/var/www/sisamazonia
+ExecStart=/usr/bin/php8.4 /var/www/sisamazonia/artisan queue:work database --queue=ai-evaluations,default --sleep=3 --tries=3 --timeout=70 --max-time=3600
+Restart=always
+RestartSec=5
+KillSignal=SIGTERM
+KillMode=control-group
+TimeoutStopSec=90
+UMask=0002
+NoNewPrivileges=true
+PrivateTmp=true
+
+[Install]
+WantedBy=multi-user.target
