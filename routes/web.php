@@ -9,6 +9,7 @@ use App\Http\Controllers\EvaluationCriterionController;
 use App\Http\Controllers\JudgingController;
 use App\Http\Controllers\ModalityController;
 use App\Http\Controllers\RegistrationController;
+use App\Http\Controllers\RegistrationReportController;
 use App\Http\Controllers\UserController;
 use App\Http\Middleware\CheckAdmin;
 use App\Http\Middleware\CheckJudge;
@@ -129,6 +130,9 @@ Route::middleware('auth')->group(function () {
         Route::post('/ai-settings/test', [AiSettingsController::class, 'testConnection'])->middleware([...$middleware, 'throttle:5,1'])->name('admin.ai-settings.test');
         Route::post('/ai-settings/process/{type}', [AiSettingsController::class, 'process'])->whereIn('type', ['technical', 'selection'])->middleware($middleware)->name('admin.ai-settings.process');
 
+        Route::get('/registration-reports', [RegistrationReportController::class, 'index'])->middleware($middleware)->name('admin.registration-reports.index');
+        Route::post('/registration-reports', [RegistrationReportController::class, 'generate'])->middleware($middleware)->name('admin.registration-reports.generate');
+
     });
 
     // Painel do julgador (fora do back-office admin; acesso por is_judge — spec 0002;
@@ -141,10 +145,4 @@ Route::middleware('auth')->group(function () {
             ->name('panel.julgar.store');
     });
 
-});
-
-Route::middleware(['auth', CheckAdmin::class.':admin'])->prefix('admin/analytics')->name('admin.analytics.')->group(function () {
-    Route::get('/', [\App\Http\Controllers\AnalyticsController::class, 'index'])->name('index');
-    Route::post('/query', [\App\Http\Controllers\AnalyticsController::class, 'query'])->middleware('throttle:20,1')->name('query');
-    Route::delete('/context', [\App\Http\Controllers\AnalyticsController::class, 'clear'])->name('clear');
 });

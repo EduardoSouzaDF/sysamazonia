@@ -64,7 +64,6 @@ class MenuBuilder
             [
                 'heading' => 'Relatórios',
             ],
-            ['title' => 'Assistente de Dados', 'icon' => 'ki-abstract-45', 'route' => 'admin.analytics.index'],
             [
                 'title' => 'Dashboard',
                 'icon' => 'ki-abstract-45',
@@ -102,6 +101,11 @@ class MenuBuilder
             ],
             [
                 'heading' => 'Tarefas Sincronizadas',
+            ],
+            [
+                'title' => 'Relatórios de Inscrições',
+                'icon' => 'ki-document',
+                'route' => 'admin.registration-reports.index',
             ],
             [
                 'title' => 'Agente IA',

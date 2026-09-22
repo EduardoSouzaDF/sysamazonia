@@ -7,8 +7,6 @@ from fastapi.exceptions import RequestValidationError
 from fastapi.responses import JSONResponse
 from pydantic import ValidationError
 
-from app.schemas.analytics import AnalyticsPlan, AnalyticsRequest
-from app.agents.analytics import interpret
 from app.agents import AgnoEvaluator
 from app.config import Settings, get_settings
 from app.provider_diagnostics import ProviderError, provider_models
@@ -114,8 +112,3 @@ def provider_error(_request: Request, exception: ProviderError) -> JSONResponse:
 @app.post("/v1/configuration/models", dependencies=[Depends(authorize)])
 def list_models(payload: RuntimeConfiguration, settings: Settings = Depends(validated_settings)):
     return {"models": provider_models(LlmProviderFactory(settings), payload)}
-
-
-@app.post('/v1/analytics/plan', response_model=AnalyticsPlan, response_model_exclude_none=True, dependencies=[Depends(authorize)])
-def analytics_plan(payload: AnalyticsRequest, service: AgnoEvaluator = Depends(evaluator)) -> AnalyticsPlan:
-    return interpret(payload, service)
