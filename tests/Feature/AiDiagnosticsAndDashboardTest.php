@@ -102,8 +102,8 @@ class AiDiagnosticsAndDashboardTest extends TestCase
         $this->get(route('admin.ai-settings.index', ['tab' => 'executions']))->assertOk()
             ->assertSee('Nenhuma execução encontrada');
         Http::assertNothingSent();
-        $this->get(route('admin.ai-settings.index', ['tab' => 'operations']))->assertOk()
-            ->assertSee('Diagnóstico da conexão')->assertSee('Avaliações técnicas')->assertSee('Seleção estratégica');
+        $this->get(route('admin.ai-settings.index', ['tab' => 'problems']))->assertOk()
+            ->assertSee('Problemas e diagnóstico')->assertSee('Conectividade');
         Http::assertSentCount(1);
         $this->actingAs(User::factory()->create())->withSession(['_token' => 'csrf-test'])->post(route('admin.ai-settings.models'), ['_token' => 'csrf-test'])->assertForbidden();
     }
@@ -151,7 +151,7 @@ class AiDiagnosticsAndDashboardTest extends TestCase
                     ->andReturn(compact('started', 'completed'));
             });
             $response = $this->post(route('admin.ai-settings.process', 'technical'), ['mode' => $mode, '_token' => 'csrf-test']);
-            $response->assertRedirect(route('admin.ai-settings.index', ['tab' => 'operations']))->assertSessionHas($flash);
+            $response->assertRedirect(route('admin.ai-settings.index', ['tab' => 'evaluations']))->assertSessionHas($flash);
             $this->assertStringNotContainsString('sincronamente', $response->getSession()->get($flash));
         }
     }

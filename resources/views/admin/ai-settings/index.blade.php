@@ -7,14 +7,14 @@
         <div class="ai-provider"><span class="kt-badge kt-badge-outline">{{ config('ai_evaluation.providers.'.$settings->provider, $settings->provider) }}</span><span class="text-sm">{{ $settings->model ?: 'Modelo não configurado' }}</span></div>
     </header>
     <nav class="kt-tabs kt-tabs-line ai-tabs" aria-label="Seções de configurações de IA">
-        @foreach(['progress' => ['Andamento das avaliações', 'chart-simple'], 'configuration' => ['Configuração do LLM', 'setting-2'], 'operations' => ['Diagnóstico e processamento', 'pulse'], 'executions' => ['Execuções recentes', 'time']] as $key => [$label, $icon])
+        @foreach(['progress' => ['Andamento', 'chart-simple'], 'evaluations' => ['Avaliações', 'notepad-edit'], 'indications' => ['Indicações', 'award'], 'problems' => ['Problemas', 'information-2'], 'configuration' => ['Configuração IA', 'setting-2'], 'executions' => ['Auditoria', 'time']] as $key => [$label, $icon])
             <a class="kt-tab-toggle {{ $tab === $key ? 'active' : '' }}" href="{{ route('admin.ai-settings.index', ['tab' => $key]) }}" @if($tab === $key) aria-current="page" @endif><i class="ki-filled ki-{{ $icon }}" aria-hidden="true"></i>{{ $label }}</a>
         @endforeach
     </nav>
     @if(session('success')) <div class="kt-alert kt-alert-success" role="status">{{ session('success') }}</div> @endif
     @if(session('error')) <div class="kt-alert kt-alert-danger" role="alert">{{ session('error') }}</div> @endif
     @if($errors->any()) <div class="kt-alert kt-alert-danger" role="alert"><ul>@foreach($errors->all() as $error)<li>{{ $error }}</li>@endforeach</ul></div> @endif
-    @include('admin.ai-settings.'.['progress' => 'metrics', 'configuration' => 'configuration', 'operations' => 'operations', 'executions' => 'executions'][$tab])
+    @include('admin.ai-settings.'.['progress' => 'metrics', 'evaluations' => 'evaluations', 'indications' => 'indications', 'problems' => 'problems', 'configuration' => 'configuration', 'executions' => 'executions'][$tab])
 </div>
 @endsection
 

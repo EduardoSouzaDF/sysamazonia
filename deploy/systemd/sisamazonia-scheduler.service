@@ -1,0 +1,16 @@
+[Unit]
+Description=Sisamazonia Laravel scheduler
+After=network.target
+
+[Service]
+Type=simple
+WorkingDirectory=/var/www/projetos/app_amazonia.local
+ExecStart=/usr/bin/php artisan schedule:work
+Restart=always
+RestartSec=5
+KillMode=control-group
+TimeoutStopSec=30
+NoNewPrivileges=true
+
+[Install]
+WantedBy=default.target

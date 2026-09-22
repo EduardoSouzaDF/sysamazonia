@@ -4,6 +4,7 @@ use App\Enum\AiExecutionType;
 use App\Services\Ai\AiPendingOperations;
 use Illuminate\Foundation\Inspiring;
 use Illuminate\Support\Facades\Artisan;
+use Illuminate\Support\Facades\Schedule;
 
 Artisan::command('inspire', function () {
     $this->comment(Inspiring::quote());
@@ -30,3 +31,13 @@ Artisan::command('ai:select-avaliados {--dispatch}', function (AiPendingOperatio
 
     return self::SUCCESS;
 });
+
+Artisan::command('ai:reconcile', function (AiPendingOperations $operations): int {
+    $technical = $operations->start(AiExecutionType::TechnicalEvaluation);
+    $selection = $operations->start(AiExecutionType::StrategicSelection);
+    $this->info("Reconciliação concluída: {$technical['started']} avaliação(ões) e {$selection['started']} indicação(ões) enviadas.");
+
+    return self::SUCCESS;
+})->purpose('Reconcilia e envia automaticamente operações de IA pendentes');
+
+Schedule::command('ai:reconcile')->everyMinute()->withoutOverlapping(5);

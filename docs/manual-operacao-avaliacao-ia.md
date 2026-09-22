@@ -9,6 +9,22 @@ Este manual apresenta a operação diária do ambiente de avaliação por inteli
 
 A IA auxilia o processo, mas o sistema continua controlando permissões, critérios, escalas, quórum, status e prevenção de duplicidades. Resultados importantes devem ser acompanhados pela equipe responsável.
 
+### Modos por categoria
+
+Cada categoria pode definir, de forma independente, a política da avaliação técnica e da indicação estratégica:
+
+- **Somente humano:** bloqueia a produção correspondente pela IA;
+- **Somente IA:** bloqueia o lançamento humano e exige uma execução válida da IA;
+- **Humano + IA:** o fluxo somente avança quando as quantidades humana e IA forem atendidas.
+
+Categorias **honoríficas** não participam da avaliação técnica nem da indicação estratégica, humana ou por IA. Elas permanecem disponíveis somente no fluxo próprio de nomeações e julgamento honorífico.
+
+Categorias criadas antes dessa funcionalidade permanecem na regra histórica de quantidade total até serem salvas novamente. A indicação por IA não depende de a avaliação técnica por IA estar ativa; é possível, por exemplo, usar avaliação humana e indicação estratégica por IA.
+
+O painel administrativo abre em **Andamento** e separa **Avaliações**, **Indicações**, **Problemas**, **Configuração IA** e **Auditoria**. Pendências humanas e da IA são apresentadas separadamente.
+
+Além do disparo por mudança de status, `ai:reconcile` verifica operações elegíveis a cada minuto. Em instalações com systemd, mantenha ativos `sisamazonia-queue.service` e `sisamazonia-scheduler.service`. A reconciliação repete apenas falhas transitórias, respeitando o limite de tentativas; erros permanentes exigem correção da configuração.
+
 ## 2. Perfis envolvidos
 
 | Perfil | Responsabilidade |
@@ -29,13 +45,13 @@ Conferência pela comissão
         ↓
 Inscrição habilitada
         ↓
-Avaliação técnica por IA
+Avaliação técnica conforme a política da categoria
         ↓
 Quórum técnico atingido
         ↓
 Inscrição avaliada
         ↓
-Seleção estratégica por IA
+Indicação estratégica conforme a política da categoria
         ↓
 Indicada ou não indicada
 ```

@@ -4,8 +4,8 @@ namespace App\Services\Ai;
 
 use App\Data\Ai\EvaluationRequestData;
 use App\Data\Ai\EvaluationResultData;
-use App\Data\Ai\SelectionResultData;
 use App\Data\Ai\SelectionRequestData;
+use App\Data\Ai\SelectionResultData;
 use App\Enum\AiExecutionStatus;
 use App\Exceptions\Ai\NonRetryableAiException;
 use App\Models\AiExecution;
@@ -77,6 +77,7 @@ class AiExecutionManager
                 $registration,
                 User::query()->findOrFail($result->evaluatorId),
                 $scores,
+                true,
             );
 
             $locked->update([
@@ -127,6 +128,7 @@ class AiExecutionManager
             ], [
                 'decision' => $result->decision,
                 'descricao' => $result->justification,
+                'source' => 'ai',
             ]);
             $locked->update([
                 'indication_id' => $indication->id,

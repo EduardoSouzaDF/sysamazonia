@@ -16,19 +16,20 @@ class OpinionSubmissionService
     /**
      * @param  array<int, array{criterion_id: int, score: int, justification: string}>  $scores
      */
-    public function submit(Registration $registration, User $evaluator, array $scores): Opinion
+    public function submit(Registration $registration, User $evaluator, array $scores, bool $isAi = false): Opinion
     {
-        return DB::transaction(function () use ($registration, $evaluator, $scores): Opinion {
+        return DB::transaction(function () use ($registration, $evaluator, $scores, $isAi): Opinion {
             $lockedRegistration = Registration::query()
                 ->with(['category.evaluationCriteria', 'category.evaluators'])
                 ->lockForUpdate()
                 ->findOrFail($registration->id);
 
-            $this->validateSubmission($lockedRegistration, $evaluator, $scores);
+            $this->validateSubmission($lockedRegistration, $evaluator, $scores, $isAi);
 
             $opinion = Opinion::query()->create([
                 'user_id' => $evaluator->id,
                 'registration_id' => $lockedRegistration->id,
+                'source' => $isAi ? 'ai' : 'human',
             ]);
 
             foreach ($scores as $score) {
@@ -49,7 +50,7 @@ class OpinionSubmissionService
     /**
      * @param  array<int, array{criterion_id: int, score: int, justification: string}>  $scores
      */
-    private function validateSubmission(Registration $registration, User $evaluator, array $scores): void
+    private function validateSubmission(Registration $registration, User $evaluator, array $scores, bool $isAi): void
     {
         if ((int) $registration->status !== RegistrationStatusEnum::Habilitado->value) {
             throw ValidationException::withMessages(['registration' => 'A inscrição não está habilitada para avaliação.']);
@@ -57,6 +58,21 @@ class OpinionSubmissionService
 
         if (! $registration->category->evaluators->contains('id', $evaluator->id)) {
             throw ValidationException::withMessages(['evaluator' => 'O usuário não é avaliador autorizado desta categoria.']);
+        }
+
+        if ($registration->category->is_honorific) {
+            throw ValidationException::withMessages([
+                'category' => 'Categorias honoríficas não passam pelo processo de avaliação técnica.',
+            ]);
+        }
+
+        if ($registration->category->evaluation_mode !== null
+            && ($isAi ? ! $registration->category->allowsAiEvaluation() : ! $registration->category->allowsHumanEvaluation())) {
+            throw ValidationException::withMessages([
+                'evaluation_mode' => $isAi
+                    ? 'A política desta categoria não permite avaliação por IA.'
+                    : 'A política desta categoria não permite avaliação humana.',
+            ]);
         }
 
         $criteria = $registration->category->evaluationCriteria->keyBy('id');

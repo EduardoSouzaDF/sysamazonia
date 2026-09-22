@@ -1,0 +1,8 @@
+<section class="space-y-6">
+    <div><h2 class="text-xl font-semibold">Indicações estratégicas</h2><p class="text-sm text-secondary-foreground">A indicação IA é independente do modo usado na avaliação técnica.</p></div>
+    <div class="grid md:grid-cols-4 gap-4"><div class="kt-card p-5"><span>Pendentes humanas</span><strong class="block text-2xl">{{ $workflow['selection']['awaiting_human'] }}</strong></div><div class="kt-card p-5"><span>Pendentes IA</span><strong class="block text-2xl">{{ $workflow['selection']['awaiting_ai'] }}</strong></div><div class="kt-card p-5"><span>Indicadas</span><strong class="block text-2xl">{{ $workflow['selection']['indicated'] }}</strong></div><div class="kt-card p-5"><span>Não indicadas</span><strong class="block text-2xl">{{ $workflow['selection']['not_indicated'] }}</strong></div></div>
+    <div class="kt-card p-6 space-y-4"><div class="ai-heading"><h3 class="font-semibold">Fila automática da IA</h3><span class="kt-badge">{{ $selectionPending->count() }} disponível(is)</span></div>
+        @if($selectionPending->isNotEmpty())<ul class="space-y-2">@foreach($selectionPending->take(20) as $item)<li>#{{ $item->id }} — {{ $item->title }} <span class="text-sm text-secondary-foreground">({{ $item->category->title }})</span></li>@endforeach</ul>@else<p>Nenhuma indicação IA aguardando envio.</p>@endif
+        <form method="POST" action="{{ route('admin.ai-settings.process', 'selection') }}" onsubmit="return confirm('Confirma o envio das indicações pendentes?')">@csrf<button name="mode" value="async" class="kt-btn kt-btn-primary" @disabled($selectionPending->isEmpty())>Enviar pendentes à fila</button></form>
+    </div>
+</section>

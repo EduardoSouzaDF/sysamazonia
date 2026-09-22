@@ -20,11 +20,17 @@ class AiExecutionDispatcher
     {
         $settings = $this->settings->current();
         $evaluatorId = $type === AiExecutionType::TechnicalEvaluation ? $settings->technicalEvaluatorId : $settings->selectionEvaluatorId;
-        $enabled = $type === AiExecutionType::TechnicalEvaluation ? $settings->evaluationEnabled : ($settings->evaluationEnabled && $settings->selectionEnabled);
+        $enabled = $type === AiExecutionType::TechnicalEvaluation ? $settings->evaluationEnabled : $settings->selectionEnabled;
         if (! $enabled || $evaluatorId <= 0 || ! User::query()->whereKey($evaluatorId)->exists()) {
             return null;
         }
         $registration->loadMissing(['category.evaluators', 'category.indicators', 'category.evaluationCriteria']);
+        $allowedByPolicy = $type === AiExecutionType::TechnicalEvaluation
+            ? $registration->category->allowsAiEvaluation()
+            : $registration->category->allowsAiIndication();
+        if (! $allowedByPolicy) {
+            return null;
+        }
         $authorized = $type === AiExecutionType::TechnicalEvaluation
             ? $registration->category->evaluators->contains('id', $evaluatorId)
             : $registration->category->indicators->contains('id', $evaluatorId);

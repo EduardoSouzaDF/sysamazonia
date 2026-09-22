@@ -45,9 +45,27 @@ class EvaluationCompletionService
     public function hasRequiredQuorum(Registration $registration): bool
     {
         $registration->loadMissing('category');
-        $requiredOpinions = (int) $registration->category->evaluations_count;
+        $validOpinions = $this->validOpinions($registration);
+        $category = $registration->category;
+        if ($category->is_honorific) {
+            return false;
+        }
 
-        return $requiredOpinions > 0 && $this->validOpinions($registration)->count() >= $requiredOpinions;
+        // Categorias anteriores à política explícita mantêm exatamente a regra legada.
+        if ($category->evaluation_mode === null) {
+            $requiredOpinions = (int) $category->evaluations_count;
+
+            return $requiredOpinions > 0 && $validOpinions->count() >= $requiredOpinions;
+        }
+
+        $aiCount = $validOpinions->where('source', 'ai')->count();
+        $humanCount = $validOpinions->count() - $aiCount;
+        $requiredHuman = $category->allowsHumanEvaluation() ? (int) $category->human_evaluations_required : 0;
+        $requiredAi = $category->allowsAiEvaluation() ? (int) $category->ai_evaluations_required : 0;
+
+        return ($requiredHuman + $requiredAi) > 0
+            && $humanCount >= $requiredHuman
+            && $aiCount >= $requiredAi;
     }
 
     public function completeIfReady(Registration $registration): bool

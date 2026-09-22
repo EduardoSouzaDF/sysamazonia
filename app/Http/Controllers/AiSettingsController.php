@@ -11,6 +11,7 @@ use App\Services\Ai\AiDashboardMetrics;
 use App\Services\Ai\AiPendingOperations;
 use App\Services\Ai\AiServiceDiagnostics;
 use App\Services\Ai\AiSettingsService;
+use App\Services\Ai\AiWorkflowDashboard;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Cache;
@@ -18,12 +19,12 @@ use Illuminate\View\View;
 
 class AiSettingsController extends Controller
 {
-    public function index(Request $request, AiSettingsService $settings, AiPendingOperations $operations, AiServiceDiagnostics $diagnostics, AiDashboardMetrics $metrics): View
+    public function index(Request $request, AiSettingsService $settings, AiPendingOperations $operations, AiServiceDiagnostics $diagnostics, AiDashboardMetrics $metrics, AiWorkflowDashboard $workflow): View
     {
         $resolved = $settings->current();
         $model = AiSetting::query()->first();
         $tab = $request->query('tab', 'progress');
-        if (! in_array($tab, ['progress', 'configuration', 'operations', 'executions'], true)) {
+        if (! in_array($tab, ['progress', 'evaluations', 'indications', 'problems', 'configuration', 'executions'], true)) {
             $tab = 'progress';
         }
         if ($request->session()->get('errors')?->any()) {
@@ -40,10 +41,12 @@ class AiSettingsController extends Controller
             'settings' => $resolved, 'keyStatus' => $settings->maskedKey($model),
             'users' => $tab === 'configuration' ? User::query()->orderBy('name')->get(['id', 'name', 'email']) : collect(),
             'tab' => $tab, 'recent' => $recent, 'statusFilter' => $statusFilter, 'typeFilter' => $typeFilter,
-            'technicalPending' => $tab === 'operations' ? $operations->candidates(AiExecutionType::TechnicalEvaluation) : collect(),
-            'selectionPending' => $tab === 'operations' ? $operations->candidates(AiExecutionType::StrategicSelection) : collect(),
-            'health' => $tab === 'operations' ? $diagnostics->check($resolved) : null,
+            'technicalPending' => $tab === 'evaluations' ? $operations->candidates(AiExecutionType::TechnicalEvaluation) : collect(),
+            'selectionPending' => $tab === 'indications' ? $operations->candidates(AiExecutionType::StrategicSelection) : collect(),
+            'health' => $tab === 'problems' ? $diagnostics->check($resolved) : null,
             'metrics' => $tab === 'progress' ? $metrics->forDays((int) $request->input('days', 30)) : null,
+            'workflow' => in_array($tab, ['progress', 'evaluations', 'indications', 'problems'], true) ? $workflow->summary($resolved) : null,
+            'recentProblems' => $tab === 'problems' ? AiExecution::query()->whereIn('status', ['failed', 'processing'])->latest('updated_at')->limit(20)->get() : collect(),
             'models' => Cache::get('ai.models.'.($resolved->versionId ?? 'fallback'), []),
         ]);
     }
@@ -59,7 +62,7 @@ class AiSettingsController extends Controller
     {
         $result = $diagnostics->check($settings->current(), 'test');
 
-        return to_route('admin.ai-settings.index', ['tab' => 'operations'])->with($result['ok'] ? 'success' : 'error', $result['ok'] ? 'Provedor conectado; modelo acessível. Teste de metadados sem inferência.' : $result['message']);
+        return to_route('admin.ai-settings.index', ['tab' => 'problems'])->with($result['ok'] ? 'success' : 'error', $result['ok'] ? 'Provedor conectado; modelo acessível. Teste de metadados sem inferência.' : $result['message']);
     }
 
     public function refreshModels(AiSettingsService $settings, AiServiceDiagnostics $diagnostics): RedirectResponse
@@ -85,7 +88,7 @@ class AiSettingsController extends Controller
         $synchronous = $validated['mode'] === 'sync';
         $result = $operations->start($executionType, $synchronous, $synchronous ? 1 : null);
 
-        $redirect = to_route('admin.ai-settings.index', ['tab' => 'operations']);
+        $redirect = to_route('admin.ai-settings.index', ['tab' => $type === 'technical' ? 'evaluations' : 'indications']);
         if ($result['started'] === 0) {
             return $redirect->with('success', 'Nenhum registro disponível para processamento.');
         }

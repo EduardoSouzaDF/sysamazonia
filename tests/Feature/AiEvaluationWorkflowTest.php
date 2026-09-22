@@ -54,6 +54,39 @@ class AiEvaluationWorkflowTest extends TestCase
         Queue::assertNothingPushed();
     }
 
+    public function test_honorific_category_never_dispatches_ai_evaluation_or_selection(): void
+    {
+        [$registration, $evaluator, , $selector] = $this->domain();
+        $registration->category()->update(['is_honorific' => true]);
+        Queue::fake();
+        config([
+            'ai_evaluation.enabled' => true,
+            'ai_evaluation.selection_enabled' => true,
+            'ai_evaluation.technical_evaluator_id' => $evaluator->id,
+            'ai_evaluation.selection_evaluator_id' => $selector->id,
+        ]);
+
+        $registration->update(['status' => RegistrationStatusEnum::Habilitado]);
+        $registration->update(['status' => RegistrationStatusEnum::Avaliado]);
+
+        Queue::assertNothingPushed();
+        $this->assertDatabaseCount('ai_executions', 0);
+    }
+
+    public function test_honorific_category_rejects_human_opinion(): void
+    {
+        [$registration, $evaluator, $criterion] = $this->domain();
+        $registration->category()->update(['is_honorific' => true]);
+        $registration->update(['status' => RegistrationStatusEnum::Habilitado]);
+
+        $this->expectException(ValidationException::class);
+        app(OpinionSubmissionService::class)->submit($registration->fresh(), $evaluator, [[
+            'criterion_id' => $criterion,
+            'score' => 7,
+            'justification' => 'Categoria honorífica não deve aceitar parecer técnico humano.',
+        ]]);
+    }
+
     public function test_repeated_transition_is_idempotent(): void
     {
         [$registration, $evaluator] = $this->domain();
@@ -157,6 +190,71 @@ class AiEvaluationWorkflowTest extends TestCase
                 : RegistrationStatusEnum::Avaliado->value;
             $this->assertSame($expectedStatus, (int) $registration->refresh()->status);
         }
+    }
+
+    public function test_hybrid_policy_requires_both_human_and_ai_opinions(): void
+    {
+        [$registration, $humanEvaluator, $criterion] = $this->domain(2);
+        $registration->category()->update([
+            'evaluation_mode' => 'hybrid',
+            'human_evaluations_required' => 1,
+            'ai_evaluations_required' => 1,
+        ]);
+        $registration->update(['status' => RegistrationStatusEnum::Habilitado]);
+        $score = [[
+            'criterion_id' => $criterion,
+            'score' => 7,
+            'justification' => 'Justificativa completa e válida para verificar a composição híbrida do quórum.',
+        ]];
+
+        app(OpinionSubmissionService::class)->submit($registration->fresh(), $humanEvaluator, $score);
+        $this->assertSame(RegistrationStatusEnum::Habilitado->value, (int) $registration->refresh()->status);
+
+        $aiEvaluator = $this->evaluatorFor($registration);
+        app(OpinionSubmissionService::class)->submit($registration->fresh(), $aiEvaluator, $score, true);
+
+        $this->assertSame(RegistrationStatusEnum::Avaliado->value, (int) $registration->refresh()->status);
+        $this->assertDatabaseHas('opinions', ['registration_id' => $registration->id, 'source' => 'human']);
+        $this->assertDatabaseHas('opinions', ['registration_id' => $registration->id, 'source' => 'ai']);
+    }
+
+    public function test_ai_only_policy_rejects_human_opinion(): void
+    {
+        [$registration, $evaluator, $criterion] = $this->domain();
+        $registration->category()->update([
+            'evaluation_mode' => 'ai_only',
+            'human_evaluations_required' => 0,
+            'ai_evaluations_required' => 1,
+        ]);
+        $registration->update(['status' => RegistrationStatusEnum::Habilitado]);
+
+        $this->expectException(ValidationException::class);
+        app(OpinionSubmissionService::class)->submit($registration->fresh(), $evaluator, [[
+            'criterion_id' => $criterion,
+            'score' => 7,
+            'justification' => 'Justificativa humana que deve ser recusada pela política somente IA.',
+        ]]);
+    }
+
+    public function test_ai_selection_can_run_when_technical_ai_is_disabled(): void
+    {
+        [$registration, , , $selector] = $this->domain();
+        $registration->category()->update([
+            'indication_mode' => 'ai_only',
+            'human_indications_required' => 0,
+            'ai_indications_required' => 1,
+        ]);
+        $registration->update(['status' => RegistrationStatusEnum::Avaliado]);
+        config([
+            'ai_evaluation.enabled' => false,
+            'ai_evaluation.selection_enabled' => true,
+            'ai_evaluation.selection_evaluator_id' => $selector->id,
+        ]);
+
+        $candidates = app(\App\Services\Ai\AiPendingOperations::class)
+            ->candidates(\App\Enum\AiExecutionType::StrategicSelection);
+
+        $this->assertTrue($candidates->contains('id', $registration->id));
     }
 
     public function test_result_is_not_persisted_after_registration_status_changes(): void

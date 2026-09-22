@@ -12,7 +12,7 @@
     <p class="text-sm text-secondary-foreground">O teste verifica o modelo salvo, sem gerar avaliações.</p>
 </section>
 <div class="grid md:grid-cols-2 gap-6">
-    @foreach([['technical', 'Avaliações técnicas', $technicalPending, $settings->evaluationEnabled, 'Avalia as inscrições habilitadas conforme os critérios da categoria.'], ['selection', 'Seleção estratégica', $selectionPending, $settings->evaluationEnabled && $settings->selectionEnabled, 'Analisa as inscrições avaliadas para registrar a decisão de indicação.']] as [$type, $title, $pending, $enabled, $description])
+    @foreach([['technical', 'Avaliações técnicas', $technicalPending, $settings->evaluationEnabled, 'Avalia as inscrições habilitadas conforme os critérios da categoria.'], ['selection', 'Seleção estratégica', $selectionPending, $settings->selectionEnabled, 'Analisa as inscrições avaliadas para registrar a decisão de indicação.']] as [$type, $title, $pending, $enabled, $description])
     <section class="kt-card p-6 space-y-4">
         <div class="ai-heading"><h2 class="text-lg font-semibold">{{ $title }}</h2><span class="kt-badge {{ $enabled ? 'kt-badge-success' : 'kt-badge-secondary' }}">{{ $enabled ? 'Ativa' : 'Inativa' }}</span></div>
         <p class="text-sm text-secondary-foreground">{{ $description }}</p>

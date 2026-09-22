@@ -26,6 +26,7 @@ class Opinion extends Model
     protected $fillable = [
         'user_id',
         'registration_id',
+        'source',
     ];
 
     /**

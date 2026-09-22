@@ -28,6 +28,7 @@ class Indication extends Model
         'descricao',
         'registration_id',
         'decision',
+        'source',
     ];
 
     protected function casts(): array
@@ -43,7 +44,6 @@ class Indication extends Model
         return $this->belongsTo(User::class);
     }
 
-    
     /**
      * Get the registration that is being evaluated.
      */
@@ -51,6 +51,4 @@ class Indication extends Model
     {
         return $this->belongsTo(Registration::class);
     }
-
-   
 }

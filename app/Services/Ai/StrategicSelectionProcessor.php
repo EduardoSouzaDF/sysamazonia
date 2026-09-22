@@ -22,7 +22,7 @@ class StrategicSelectionProcessor
         }
         try {
             $settings = $this->settings->current();
-            if (! $settings->evaluationEnabled || ! $settings->selectionEnabled) {
+            if (! $settings->selectionEnabled) {
                 return false;
             }
             $execution = AiExecution::query()->with('registration.opinions.scores.evaluationCriterion')->findOrFail($executionId);
