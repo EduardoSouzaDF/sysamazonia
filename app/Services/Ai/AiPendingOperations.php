@@ -4,6 +4,7 @@ namespace App\Services\Ai;
 
 use App\Enum\AiExecutionType;
 use App\Enum\RegistrationStatusEnum;
+use App\Exceptions\Ai\RetryableAiException;
 use App\Models\AiExecution;
 use App\Models\Registration;
 use Illuminate\Support\Collection;
@@ -18,6 +19,7 @@ class AiPendingOperations
         'PROVIDER_TIMEOUT',
         'PROVIDER_UNAVAILABLE',
         'LOCAL_UNAVAILABLE',
+        'PROVIDER_INVALID_RESPONSE',
     ];
 
     public function __construct(private AiExecutionDispatcher $dispatcher, private TechnicalEvaluationProcessor $technical, private StrategicSelectionProcessor $strategic, private AiSettingsService $settings, private EvaluationConfigurationFingerprint $fingerprint) {}
@@ -91,7 +93,11 @@ class AiPendingOperations
             }
             $started++;
             if ($synchronous) {
-                $completed += ($type === AiExecutionType::TechnicalEvaluation ? $this->technical->process($execution->id) : $this->strategic->process($execution->id)) ? 1 : 0;
+                try {
+                    $completed += ($type === AiExecutionType::TechnicalEvaluation ? $this->technical->process($execution->id) : $this->strategic->process($execution->id)) ? 1 : 0;
+                } catch (RetryableAiException) {
+                    // A falha segura já foi registrada e ficará disponível para nova tentativa.
+                }
             } else {
                 $this->dispatcher->dispatch($execution);
             }

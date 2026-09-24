@@ -7,6 +7,7 @@ use App\Data\Ai\EvaluationResultData;
 use App\Data\Ai\SelectionResultData;
 use App\Enum\AiExecutionStatus;
 use App\Enum\RegistrationStatusEnum;
+use App\Exceptions\Ai\RetryableAiException;
 use App\Jobs\EvaluateRegistrationWithAi;
 use App\Jobs\SelectRegistrationWithAi;
 use App\Models\AiExecution;
@@ -25,6 +26,44 @@ use Tests\TestCase;
 class AiEvaluationWorkflowTest extends TestCase
 {
     use RefreshDatabase;
+
+    public function test_provider_invalid_response_is_retryable_and_records_safe_diagnostic(): void
+    {
+        [$registration, $evaluator] = $this->domain();
+        config([
+            'ai_evaluation.enabled' => true,
+            'ai_evaluation.technical_evaluator_id' => $evaluator->id,
+            'ai_evaluation.token' => 'test-token',
+        ]);
+        Queue::fake();
+        Http::fake(['*/v1/evaluations/technical' => Http::response([
+            'code' => 'PROVIDER_INVALID_RESPONSE',
+            'detail' => 'conteúdo não confiável',
+            'issues' => [
+                ['field' => 'criterios.0.justificativa', 'type' => 'justification_word_count'],
+                ['field' => '<script>', 'type' => 'secret-value'],
+            ],
+        ], 502)]);
+
+        $registration->update(['status' => RegistrationStatusEnum::Habilitado]);
+        $execution = AiExecution::query()->firstOrFail();
+
+        try {
+            app()->call([new EvaluateRegistrationWithAi($execution->id), 'handle']);
+            $this->fail('A resposta inválida deveria permitir nova tentativa da fila.');
+        } catch (RetryableAiException $exception) {
+            $this->assertSame('PROVIDER_INVALID_RESPONSE', $exception->errorCode);
+        }
+
+        $execution->refresh();
+        $this->assertSame(AiExecutionStatus::Failed, $execution->status);
+        $this->assertSame(1, $execution->attempts);
+        $this->assertStringContainsString('criterios.0.justificativa: justification_word_count', $execution->error_message);
+        $this->assertStringNotContainsString('conteúdo não confiável', $execution->error_message);
+        $this->assertStringNotContainsString('secret-value', $execution->error_message);
+        $this->assertDatabaseCount('opinions', 0);
+        $this->assertDatabaseCount('scores', 0);
+    }
 
     public function test_only_relevant_status_transitions_dispatch_jobs(): void
     {

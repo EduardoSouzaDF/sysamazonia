@@ -106,7 +106,10 @@ def strategic_selection(payload: SelectionRequest, service: AgnoEvaluator = Depe
 
 @app.exception_handler(ProviderError)
 def provider_error(_request: Request, exception: ProviderError) -> JSONResponse:
-    return JSONResponse(status_code=502, content={"code": exception.code, "detail": "Falha operacional no provider."})
+    content: dict[str, object] = {"code": exception.code, "detail": "Falha operacional no provider."}
+    if exception.issues:
+        content["issues"] = exception.issues
+    return JSONResponse(status_code=502, content=content)
 
 
 @app.post("/v1/configuration/models", dependencies=[Depends(authorize)])

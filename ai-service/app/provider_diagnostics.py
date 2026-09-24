@@ -9,8 +9,9 @@ from app.transport import BoundedTransport, EndpointError
 
 
 class ProviderError(RuntimeError):
-    def __init__(self, code: str):
+    def __init__(self, code: str, issues: list[dict[str, str]] | None = None):
         self.code = code
+        self.issues = issues or []
         super().__init__('Falha operacional no provider.')
 
 

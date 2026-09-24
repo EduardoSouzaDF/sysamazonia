@@ -8,6 +8,7 @@ use App\Data\Ai\SelectionRequestData;
 use App\Data\Ai\SelectionResultData;
 use App\Enum\AiExecutionStatus;
 use App\Exceptions\Ai\NonRetryableAiException;
+use App\Exceptions\Ai\RetryableAiException;
 use App\Models\AiExecution;
 use App\Models\Indication;
 use App\Models\Registration;
@@ -150,10 +151,11 @@ class AiExecutionManager
                 return;
             }
 
-            $errorCode = $exception instanceof NonRetryableAiException
+            $knownException = $exception instanceof NonRetryableAiException || $exception instanceof RetryableAiException;
+            $errorCode = $knownException
                 ? $exception->errorCode
                 : 'AI_SERVICE_UNAVAILABLE';
-            $safeMessage = $exception instanceof NonRetryableAiException
+            $safeMessage = $knownException
                 ? $exception->getMessage()
                 : 'O serviço de IA não pôde concluir a operação.';
             $locked->update([

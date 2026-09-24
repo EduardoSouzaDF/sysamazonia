@@ -6,6 +6,7 @@ use App\Data\Ai\EvaluationRequestData;
 use App\Enum\AiExecutionStatus;
 use App\Enum\RegistrationStatusEnum;
 use App\Exceptions\Ai\NonRetryableAiException;
+use App\Exceptions\Ai\RetryableAiException;
 use App\Models\AiExecution;
 use App\Services\Ai\Contracts\AiEvaluationServiceInterface;
 use Illuminate\Support\Facades\Cache;
@@ -38,6 +39,10 @@ class TechnicalEvaluationProcessor
                 $this->manager->fail($execution, $e);
 
                 return false;
+            } catch (RetryableAiException $e) {
+                $this->manager->fail($execution, $e);
+
+                throw $e;
             }
 
             return $this->manager->completeEvaluation($execution, $request, $result, (int) ((hrtime(true) - $started) / 1_000_000));

@@ -7,6 +7,7 @@ use App\Data\Ai\EvaluationResultData;
 use App\Data\Ai\SelectionRequestData;
 use App\Data\Ai\SelectionResultData;
 use App\Exceptions\Ai\NonRetryableAiException;
+use App\Exceptions\Ai\RetryableAiException;
 use App\Models\AiExecution;
 use App\Services\Ai\Contracts\AiEvaluationServiceInterface;
 use Illuminate\Http\Client\PendingRequest;
@@ -57,7 +58,18 @@ class AgnoEvaluationService implements AiEvaluationServiceInterface
             ->where('correlation_id', (string) ($payload['correlation_id'] ?? ''))
             ->update(['service_http_status' => $response->status()]);
         $providerCode = $response->json('code');
-        if (is_string($providerCode) && in_array($providerCode, ['PROVIDER_UNAUTHORIZED', 'PROVIDER_FORBIDDEN', 'MODEL_NOT_FOUND', 'PROVIDER_INVALID_RESPONSE'], true)) {
+        if ($providerCode === 'PROVIDER_INVALID_RESPONSE') {
+            $issues = $response->json('issues');
+            $diagnostic = is_array($issues) ? $this->safeIssueSummary($issues) : '';
+            throw new RetryableAiException(
+                $providerCode,
+                'O provedor retornou uma resposta fora do formato esperado.'.($diagnostic !== '' ? ' '.$diagnostic : ''),
+            );
+        }
+        if (is_string($providerCode) && in_array($providerCode, ['PROVIDER_RATE_LIMIT', 'PROVIDER_TIMEOUT', 'PROVIDER_UNAVAILABLE', 'LOCAL_UNAVAILABLE'], true)) {
+            throw new RetryableAiException($providerCode, AiServiceDiagnostics::MESSAGES[$providerCode]);
+        }
+        if (is_string($providerCode) && in_array($providerCode, ['PROVIDER_UNAUTHORIZED', 'PROVIDER_FORBIDDEN', 'MODEL_NOT_FOUND'], true)) {
             throw new NonRetryableAiException($providerCode, AiServiceDiagnostics::MESSAGES[$providerCode]);
         }
         if ($response->serverError() && $response->json('code') === 'LLM_CONFIGURATION_ERROR') {
@@ -79,6 +91,26 @@ class AgnoEvaluationService implements AiEvaluationServiceInterface
         }
 
         return $decoded;
+    }
+
+    private function safeIssueSummary(array $issues): string
+    {
+        $allowed = '/^[a-zA-Z0-9_.]+$/';
+        $summaries = collect($issues)->take(5)->map(function (mixed $issue) use ($allowed): ?string {
+            if (! is_array($issue)) {
+                return null;
+            }
+            $field = $issue['field'] ?? null;
+            $type = $issue['type'] ?? null;
+            if (! is_string($field) || ! is_string($type)
+                || ! preg_match($allowed, $field) || ! preg_match($allowed, $type)) {
+                return null;
+            }
+
+            return $field.': '.$type;
+        })->filter()->implode('; ');
+
+        return $summaries === '' ? '' : 'Validação: '.$summaries.'.';
     }
 
     private function client(): PendingRequest

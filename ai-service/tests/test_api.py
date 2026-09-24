@@ -4,7 +4,8 @@ from pydantic import ValidationError
 
 from app.config import Settings
 from app.agents.evaluators import AgnoEvaluator
-from app.main import authorize, request_validation_error, technical_evaluation
+from app.main import authorize, provider_error, request_validation_error, technical_evaluation
+from app.provider_diagnostics import ProviderError
 from app.prompts import SELECTION_PROMPT, TECHNICAL_PROMPT
 from app.schemas import CriterionEvaluation, TechnicalEvaluationRequest, TechnicalEvaluationResult
 
@@ -154,3 +155,12 @@ def test_validation_error_response_never_reflects_secret():
     response = request_validation_error(None, error)
     assert response.status_code == 422
     assert b"secret" not in response.body
+
+
+def test_provider_error_returns_only_sanitized_validation_issues():
+    response = provider_error(None, ProviderError("PROVIDER_INVALID_RESPONSE", [
+        {"field": "criterios.0.justificativa", "type": "justification_word_count"},
+    ]))
+    assert response.status_code == 502
+    assert b"criterios.0.justificativa" in response.body
+    assert b"justification_word_count" in response.body

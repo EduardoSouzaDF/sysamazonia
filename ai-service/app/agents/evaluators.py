@@ -110,10 +110,10 @@ class AgnoEvaluator:
                 for item in error.errors(include_input=False, include_context=False, include_url=False)
             ]
             logger.warning("AI response validation failed schema=%s correlation_id=%s errors=%s", schema.__name__, request.correlation_id, failures)
-            raise ProviderError('PROVIDER_INVALID_RESPONSE') from None
+            raise ProviderError('PROVIDER_INVALID_RESPONSE', failures) from None
         except Exception as error:
             logger.warning("AI response processing failed schema=%s correlation_id=%s exception_type=%s", schema.__name__, request.correlation_id, type(error).__name__)
-            raise ProviderError('PROVIDER_INVALID_RESPONSE') from None
+            raise ProviderError('PROVIDER_INVALID_RESPONSE', [{"field": "response", "type": type(error).__name__}]) from None
         finally:
             client = getattr(configured_model.model, 'http_client', None)
             if client is not None:
