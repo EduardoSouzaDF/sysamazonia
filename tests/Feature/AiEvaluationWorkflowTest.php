@@ -65,6 +65,38 @@ class AiEvaluationWorkflowTest extends TestCase
         $this->assertDatabaseCount('scores', 0);
     }
 
+    public function test_provider_unavailability_preserves_retryable_cause_without_creating_opinion(): void
+    {
+        [$registration, $evaluator] = $this->domain();
+        Queue::fake();
+        config([
+            'ai_evaluation.enabled' => true,
+            'ai_evaluation.technical_evaluator_id' => $evaluator->id,
+            'ai_evaluation.token' => 'test-token',
+        ]);
+        Http::fake(['*/v1/evaluations/technical' => Http::response([
+            'code' => 'PROVIDER_UNAVAILABLE',
+            'detail' => 'sensitive upstream response',
+        ], 502)]);
+        $registration->update(['status' => RegistrationStatusEnum::Habilitado]);
+        $execution = AiExecution::sole();
+
+        try {
+            app()->call([new EvaluateRegistrationWithAi($execution->id), 'handle']);
+            $this->fail('Indisponibilidade temporária deve permitir nova tentativa.');
+        } catch (RetryableAiException $exception) {
+            $this->assertSame('PROVIDER_UNAVAILABLE', $exception->errorCode);
+        }
+
+        $execution->refresh();
+        $this->assertSame('PROVIDER_UNAVAILABLE', $execution->error_code);
+        $this->assertSame(502, $execution->service_http_status);
+        $this->assertSame(1, $execution->attempts);
+        $this->assertStringNotContainsString('sensitive', $execution->error_message);
+        $this->assertDatabaseCount('opinions', 0);
+        $this->assertDatabaseCount('scores', 0);
+    }
+
     public function test_only_relevant_status_transitions_dispatch_jobs(): void
     {
         [$registration, $evaluator, , $selector] = $this->domain();
@@ -237,7 +269,6 @@ class AiEvaluationWorkflowTest extends TestCase
         $registration->category()->update([
             'evaluation_mode' => 'hybrid',
             'human_evaluations_required' => 1,
-            'ai_evaluations_required' => 1,
         ]);
         $registration->update(['status' => RegistrationStatusEnum::Habilitado]);
         $score = [[
@@ -263,7 +294,6 @@ class AiEvaluationWorkflowTest extends TestCase
         $registration->category()->update([
             'evaluation_mode' => 'ai_only',
             'human_evaluations_required' => 0,
-            'ai_evaluations_required' => 1,
         ]);
         $registration->update(['status' => RegistrationStatusEnum::Habilitado]);
 
@@ -281,7 +311,6 @@ class AiEvaluationWorkflowTest extends TestCase
         $registration->category()->update([
             'indication_mode' => 'ai_only',
             'human_indications_required' => 0,
-            'ai_indications_required' => 1,
         ]);
         $registration->update(['status' => RegistrationStatusEnum::Avaliado]);
         config([
@@ -557,6 +586,7 @@ class AiEvaluationWorkflowTest extends TestCase
     public function test_strategic_selection_does_not_modify_existing_scores(): void
     {
         [$registration, $evaluator, $criterion, $selector] = $this->domain();
+        $registration->category()->update(['evaluation_mode' => 'human_only']);
         Queue::fake();
         config([
             'ai_evaluation.enabled' => true,
@@ -594,6 +624,7 @@ class AiEvaluationWorkflowTest extends TestCase
     public function test_strategic_selection_updates_existing_indication_without_duplicates(): void
     {
         [$registration, $evaluator, $criterion, $selector] = $this->domain();
+        $registration->category()->update(['evaluation_mode' => 'human_only']);
         Queue::fake();
         config([
             'ai_evaluation.enabled' => true,
@@ -678,6 +709,42 @@ class AiEvaluationWorkflowTest extends TestCase
         $this->assertSame('AI_SELECTION_CONTEXT_CHANGED', $execution->error_code);
     }
 
+    public function test_ai_opinions_do_not_hide_pending_human_evaluation(): void
+    {
+        [$registration, $human] = $this->domain();
+        $registration->category->modality->edition->update(['is_registration_active' => true]);
+        $registration->update(['status' => RegistrationStatusEnum::Habilitado]);
+        $human->roles()->attach(\App\Models\Role::firstOrCreate(['name' => 'comissao'], ['active' => true]));
+        foreach ([$this->evaluatorFor($registration), $this->evaluatorFor($registration)] as $ai) {
+            $registration->opinions()->create(['user_id' => $ai->id, 'source' => 'ai']);
+        }
+
+        $this->actingAs($human->refresh())->get(route('admin.registration.index'))->assertOk()
+            ->assertViewHas('list', fn ($list) => $list->contains('id', $registration->id));
+
+        $registration->opinions()->create(['user_id' => $human->id, 'source' => 'human']);
+        $this->get(route('admin.registration.index'))->assertOk()
+            ->assertViewHas('list', fn ($list) => ! $list->contains('id', $registration->id));
+    }
+
+    public function test_ai_indications_do_not_hide_pending_human_indication(): void
+    {
+        [$registration, , , $human] = $this->domain();
+        $registration->category()->update(['indication_mode' => 'hybrid', 'human_indications_required' => 1]);
+        $registration->category->modality->edition->update(['is_registration_active' => true]);
+        $registration->update(['status' => RegistrationStatusEnum::Avaliado]);
+        $human->roles()->attach(\App\Models\Role::firstOrCreate(['name' => 'comissao'], ['active' => true]));
+        foreach ([User::factory()->create(), User::factory()->create()] as $ai) {
+            $registration->indications()->create(['user_id' => $ai->id, 'source' => 'ai']);
+        }
+
+        $this->actingAs($human->refresh())->get(route('admin.registration.index'))->assertOk()
+            ->assertViewHas('list', fn ($list) => $list->contains('id', $registration->id));
+        $registration->category()->update(['indication_mode' => 'ai_only', 'human_indications_required' => 0]);
+        $this->get(route('admin.registration.index'))->assertOk()
+            ->assertViewHas('list', fn ($list) => ! $list->contains('id', $registration->id));
+    }
+
     /** @return array{Registration, User, int, User} */
     private function domain(int $requiredOpinions = 1): array
     {
@@ -694,7 +761,9 @@ class AiEvaluationWorkflowTest extends TestCase
         ]);
         $category = DB::table('categories')->insertGetId([
             'title' => 'Categoria', 'acronym' => 'CAT', 'modality_id' => $modality,
-            'evaluations_count' => $requiredOpinions, 'created_at' => $now, 'updated_at' => $now,
+            'evaluation_mode' => $requiredOpinions > 1 ? 'human_only' : 'hybrid',
+            'human_evaluations_required' => $requiredOpinions,
+            'indication_mode' => 'ai_only', 'human_indications_required' => 0, 'created_at' => $now, 'updated_at' => $now,
         ]);
         $candidate = DB::table('candidates')->insertGetId([
             'nome' => 'Candidato', 'cpf' => '12345678901', 'dt_nascimento' => '1990-01-01',

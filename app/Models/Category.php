@@ -19,14 +19,10 @@ class Category extends Model
         'acronym',
         'description',
         'is_honorific',
-        'nominations_count',
-        'evaluations_count',
         'evaluation_mode',
         'human_evaluations_required',
-        'ai_evaluations_required',
         'indication_mode',
         'human_indications_required',
-        'ai_indications_required',
         'recipients_count',
         'submissions_per_candidate',
         'judging_start',
@@ -36,20 +32,38 @@ class Category extends Model
 
     protected $casts = [
         'is_honorific' => 'boolean',
-        'nominations_count' => 'integer',
-        'evaluations_count' => 'integer',
         'evaluation_mode' => EvaluationMode::class,
         'human_evaluations_required' => 'integer',
-        'ai_evaluations_required' => 'integer',
         'indication_mode' => EvaluationMode::class,
         'human_indications_required' => 'integer',
-        'ai_indications_required' => 'integer',
         'recipients_count' => 'integer',
         'submissions_per_candidate' => 'integer',
         'judging_start' => 'date',
         'judging_end' => 'date',
         'is_open_for_submissions' => 'boolean',
     ];
+
+    public function requiredAiEvaluations(): int
+    {
+        return (int) $this->allowsAiEvaluation();
+    }
+
+    public function requiredAiIndications(): int
+    {
+        return (int) $this->allowsAiIndication();
+    }
+
+    public function requiredEvaluations(): int
+    {
+        return ($this->allowsHumanEvaluation() ? (int) $this->human_evaluations_required : 0)
+            + $this->requiredAiEvaluations();
+    }
+
+    public function requiredIndications(): int
+    {
+        return ($this->allowsHumanIndication() ? (int) $this->human_indications_required : 0)
+            + $this->requiredAiIndications();
+    }
 
     // RELATIONSHIPS
     public function modality(): BelongsTo
@@ -92,22 +106,22 @@ class Category extends Model
 
     public function allowsHumanEvaluation(): bool
     {
-        return ! $this->is_honorific && ($this->evaluation_mode?->allowsHuman() ?? true);
+        return ! $this->is_honorific && ($this->evaluation_mode?->allowsHuman() ?? false);
     }
 
     public function allowsAiEvaluation(): bool
     {
-        return ! $this->is_honorific && ($this->evaluation_mode?->allowsAi() ?? true);
+        return ! $this->is_honorific && ($this->evaluation_mode?->allowsAi() ?? false);
     }
 
     public function allowsHumanIndication(): bool
     {
-        return ! $this->is_honorific && ($this->indication_mode?->allowsHuman() ?? true);
+        return ! $this->is_honorific && ($this->indication_mode?->allowsHuman() ?? false);
     }
 
     public function allowsAiIndication(): bool
     {
-        return ! $this->is_honorific && ($this->indication_mode?->allowsAi() ?? true);
+        return ! $this->is_honorific && ($this->indication_mode?->allowsAi() ?? false);
     }
 
     // SELEÇÕES DO JULGADOR / COTA (spec 0003)

@@ -51,17 +51,10 @@ class EvaluationCompletionService
             return false;
         }
 
-        // Categorias anteriores à política explícita mantêm exatamente a regra legada.
-        if ($category->evaluation_mode === null) {
-            $requiredOpinions = (int) $category->evaluations_count;
-
-            return $requiredOpinions > 0 && $validOpinions->count() >= $requiredOpinions;
-        }
-
         $aiCount = $validOpinions->where('source', 'ai')->count();
         $humanCount = $validOpinions->count() - $aiCount;
         $requiredHuman = $category->allowsHumanEvaluation() ? (int) $category->human_evaluations_required : 0;
-        $requiredAi = $category->allowsAiEvaluation() ? (int) $category->ai_evaluations_required : 0;
+        $requiredAi = $category->requiredAiEvaluations();
 
         return ($requiredHuman + $requiredAi) > 0
             && $humanCount >= $requiredHuman

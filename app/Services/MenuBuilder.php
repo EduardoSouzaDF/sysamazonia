@@ -15,7 +15,13 @@ class MenuBuilder
         }
 
         $user->loadMissing('roles');
-        $menus = [];
+        $menus = [
+            [
+                'title' => 'Início',
+                'icon' => 'ki-home-2',
+                'route' => 'home',
+            ],
+        ];
 
         if ($user->hasRole(Role::ADMIN)) {
             $menus = array_merge($menus, self::getAdminMenu());

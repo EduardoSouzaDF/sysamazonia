@@ -18,17 +18,6 @@
 <div class="flex w-full gap-4 mt-5 ">
 
     <div class="w-4/12">
-        <x-form.input value="{{ isset($object) ? $object->nominations_count : old('nominations_count') }}" type="number"
-            name="nominations_count" label="Quantidade de nomeações" placeholder="Ex: 3" :required="true" />
-    </div>
-
-    <div class="w-4/12">
-        <x-form.input value="{{ isset($object) ? $object->evaluations_count : old('evaluations_count') }}"
-            type="number" name="evaluations_count" label="Quantidade de avaliações Técnicas" placeholder="Ex: 3"
-            :required="true" />
-    </div>
-
-    <div class="w-4/12">
         <x-form.input value="{{ isset($object) ? $object->recipients_count : old('recipients_count') }}" type="number"
             name="recipients_count" label="Quantidade de Agracidados" placeholder="Ex: 3" :required="true" />
     </div>

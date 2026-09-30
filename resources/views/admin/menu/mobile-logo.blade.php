@@ -1,6 +1,6 @@
 <div class="flex gap-2.5 lg:hidden items-center -ms-1">
-    <a class="shrink-0" >
-    <img class="max-h-[25px] w-full"  src="{{ asset('images/logo-mini.png')}}"/>
+    <a class="shrink-0" href="{{ route('home') }}" aria-label="Página inicial">
+    <img class="max-h-[25px] w-full" style="width: auto; height: 25px; object-fit: contain;" src="{{ asset('images/lg_Premios_alt.webp') }}" alt="Premiação Amazônia" />
     </a>
     <div class="flex items-center">
     <button class="kt-btn kt-btn-icon kt-btn-ghost" data-kt-drawer-toggle="#sidebar">

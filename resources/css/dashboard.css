@@ -1,16 +1,36 @@
 body:has(#statistics-dashboard) > .flex.grow,
 .kt-wrapper:has(#statistics-dashboard), #content:has(#statistics-dashboard) { min-width: 0; }
-#statistics-dashboard { --map-zero: #e2e8f0; --map-one: #bfdbfe; --map-two: #60a5fa; --map-three: #2563eb; --map-four: #1e3a8a; }
+#statistics-dashboard {
+    /* Tons escurecidos inspirados nas folhas da marca Amazônia. */
+    --brand-forest: #246b35;
+    --brand-blue: #246589;
+    --brand-teal: #207568;
+    --brand-olive: #61752c;
+    --brand-gold: #8a6b18;
+    --dashboard-accent: var(--brand-forest);
+    --map-zero: #e2e8e3; --map-one: #c1ddc5; --map-two: #7cb589; --map-three: #40874f; --map-four: #205a2e;
+}
+#statistics-dashboard [data-indicator="regular"],
+#statistics-dashboard [data-dimension="categories"],
+#statistics-dashboard [data-dimension="states"] { --dashboard-accent: var(--brand-blue); }
+#statistics-dashboard [data-indicator="honorary"],
+#statistics-dashboard [data-dimension="education"] { --dashboard-accent: var(--brand-gold); }
+#statistics-dashboard [data-dimension="sex"] { --dashboard-accent: var(--brand-teal); }
+#statistics-dashboard [data-dimension="ages"] { --dashboard-accent: var(--brand-olive); }
 #statistics-dashboard .dashboard-heading { display: flex; justify-content: space-between; align-items: center; gap: 1rem; flex-wrap: wrap; }
 #statistics-dashboard .kt-tabs { overflow-x: auto; flex-wrap: nowrap; }
 #statistics-dashboard .kt-tab-toggle { white-space: nowrap; padding: 1rem .75rem; }
 #statistics-dashboard [role="tab"]:focus-visible { outline: 2px solid var(--primary); outline-offset: -3px; }
 #statistics-dashboard .dashboard-indicators { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 1rem; }
-#statistics-dashboard .dashboard-indicator { padding: 1.5rem; }
+#statistics-dashboard .dashboard-indicator { padding: 1.5rem; border-top: 4px solid var(--dashboard-accent); background: color-mix(in srgb, var(--dashboard-accent) 8%, var(--background, white)); }
+#statistics-dashboard .dashboard-indicator strong { color: var(--dashboard-accent); }
 #statistics-dashboard .dashboard-indicator strong { display: block; font-size: 2rem; line-height: 1.3; margin-top: .75rem; font-variant-numeric: tabular-nums; }
 #statistics-dashboard .dashboard-chart-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 2rem; }
-#statistics-dashboard .dashboard-chart-section { min-width: 0; border-top: 1px solid var(--border); padding-top: 1.5rem; }
-#statistics-dashboard .dashboard-chart-section h3 { margin-bottom: 1rem; }
+#statistics-dashboard .dashboard-chart-section { min-width: 0; border-top: 3px solid var(--dashboard-accent); padding-top: 1.5rem; }
+#statistics-dashboard .dashboard-chart-section h3 { margin-bottom: 1rem; border-left: 4px solid var(--dashboard-accent); padding-left: .75rem; }
+#statistics-dashboard .kt-table thead { background: color-mix(in srgb, var(--dashboard-accent) 8%, transparent); }
+#statistics-dashboard .kt-table tfoot { background: color-mix(in srgb, var(--brand-forest) 10%, transparent); font-weight: 600; }
+.dark #statistics-dashboard { --brand-forest: #7cb589; --brand-blue: #78b8d8; --brand-teal: #70bcac; --brand-olive: #b2c477; --brand-gold: #d7bb68; }
 #statistics-dashboard .dashboard-chart-scroll { max-height: 460px; overflow: auto; }
 #statistics-dashboard .dashboard-table-details { margin-top: 1rem; }
 #statistics-dashboard summary { cursor: pointer; padding: .5rem 0; font-weight: 500; }
@@ -31,7 +51,7 @@ body:has(#statistics-dashboard) > .flex.grow,
 #statistics-dashboard .dashboard-map-legend { display: flex; gap: .75rem; flex-wrap: wrap; font-size: .8125rem; margin-block: .75rem; }
 #statistics-dashboard .dashboard-map-legend span { display: inline-flex; align-items: center; gap: .35rem; }
 #statistics-dashboard .dashboard-map-legend i { width: 1.25rem; height: .75rem; display: inline-block; border: 1px solid #64748b; }
-#statistics-dashboard .dashboard-selected-state { border-left: 3px solid var(--primary); padding: .75rem 1rem; background: var(--muted); }
+#statistics-dashboard .dashboard-selected-state { border-left: 3px solid var(--brand-forest); padding: .75rem 1rem; background: color-mix(in srgb, var(--brand-forest) 8%, var(--background, white)); }
 #statistics-dashboard .dashboard-selected-state p { margin-top: .5rem; line-height: 1.6; }
 #statistics-dashboard [data-state-row].selected { background: var(--muted); }
 #statistics-dashboard .dashboard-tooltip { white-space: normal; overflow-wrap: anywhere; max-width: 280px; padding: .75rem; background: var(--background); color: var(--foreground); }

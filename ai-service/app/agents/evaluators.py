@@ -4,6 +4,7 @@ from typing import TypeVar
 
 from agno.agent import Agent
 from agno.exceptions import ModelProviderError
+from agno.run.base import RunStatus
 from app.provider_diagnostics import ProviderError
 from app.safe_logging import configure_safe_logging
 
@@ -19,6 +20,15 @@ configure_safe_logging()
 logger = logging.getLogger(__name__)
 
 ResultT = TypeVar("ResultT", bound=BaseModel)
+
+PROVIDER_ERROR_CODES = {
+    401: "PROVIDER_UNAUTHORIZED",
+    403: "PROVIDER_FORBIDDEN",
+    404: "MODEL_NOT_FOUND",
+    408: "PROVIDER_TIMEOUT",
+    429: "PROVIDER_RATE_LIMIT",
+    504: "PROVIDER_TIMEOUT",
+}
 
 STRUCTURAL_GUARD = """
 
@@ -93,12 +103,31 @@ class AgnoEvaluator:
         )
         try:
             response = agent.run(message)
+            # Agno may return a failed RunOutput instead of raising ModelProviderError.
+            # Its content is an error envelope, never an evaluation to validate.
+            if response.status == RunStatus.error:
+                content = response.content
+                if isinstance(content, str):
+                    try:
+                        content = json.loads(content)
+                    except (ValueError, TypeError):
+                        content = None
+                error = content.get("error") if isinstance(content, dict) else None
+                status = error.get("code") if isinstance(error, dict) else None
+                status = status if type(status) is int and 400 <= status <= 599 else None
+                code = PROVIDER_ERROR_CODES.get(status, "PROVIDER_UNAVAILABLE")
+                logger.warning(
+                    "AI provider run failed correlation_id=%s provider_http_status=%s code=%s",
+                    request.correlation_id, status, code,
+                )
+                raise ProviderError(code)
             if isinstance(response.content, str):
                 return schema.model_validate_json(response.content)
             return schema.model_validate(response.content)
+        except ProviderError:
+            raise
         except ModelProviderError as error:
-            codes = {401: 'PROVIDER_UNAUTHORIZED', 403: 'PROVIDER_FORBIDDEN', 404: 'MODEL_NOT_FOUND', 429: 'PROVIDER_RATE_LIMIT'}
-            raise ProviderError(codes.get(getattr(error, 'status_code', None), 'PROVIDER_UNAVAILABLE')) from None
+            raise ProviderError(PROVIDER_ERROR_CODES.get(getattr(error, 'status_code', None), 'PROVIDER_UNAVAILABLE')) from None
         except ValidationError as error:
             # Never log input, messages, context or unknown field names supplied by the provider.
             fields = set(schema.model_fields) | {"criterio_id", "nota", "justificativa"}

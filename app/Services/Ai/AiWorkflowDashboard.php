@@ -23,7 +23,7 @@ class AiWorkflowDashboard
                 RegistrationStatusEnum::Agraciado->value,
             ])
             ->with([
-                'category:id,title,is_honorific,evaluations_count,nominations_count,evaluation_mode,human_evaluations_required,ai_evaluations_required,indication_mode,human_indications_required,ai_indications_required',
+                'category:id,title,is_honorific,evaluation_mode,human_evaluations_required,indication_mode,human_indications_required',
                 'opinions:id,registration_id,source',
                 'indications:id,registration_id,source,decision',
             ])->get();
@@ -91,13 +91,10 @@ class AiWorkflowDashboard
         $category = $registration->category;
         $human = $registration->opinions->where('source', 'human')->count();
         $ai = $registration->opinions->where('source', 'ai')->count();
-        if ($category->evaluation_mode === null) {
-            return [($human + $ai) < (int) $category->evaluations_count, $ai === 0];
-        }
 
         return [
             $category->allowsHumanEvaluation() && $human < (int) $category->human_evaluations_required,
-            $category->allowsAiEvaluation() && $ai < (int) $category->ai_evaluations_required,
+            $category->allowsAiEvaluation() && $ai < $category->requiredAiEvaluations(),
         ];
     }
 
@@ -106,13 +103,10 @@ class AiWorkflowDashboard
         $category = $registration->category;
         $human = $registration->indications->where('source', 'human')->count();
         $ai = $registration->indications->where('source', 'ai')->count();
-        if ($category->indication_mode === null) {
-            return [($human + $ai) < (int) $category->nominations_count, $ai === 0];
-        }
 
         return [
             $category->allowsHumanIndication() && $human < (int) $category->human_indications_required,
-            $category->allowsAiIndication() && $ai < (int) $category->ai_indications_required,
+            $category->allowsAiIndication() && $ai < $category->requiredAiIndications(),
         ];
     }
 
