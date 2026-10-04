@@ -6,10 +6,26 @@ use App\Enum\RegistrationStatusEnum;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class Registration extends Model
 {
     use HasFactory;
+
+    protected static function booted(): void
+    {
+        static::updated(function (Registration $registration): void {
+            if ($registration->wasChanged('status')) {
+                $previousStatus = $registration->getRawOriginal('status');
+                $currentStatus = $registration->status;
+                event(new \App\Events\RegistrationStatusChanged(
+                    $registration->id,
+                    $previousStatus instanceof RegistrationStatusEnum ? $previousStatus->value : (int) $previousStatus,
+                    $currentStatus instanceof RegistrationStatusEnum ? $currentStatus->value : (int) $currentStatus,
+                ));
+            }
+        });
+    }
 
     /**
      * The table associated with the model.
@@ -146,6 +162,11 @@ class Registration extends Model
         return $this->hasMany(Indication::class);
     }
 
+    public function aiExecutions(): HasMany
+    {
+        return $this->hasMany(AiExecution::class);
+    }
+
     /**
      * Pareceres já com seus scores (notas) carregados.
      * Útil para listagens e dashboards.
@@ -262,76 +283,7 @@ class Registration extends Model
 
     public function updateEvaluationsAvg(): void
     {
-
-        /** @var \Illuminate\Database\Eloquent\Collection<int, Opinion> $opinions */
-        $opinions = $this->opinions()->get();
-
-        // Se não houver opiniões/avaliações, define como null e encerra
-        if ($opinions->isEmpty()) {
-            $this->update(['evaluation_avg' => null]);
-
-            return;
-        }
-
-        $totalOpinionAverages = 0;
-        $validOpinionsCount = 0;
-
-        /** @var Opinion $opinion */
-        foreach ($opinions as $opinion) {
-            /** @var \Illuminate\Database\Eloquent\Collection<int, Score> $scores */
-            $scores = $opinion->scores;
-
-            if ($scores->isEmpty()) {
-                continue;
-            }
-
-            $weightedSum = 0;
-            $totalWeight = 0;
-
-            /** @var Score $score */
-            foreach ($scores as $score) {
-                /** @var EvaluationCriterion|null $criterio */
-                $criterio = $score->evaluationCriterion;
-
-                if (! $criterio) {
-                    continue;
-                }
-
-                $nota = $score->valor;
-                $minScore = $criterio->min_score;
-                $maxScore = $criterio->max_score;
-                $weight = $criterio->weight ?? 1; // Assume peso 1 caso não esteja definido no critério
-
-                $range = $maxScore - $minScore;
-
-                // Evita divisão por zero se min_score for igual a max_score
-                if ($range > 0) {
-                    // Normaliza a nota para uma porcentagem entre 0.0 e 1.0 (0% a 100%)
-                    $normalizedScore = ($nota - $minScore) / $range;
-
-                    $weightedSum += $normalizedScore * $weight;
-                    $totalWeight += $weight;
-                }
-            }
-
-            // Calcula a porcentagem final desta Opinião específica
-            if ($totalWeight > 0) {
-                $opinionPercentageAvg = $weightedSum / $totalWeight;
-                $totalOpinionAverages += $opinionPercentageAvg;
-                $validOpinionsCount++;
-            }
-        }
-
-        // Se houve opiniões válidas com notas calculadas
-        if ($validOpinionsCount > 0) {
-            // Média de todas as opiniões recebidas (em escala 0.0 a 1.0)
-            $finalPercentage = $totalOpinionAverages / $validOpinionsCount;
-            // Converte para escala de 0 a 100 e arredonda para salvar no unsignedTinyInteger
-            $evaluationAvg = (int) round($finalPercentage * 100);
-            $this->update(['evaluation_avg' => $evaluationAvg, 'status' => RegistrationStatusEnum::Avaliado]);
-        } else {
-            $this->update(['evaluation_avg' => null]);
-        }
+        app(\App\Services\EvaluationCompletionService::class)->recalculate($this);
     }
 
     /**

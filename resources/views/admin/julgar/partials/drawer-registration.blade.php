@@ -14,6 +14,14 @@
                     <dt class="text-muted-foreground">Modalidade</dt>
                     <dd>{{ $inscription->category?->modality?->title }}</dd>
                 </div>
+                <div>
+                    <dt class="text-muted-foreground">Protocolo</dt>
+                    <dd>{{ $inscription->protocol ?? '—' }}</dd>
+                </div>
+                <div>
+                    <dt class="text-muted-foreground">Candidato</dt>
+                    <dd>{{ $inscription->candidate?->nome ?? '—' }}</dd>
+                </div>
                 <div class=" ">
                     <dt class="text-muted-foreground">Título</dt>
                     <dd class="text-xl">{{ $inscription->title }}</dd>

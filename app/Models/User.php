@@ -153,6 +153,7 @@ class User extends Authenticatable
         $categoryIds = $this->evaluatorCategories()->pluck('categories.id');
 
         return Registration::query()
+            ->whereHas('category', fn ($query) => $query->where('is_honorific', false))
             ->whereIn('category_id', $categoryIds);
     }
 

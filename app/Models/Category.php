@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Enum\EvaluationMode;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
@@ -20,6 +21,12 @@ class Category extends Model
         'is_honorific',
         'nominations_count',
         'evaluations_count',
+        'evaluation_mode',
+        'human_evaluations_required',
+        'ai_evaluations_required',
+        'indication_mode',
+        'human_indications_required',
+        'ai_indications_required',
         'recipients_count',
         'submissions_per_candidate',
         'judging_start',
@@ -31,6 +38,12 @@ class Category extends Model
         'is_honorific' => 'boolean',
         'nominations_count' => 'integer',
         'evaluations_count' => 'integer',
+        'evaluation_mode' => EvaluationMode::class,
+        'human_evaluations_required' => 'integer',
+        'ai_evaluations_required' => 'integer',
+        'indication_mode' => EvaluationMode::class,
+        'human_indications_required' => 'integer',
+        'ai_indications_required' => 'integer',
         'recipients_count' => 'integer',
         'submissions_per_candidate' => 'integer',
         'judging_start' => 'date',
@@ -75,6 +88,26 @@ class Category extends Model
     public function nominees(): HasMany
     {
         return $this->hasMany(Nominee::class);
+    }
+
+    public function allowsHumanEvaluation(): bool
+    {
+        return ! $this->is_honorific && ($this->evaluation_mode?->allowsHuman() ?? true);
+    }
+
+    public function allowsAiEvaluation(): bool
+    {
+        return ! $this->is_honorific && ($this->evaluation_mode?->allowsAi() ?? true);
+    }
+
+    public function allowsHumanIndication(): bool
+    {
+        return ! $this->is_honorific && ($this->indication_mode?->allowsHuman() ?? true);
+    }
+
+    public function allowsAiIndication(): bool
+    {
+        return ! $this->is_honorific && ($this->indication_mode?->allowsAi() ?? true);
     }
 
     // SELEÇÕES DO JULGADOR / COTA (spec 0003)

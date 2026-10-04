@@ -103,9 +103,14 @@ class MenuBuilder
                 'heading' => 'Tarefas Sincronizadas',
             ],
             [
+                'title' => 'Relatórios de Inscrições',
+                'icon' => 'ki-document',
+                'route' => 'admin.registration-reports.index',
+            ],
+            [
                 'title' => 'Agente IA',
                 'icon' => 'ki-abstract-45',
-                'route' => 'dashboard',
+                'route' => 'admin.ai-settings.index',
             ],
             [
                 'heading' => 'Cache Sistema',

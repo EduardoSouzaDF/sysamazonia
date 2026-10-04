@@ -1,0 +1,24 @@
+[Unit]
+Description=Sisamazonia homologacao - servico de IA
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=simple
+User=www-data
+Group=www-data
+WorkingDirectory=/var/www/sisamazonia/ai-service
+ExecStart=/usr/bin/bash /var/www/sisamazonia/scripts/ai-service.sh
+Environment=PYTHONUNBUFFERED=1
+Environment=PYTHONDONTWRITEBYTECODE=1
+Environment=AI_SERVICE_PORT=8000
+Restart=on-failure
+RestartSec=5
+KillMode=control-group
+TimeoutStopSec=90
+UMask=0027
+NoNewPrivileges=true
+PrivateTmp=true
+
+[Install]
+WantedBy=multi-user.target

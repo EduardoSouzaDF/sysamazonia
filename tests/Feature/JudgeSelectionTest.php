@@ -49,7 +49,11 @@ class JudgeSelectionTest extends TestCase
         $r4 = $this->createRegistration($category, ['evaluation_avg' => 8, 'candidate_id' => $candidate->id]);
 
         foreach ([$r1, $r1, $r4, $r4, $r2] as $target) {
-            Indication::create(['user_id' => $this->judge->id, 'descricao' => 'ok', 'registration_id' => $target->id]);
+            Indication::create([
+                'user_id' => User::factory()->create()->id,
+                'descricao' => 'ok',
+                'registration_id' => $target->id,
+            ]);
         }
 
         // Inscrições de outras categorias NÃO aparecem agora (wizard).

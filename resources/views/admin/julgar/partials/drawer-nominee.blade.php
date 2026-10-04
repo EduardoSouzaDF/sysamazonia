@@ -16,7 +16,7 @@
                 </div>
                 <div>
                     <dt class="text-muted-foreground">Indicado</dt>
-                    <dd>{{   $inscription->name }}</dd>
+                    <dd>{{ $inscription->candidate?->nome ?? $inscription->name }}</dd>
                 </div>
                 <div>
                     <dt class="text-muted-foreground">Estado</dt>

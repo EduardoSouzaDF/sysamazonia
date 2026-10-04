@@ -5,6 +5,8 @@ namespace App\Http\Controllers;
 use App\Models\Category;
 use App\Models\Modality;
 use Illuminate\Http\Request;
+use Illuminate\Validation\Rule;
+use Illuminate\Validation\ValidationException;
 
 class CategoryController extends Controller
 {
@@ -68,6 +70,12 @@ class CategoryController extends Controller
             'description' => 'required|filled|string',
             'nominations_count' => 'integer',
             'evaluations_count' => 'integer',
+            'evaluation_mode' => ['nullable', Rule::in(['human_only', 'ai_only', 'hybrid'])],
+            'human_evaluations_required' => 'nullable|integer|min:0|max:50|required_with:evaluation_mode',
+            'ai_evaluations_required' => 'nullable|integer|min:0|max:1|required_with:evaluation_mode',
+            'indication_mode' => ['nullable', Rule::in(['human_only', 'ai_only', 'hybrid'])],
+            'human_indications_required' => 'nullable|integer|min:0|max:50|required_with:indication_mode',
+            'ai_indications_required' => 'nullable|integer|min:0|max:1|required_with:indication_mode',
             'recipients_count' => 'integer',
             'submissions_per_candidate' => 'integer',
             'judging_start' => 'required|date',
@@ -82,6 +90,21 @@ class CategoryController extends Controller
 
         $request->validate($rules, $messages);
 
+        if (! $request->boolean('is_honorific')) {
+            foreach ([
+                'evaluation' => [(string) $request->input('evaluation_mode'), (int) $request->input('human_evaluations_required'), (int) $request->input('ai_evaluations_required')],
+                'indication' => [(string) $request->input('indication_mode'), (int) $request->input('human_indications_required'), (int) $request->input('ai_indications_required')],
+            ] as $prefix => [$mode, $human, $ai]) {
+                if (($mode === 'human_only' && ($human < 1 || $ai !== 0))
+                    || ($mode === 'ai_only' && ($human !== 0 || $ai !== 1))
+                    || ($mode === 'hybrid' && ($human < 1 || $ai !== 1))) {
+                    throw ValidationException::withMessages([
+                        $prefix.'_mode' => 'As quantidades não correspondem ao modo escolhido. Somente humano exige ao menos um humano; somente IA exige uma IA; híbrido exige ambos.',
+                    ]);
+                }
+            }
+        }
+
     }
 
     public function getDataRequest(Request $request)
@@ -93,6 +116,12 @@ class CategoryController extends Controller
             'description',
             'nominations_count',
             'evaluations_count',
+            'evaluation_mode',
+            'human_evaluations_required',
+            'ai_evaluations_required',
+            'indication_mode',
+            'human_indications_required',
+            'ai_indications_required',
             'recipients_count',
             'submissions_per_candidate',
             'judging_start',
@@ -102,6 +131,25 @@ class CategoryController extends Controller
 
         $data['is_open_for_submissions'] = $request->boolean('is_open_for_submissions');
         $data['is_honorific'] = $request->boolean('is_honorific');
+        if ($data['is_honorific']) {
+            $data['evaluations_count'] = 0;
+            $data['evaluation_mode'] = null;
+            $data['human_evaluations_required'] = null;
+            $data['ai_evaluations_required'] = null;
+            $data['indication_mode'] = null;
+            $data['human_indications_required'] = null;
+            $data['ai_indications_required'] = null;
+
+            return $data;
+        }
+        if ($request->filled('evaluation_mode')) {
+            $data['evaluations_count'] = (int) $request->input('human_evaluations_required', 0)
+                + (int) $request->input('ai_evaluations_required', 0);
+        }
+        if ($request->filled('indication_mode')) {
+            $data['nominations_count'] = (int) $request->input('human_indications_required', 0)
+                + (int) $request->input('ai_indications_required', 0);
+        }
 
         return $data;
     }

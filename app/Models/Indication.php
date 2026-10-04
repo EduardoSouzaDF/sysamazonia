@@ -2,10 +2,10 @@
 
 namespace App\Models;
 
+use App\Enum\SelectionDecision;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
-use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class Indication extends Model
 {
@@ -27,7 +27,14 @@ class Indication extends Model
         'user_id',
         'descricao',
         'registration_id',
+        'decision',
+        'source',
     ];
+
+    protected function casts(): array
+    {
+        return ['decision' => SelectionDecision::class];
+    }
 
     /**
      * Get the judge (user) that authored the opinion.
@@ -37,7 +44,6 @@ class Indication extends Model
         return $this->belongsTo(User::class);
     }
 
-    
     /**
      * Get the registration that is being evaluated.
      */
@@ -45,6 +51,4 @@ class Indication extends Model
     {
         return $this->belongsTo(Registration::class);
     }
-
-   
 }
