@@ -37,6 +37,12 @@ use Carbon\Carbon;
         .details-group-example sl-details:not(:last-of-type) {
             margin-bottom: var(--sl-spacing-2x-small);
         }
+
+        .registration-detail-card {
+            --card-accent: #166534;
+            border-top: 4px solid var(--card-accent);
+            background: color-mix(in srgb, var(--card-accent) 8%, var(--background, white));
+        }
     </style>
 
     <x-pages.crud.create btnSubmit='{{ false }}'
@@ -45,7 +51,7 @@ use Carbon\Carbon;
          @if($user->isAdmin())
                 <div class="w-full flex flex-row justify-between gap-2 min-h-10">
                         <div>  <b>Autor:</b> {{ $candidate->nome }} </div>
-                        <div class="w-1/4  bg-green-300 min-h-16 rounded-xl flex flex-row justify-between p-4">
+                        <div class="registration-detail-card w-1/4 min-h-16 rounded-xl flex flex-row justify-between p-4">
                             <div class="flex flex-col">
                                 <div>Inscrições</div>
                                 <div class="place-self-center">{{ sizeof($registrations) }}</div>

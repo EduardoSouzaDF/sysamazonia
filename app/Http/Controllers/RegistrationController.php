@@ -49,7 +49,14 @@ class RegistrationController extends Controller
         }
 
         // Combinar os resultados
-        $allItems = $registrations->merge($nominees);
+        $allItems = $registrations->concat($nominees);
+
+        $summary = [
+            'people' => $allItems->pluck('candidate_id')->filter(fn ($id) => $id !== null)->unique()->count(),
+            'total' => $allItems->count(),
+            'regular' => $registrations->count(),
+            'honorary' => $nominees->count(),
+        ];
 
         // Ordenar por created_at (ou outro campo)
         $allItems = $allItems->sortByDesc('created_at');
@@ -62,25 +69,36 @@ class RegistrationController extends Controller
             'pageName' => 'page',
         ]);
 
-        return view('admin.registration.index', compact('list', 'editions'));
+        return view('admin.registration.index', compact('list', 'editions', 'summary'));
     }
 
     private function setIndexFilters($query, $request)
     {
-        $search = $request->input('search');
+        $search = trim((string) $request->input('search', ''));
         $edition = $request->input('edition');
         $status = $request->input('status');
 
-        if ($search) {
-            $query->where(function ($q) use ($search) {
-                $q->where('title', 'like', '%'.$search.'%')
+        if ($search !== '') {
+            $titleColumn = $query->getModel() instanceof Nominee ? 'name' : 'title';
+            $matchingStatuses = array_map(
+                fn (RegistrationStatusEnum $status) => $status->value,
+                array_filter(RegistrationStatusEnum::cases(), fn (RegistrationStatusEnum $status) => mb_stripos($status->label(), $search) !== false),
+            );
+
+            $query->where(function ($q) use ($search, $titleColumn, $matchingStatuses) {
+                $q->where($titleColumn, 'like', '%'.$search.'%')
                     ->orWhereHas('category', function ($subQ) use ($search) {
                         $subQ->where('title', 'like', '%'.$search.'%')
                             ->orWhere('acronym', 'like', '%'.$search.'%');
                     })
                     ->orWhereHas('candidate', function ($subQ) use ($search) {
-                        $subQ->where('cpf', 'like', '%'.$search.'%');
+                        $subQ->where('cpf', 'like', '%'.$search.'%')
+                            ->orWhere('nome', 'like', '%'.$search.'%');
                     });
+
+                if ($matchingStatuses !== []) {
+                    $q->orWhereIn('status', $matchingStatuses);
+                }
             });
         }
 
@@ -107,11 +125,13 @@ class RegistrationController extends Controller
             $q->whereIn('id', $user->indicatorCategories()->pluck('categories.id'))
                 ->where('is_honorific', false)
                 ->where(function ($cat) {
-                    $cat->whereRaw('(
-                            SELECT COUNT(*)
+                    $cat->whereIn('categories.indication_mode', ['human_only', 'hybrid'])
+                        ->whereRaw("(
+                            SELECT COUNT(DISTINCT indications.user_id)
                             FROM indications
                             WHERE indications.registration_id = registrations.id
-                        ) < categories.nominations_count');
+                              AND indications.source = 'human'
+                        ) < categories.human_indications_required");
                 });
         });
 
@@ -125,7 +145,7 @@ class RegistrationController extends Controller
             $q->where('user_id', $user->id);
         });
 
-        $query->where('status', RegistrationStatusEnum::Habilitado)->orWhere('status', RegistrationStatusEnum::Avaliado);
+        $query->whereIn('status', [RegistrationStatusEnum::Habilitado, RegistrationStatusEnum::Avaliado]);
 
         return $query;
     }
@@ -137,11 +157,13 @@ class RegistrationController extends Controller
             $q->whereIn('id', $user->evaluatorCategories()->pluck('categories.id'))
                 ->where('is_honorific', false)
                 ->where(function ($cat) {
-                    $cat->whereRaw('(
-                            SELECT COUNT(*)
+                    $cat->whereIn('categories.evaluation_mode', ['human_only', 'hybrid'])
+                        ->whereRaw("(
+                            SELECT COUNT(DISTINCT opinions.user_id)
                             FROM opinions
                             WHERE opinions.registration_id = registrations.id
-                        ) < categories.evaluations_count');
+                              AND opinions.source = 'human'
+                        ) < categories.human_evaluations_required");
                 });
         });
 

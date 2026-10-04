@@ -13,15 +13,15 @@ use Carbon\Carbon;
         @if(get_class($object) == "App\Models\Registration")
             <div class="  flex flex-row justify-end">
                 @php
-                    $bgColor = match($object->getTextEvaluationAvg()) {
-                        'Não Recomendado' => 'bg-red-300',
-                        'Meritório' => 'bg-yellow-300',
-                        'Recomendado' => 'bg-green-300',
-                        default => 'bg-gray-300',
+                    $evaluationAccent = match($object->getTextEvaluationAvg()) {
+                        'Não Recomendado' => '#b91c1c',
+                        'Meritório' => '#ca8a04',
+                        'Recomendado' => '#166534',
+                        default => '#4b5563',
                     };
 
                 @endphp
-                <div class="flex flex-col w-1/6  p-4 min-h-16 rounded-xl text-center {{ $bgColor }}  bg-red-400">
+                <div class="registration-detail-card flex flex-col w-1/6 p-4 min-h-16 rounded-xl text-center" style="--card-accent: {{ $evaluationAccent }}">
                     <div>Nota Avaliação</div>
                     <div class="place-self-center"> {{ $object->getEvaluationAvgPercentage() }}</div>
                     <div class="place-self-center"> {{ $object->getTextEvaluationAvg() }}</div>

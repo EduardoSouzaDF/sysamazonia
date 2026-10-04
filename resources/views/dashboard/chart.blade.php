@@ -1,4 +1,4 @@
-<section class="dashboard-chart-section" aria-labelledby="{{ $id }}-title">
+<section class="dashboard-chart-section" data-dimension="{{ $dimension }}" aria-labelledby="{{ $id }}-title">
     <h3 id="{{ $id }}-title" class="text-lg font-semibold">{{ $title }}</h3>
     @if(array_sum(array_column($rows, 'total')) === 0)
         <p class="dashboard-empty">Nenhuma inscrição disponível para esta distribuição.</p>

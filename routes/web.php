@@ -53,7 +53,7 @@ Route::middleware('guest')->group(function () {
 
 // Rotas autenticadas
 Route::middleware('auth')->group(function () {
-    Route::redirect('/', '/dashboard');
+    Route::view('/', 'home')->name('home');
     Route::get('/dashboard', [DashboardController::class, 'index'])->middleware(CheckAdmin::class.':admin,leitor')->name('dashboard');
     Route::get('/logout', [AuthController::class, 'logout'])->name('sair');
 

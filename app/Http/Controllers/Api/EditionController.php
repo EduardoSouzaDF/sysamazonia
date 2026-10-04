@@ -444,8 +444,6 @@ class EditionController extends Controller
                         unset($category['modality_id']);
                         unset($category['created_at']);
                         unset($category['updated_at']);
-                        unset($category['nominations_count']);
-                        unset($category['evaluations_count']);
                         unset($category['recipients_count']);
                         unset($category['submissions_per_candidate']);
                         unset($category['judging_start']);

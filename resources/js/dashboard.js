@@ -86,7 +86,7 @@ async function initializeDashboard() {
             const chart = new ApexCharts(element, {
                 chart: { type: 'bar', width, height: horizontal ? Math.max(260, rows.length * 38 + 50) : 340, toolbar: { show: false }, animations: { enabled: false }, fontFamily: 'inherit', foreColor: getComputedStyle(root).color },
                 series: [{ name: 'Inscrições', data: rows.map(row => row.total) }],
-                colors: ['#2563eb'],
+                colors: [getComputedStyle(element).getPropertyValue('--dashboard-accent').trim()],
                 plotOptions: { bar: { horizontal, borderRadius: 3, barHeight: '62%', columnWidth: '55%' } },
                 dataLabels: { enabled: false },
                 xaxis: { categories: rows.map(row => row.label), labels: { rotate: horizontal ? 0 : -35, trim: true, formatter: value => horizontal ? formatNumber(value) : shortenLabel(value, maxLabel) }, decimalsInFloat: 0 },

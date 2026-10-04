@@ -11,6 +11,7 @@
     'actions',
     'routeSearch',
     'paginator' => null, // Instância de LengthAwarePaginator para paginação
+    'searchValue' => '',
 ])
  
 
@@ -37,6 +38,8 @@
 
     </div>
 
+    {{ $summary ?? '' }}
+
     <div class="w-full">
         <div class="grid gap-5 lg:gap-7.5">
             <div class="kt-card kt-card-grid min-w-full">
@@ -46,7 +49,7 @@
                     <div class="w-auto flex-col flex gap-x-2">
                         <form id="search-form" class="flex-row flex gap-x-2">
                             <input type="text" placeholder="{{ $searchPlaceholder }}" class="kt-input w-80  "
-                                id="search-input" name="search" style="width: 40vw;"/>
+                                id="search-input" name="search" value="{{ $searchValue }}" style="width: 40vw;"/>
 
 
                             {{ $searchForm ?? '' }}

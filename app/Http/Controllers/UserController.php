@@ -321,7 +321,7 @@ class UserController extends Controller
         // Faz login como o usuário selecionado
         Auth::login($user);
 
-        return redirect()->route('dashboard'); // redireciona para a home ou painel do usuário
+        return redirect()->route('home');
     }
 
     public function returnToAdmin()
@@ -335,6 +335,6 @@ class UserController extends Controller
         $adminUser = User::find($adminId);
         Auth::login($adminUser);
 
-        return redirect()->route('dashboard');
+        return redirect()->route('home');
     }
 }

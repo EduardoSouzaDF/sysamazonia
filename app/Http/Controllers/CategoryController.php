@@ -44,8 +44,6 @@ class CategoryController extends Controller
     {
 
         $fieldsToInt = [
-            'nominations_count' => 1,
-            'evaluations_count' => 0,
             'recipients_count' => 0,
             'submissions_per_candidate' => 1,
         ];
@@ -68,14 +66,10 @@ class CategoryController extends Controller
             'title' => 'required|string|max:255',
             'acronym' => 'required|string|max:10,acronym',
             'description' => 'required|filled|string',
-            'nominations_count' => 'integer',
-            'evaluations_count' => 'integer',
-            'evaluation_mode' => ['nullable', Rule::in(['human_only', 'ai_only', 'hybrid'])],
-            'human_evaluations_required' => 'nullable|integer|min:0|max:50|required_with:evaluation_mode',
-            'ai_evaluations_required' => 'nullable|integer|min:0|max:1|required_with:evaluation_mode',
-            'indication_mode' => ['nullable', Rule::in(['human_only', 'ai_only', 'hybrid'])],
-            'human_indications_required' => 'nullable|integer|min:0|max:50|required_with:indication_mode',
-            'ai_indications_required' => 'nullable|integer|min:0|max:1|required_with:indication_mode',
+            'evaluation_mode' => [Rule::excludeIf(fn () => $request->boolean('is_honorific')), 'required', Rule::in(['human_only', 'ai_only', 'hybrid'])],
+            'human_evaluations_required' => [Rule::excludeIf(fn () => $request->boolean('is_honorific')), 'required', 'integer', 'min:0', 'max:50'],
+            'indication_mode' => [Rule::excludeIf(fn () => $request->boolean('is_honorific')), 'required', Rule::in(['human_only', 'ai_only', 'hybrid'])],
+            'human_indications_required' => [Rule::excludeIf(fn () => $request->boolean('is_honorific')), 'required', 'integer', 'min:0', 'max:50'],
             'recipients_count' => 'integer',
             'submissions_per_candidate' => 'integer',
             'judging_start' => 'required|date',
@@ -92,12 +86,11 @@ class CategoryController extends Controller
 
         if (! $request->boolean('is_honorific')) {
             foreach ([
-                'evaluation' => [(string) $request->input('evaluation_mode'), (int) $request->input('human_evaluations_required'), (int) $request->input('ai_evaluations_required')],
-                'indication' => [(string) $request->input('indication_mode'), (int) $request->input('human_indications_required'), (int) $request->input('ai_indications_required')],
-            ] as $prefix => [$mode, $human, $ai]) {
-                if (($mode === 'human_only' && ($human < 1 || $ai !== 0))
-                    || ($mode === 'ai_only' && ($human !== 0 || $ai !== 1))
-                    || ($mode === 'hybrid' && ($human < 1 || $ai !== 1))) {
+                'evaluation' => [(string) $request->input('evaluation_mode'), (int) $request->input('human_evaluations_required')],
+                'indication' => [(string) $request->input('indication_mode'), (int) $request->input('human_indications_required')],
+            ] as $prefix => [$mode, $human]) {
+                if ((in_array($mode, ['human_only', 'hybrid'], true) && $human < 1)
+                    || ($mode === 'ai_only' && $human !== 0)) {
                     throw ValidationException::withMessages([
                         $prefix.'_mode' => 'As quantidades não correspondem ao modo escolhido. Somente humano exige ao menos um humano; somente IA exige uma IA; híbrido exige ambos.',
                     ]);
@@ -114,14 +107,10 @@ class CategoryController extends Controller
             'title',
             'acronym',
             'description',
-            'nominations_count',
-            'evaluations_count',
             'evaluation_mode',
             'human_evaluations_required',
-            'ai_evaluations_required',
             'indication_mode',
             'human_indications_required',
-            'ai_indications_required',
             'recipients_count',
             'submissions_per_candidate',
             'judging_start',
@@ -132,23 +121,12 @@ class CategoryController extends Controller
         $data['is_open_for_submissions'] = $request->boolean('is_open_for_submissions');
         $data['is_honorific'] = $request->boolean('is_honorific');
         if ($data['is_honorific']) {
-            $data['evaluations_count'] = 0;
             $data['evaluation_mode'] = null;
             $data['human_evaluations_required'] = null;
-            $data['ai_evaluations_required'] = null;
             $data['indication_mode'] = null;
             $data['human_indications_required'] = null;
-            $data['ai_indications_required'] = null;
 
             return $data;
-        }
-        if ($request->filled('evaluation_mode')) {
-            $data['evaluations_count'] = (int) $request->input('human_evaluations_required', 0)
-                + (int) $request->input('ai_evaluations_required', 0);
-        }
-        if ($request->filled('indication_mode')) {
-            $data['nominations_count'] = (int) $request->input('human_indications_required', 0)
-                + (int) $request->input('ai_indications_required', 0);
         }
 
         return $data;

@@ -5,7 +5,9 @@ $menu = MenuBuilder::getMenuStructure();
 
 <div class="kt-sidebar bg-background border-e border-e-border fixed top-0 bottom-0 z-20 hidden lg:flex flex-col items-stretch shrink-0 [--kt-drawer-enable:true] lg:[--kt-drawer-enable:false]" data-kt-drawer="true" data-kt-drawer-class="kt-drawer kt-drawer-start top-0 bottom-0" id="sidebar">
   <div class="kt-sidebar-header hidden lg:flex items-center relative justify-between px-3 lg:px-6 shrink-0" id="sidebar_header">
-    <img class="default-logo min-h-[22px] max-w-none" src="{{ asset('images/logo-mini.png') }}" alt="Logo" />
+    <a href="{{ route('home') }}" aria-label="Página inicial">
+      <img class="default-logo min-h-[22px] max-w-none" style="width: 132px; height: 61px; object-fit: contain;" src="{{ asset('images/lg_Premios_alt.webp') }}" alt="Premiação Amazônia" />
+    </a>
   </div>
 
   <div class="kt-sidebar-content flex grow shrink-0 py-5 pe-2" id="sidebar_content">
