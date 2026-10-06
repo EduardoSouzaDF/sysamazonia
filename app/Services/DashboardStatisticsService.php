@@ -97,7 +97,7 @@ class DashboardStatisticsService
     private function group(Builder $base, string $expression, int $total): array
     {
         return (clone $base)->selectRaw("$expression AS label, COUNT(*) AS total")
-            ->groupByRaw($expression)->orderByDesc('total')->orderBy('label')->get()
+            ->groupBy('label')->orderByDesc('total')->orderBy('label')->get()
             ->map(fn ($row) => $this->row((string) $row->label, (int) $row->total, $total))->all();
     }
 
