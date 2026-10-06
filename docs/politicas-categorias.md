@@ -24,24 +24,15 @@ verificar a pendência humana, respeitando o modo configurado.
 
 ## Migração dos dados existentes
 
-A migration `2026_09_24_120000_remove_redundant_category_policy_counts` remove
-`evaluations_count`, `nominations_count`, `ai_evaluations_required` e
-`ai_indications_required`.
+A migration `2026_09_23_120000_backfill_legacy_category_policies` define as
+categorias regulares criadas antes das políticas como `human_only`: a quantidade
+de humanos exigida passa a ser o total legado (`evaluations_count` /
+`nominations_count`) e a parcela IA é zero. Categorias honoríficas e categorias
+que já tinham política definida não são alteradas.
 
-Antes de remover as colunas, ela verifica se as categorias regulares têm políticas
-explícitas e se os totais anteriores correspondem às quantidades configuradas.
-Se houver uma categoria legada ou inconsistente, a migração para antes de alterar
-o esquema; a política deve ser definida explicitamente, sem inferir a distribuição
-humana/IA a partir de um total.
-
-Se houver categorias, uma cópia completa dos registros anteriores é gravada em
-`storage/app/private/backups/category-policies-*.json`, com permissão `0600`.
-Esse arquivo também preserva os antigos totais sem uso das categorias honoríficas.
-Não é um backup completo do banco.
-
-O rollback recria as quatro colunas e calcula seus valores a partir das políticas
-vigentes; para honoríficas, os totais são zero e a parcela IA é nula. Valores
-históricos sem significado operacional permanecem disponíveis na cópia JSON.
+As colunas legadas `evaluations_count`, `nominations_count`,
+`ai_evaluations_required` e `ai_indications_required` permanecem na tabela, mas
+não são lidas nem gravadas pela aplicação.
 
 Esta mudança não exclui pareceres ou indicações, não altera o status das inscrições
 e não introduz uma exigência de indicações para entrar no painel de julgamento.

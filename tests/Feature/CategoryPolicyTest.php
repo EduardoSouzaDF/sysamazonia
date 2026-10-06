@@ -7,7 +7,6 @@ use App\Models\Role;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Schema;
 use PHPUnit\Framework\Attributes\DataProvider;
 use Tests\TestCase;
 
@@ -52,10 +51,6 @@ class CategoryPolicyTest extends TestCase
             ->assertDontSee('name="nominations_count"', false)
             ->assertDontSee('name="ai_evaluations_required"', false)
             ->assertDontSee('name="ai_indications_required"', false);
-
-        foreach (['evaluations_count', 'nominations_count', 'ai_evaluations_required', 'ai_indications_required'] as $column) {
-            $this->assertFalse(Schema::hasColumn('categories', $column));
-        }
     }
 
     public function test_honorific_does_not_require_policies_and_preserves_other_limits(): void
