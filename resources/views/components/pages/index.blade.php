@@ -131,7 +131,7 @@
                                     @forelse($data  as $item)
                                         <tr class="{{$item['color'] ?? ''}}">
                                             @foreach ($columns as $label => $field)
-                                                <td>
+                                                <td class="{{ $item['cell_classes'][$field] ?? '' }}">
                                                     <span class="line-clamp-3 max-w-64" title="{{ trim(strip_tags((string) ($item[$field] ?? '-'))) }}">{{ $item[$field] ?? '-' }}</span>
                                                 </td>
                                             @endforeach

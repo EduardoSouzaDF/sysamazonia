@@ -29,25 +29,37 @@ $actions = [
 $formattedData = array_map(function ($registration) {
     /** @var \App\Models\Registration $registrationModel */
     $registrationModel = $registration;
-
+    $honorific = $registrationModel->category->is_honorific;
+    $classification = !$honorific ? match ($registrationModel->getTextEvaluationAvg()) {
+        'Não Recomendado' => 'not-recommended',
+        'Meritório' => 'meritorious',
+        'Recomendado' => 'recommended',
+        default => '',
+    } : '';
+    $statusClass = match (true) {
+        (int) $registrationModel->status === RegistrationStatusEnum::Rejeitado->value => 'registration-status-rejected',
+        $honorific && (int) $registrationModel->status === RegistrationStatusEnum::Habilitado->value => 'registration-status-recommended',
+        $classification !== '' => 'registration-status-'.$classification,
+        default => '',
+    };
+    $rating = 'Não se Aplica';
+    if (!$honorific) {
+        $note = $registrationModel->getEvaluationAvgPercentage();
+        $noteMarkup = $note !== null ? '<strong class="registration-note registration-note-'.$classification.'">'.e((string) $note).'</strong>' : '';
+        $rating = new HtmlString(sizeof($registrationModel->opinions).' | '.$registrationModel->category->requiredEvaluations().' ( '.$noteMarkup.' )');
+    }
 
     return [
         'edition' => $registrationModel->category->modality->edition->title,
         'category' => $registrationModel->category->acronym."-".$registrationModel->category->title,
         'title' => $registrationModel->title ?? $registrationModel->name,
         'candidate_name' => $registrationModel->candidate->nome,
-        'rating' => !$registrationModel->category->is_honorific ? sizeof($registrationModel->opinions).' | '.$registrationModel->category->requiredEvaluations().' ( '.$registrationModel->getEvaluationAvgPercentage()." ) " : 'Não se Aplica',
+        'rating' => $rating,
         'nominations' => !$registrationModel->category->is_honorific ? sizeof($registrationModel->indications).' | '.$registrationModel->category->requiredIndications() : 'Não se Aplica',
         'status' => $registrationModel->statusName(), // ✅ Usando o método do model
         'id' => $registrationModel->id,
         'type' => get_class($registration),
-        'color' =>  !$registrationModel->category->is_honorific ?
-                  match($registrationModel->getTextEvaluationAvg()) {
-            'Não Recomendado' => 'bg-red-300/30',
-            'Meritório' => 'bg-yellow-300/30',
-            'Recomendado' => 'bg-green-300/30',
-            default => ''
-        }: ''
+        'cell_classes' => ['status' => $statusClass],
     ];
 }, $list->items()); // Usar items() ao invés de toArray()['data']
 
@@ -161,6 +173,21 @@ if(!$user->isAdmin()){
 
 @push('styles')
 <style>
+    .registration-status-not-recommended { background-color: #fee2e2; }
+    .registration-status-meritorious { background-color: #fef9c3; }
+    .registration-status-recommended { background-color: #ecfdf0; }
+    .registration-status-rejected { background-color: #f3f4f6; }
+    .registration-note { font-weight: 700; }
+    .registration-note-not-recommended { color: #b91c1c; }
+    .registration-note-meritorious { color: #92400e; }
+    .registration-note-recommended { color: #166534; }
+    .dark .registration-status-not-recommended { background-color: #451a1a; }
+    .dark .registration-status-meritorious { background-color: #422f12; }
+    .dark .registration-status-recommended { background-color: #143323; }
+    .dark .registration-status-rejected { background-color: #292d34; }
+    .dark .registration-note-not-recommended { color: #fca5a5; }
+    .dark .registration-note-meritorious { color: #fcd34d; }
+    .dark .registration-note-recommended { color: #86efac; }
     .registration-summary { margin-bottom: 1.25rem; }
     .registration-summary-grid { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: .75rem; }
     .registration-summary-card { --summary-accent: #207568; padding: .875rem 1rem; border-top: 3px solid var(--summary-accent); background: color-mix(in srgb, var(--summary-accent) 8%, var(--background, white)); }
