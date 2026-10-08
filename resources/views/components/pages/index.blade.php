@@ -125,7 +125,7 @@
                                         <tr class="{{$item['color'] ?? ''}}">
                                             @foreach ($columns as $label => $field)
                                                 <td>
-                                                    <span class="line-clamp-3 max-w-64" title="{{ $item[$field] ?? '-' }}">{{ $item[$field] ?? '-' }}</span>
+                                                    <span class="line-clamp-3 max-w-64" title="{{ trim(strip_tags((string) ($item[$field] ?? '-'))) }}">{{ $item[$field] ?? '-' }}</span>
                                                 </td>
                                             @endforeach
                                             @if (!empty($actions))
