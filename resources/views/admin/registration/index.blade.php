@@ -125,6 +125,15 @@ if(!$user->isAdmin()){
 
     <x-slot:searchForm>
 
+        <div class="w-full sm:w-64 min-w-0">
+            <select name="category" id="registration-category" class="kt-select" aria-label="Categoria">
+                <option value="">Todas as categorias</option>
+                @foreach ($categories as $category)
+                    <option value="{{ $category->id }}" @selected((string) request('category', '') === (string) $category->id)>{{ $category->acronym }} — {{ $category->title }}</option>
+                @endforeach
+            </select>
+        </div>
+
     @if($user->isAdmin())
         <div style="min-width: max-content">
             <select name="edition" id="editions" class="kt-select" aria-label="Edição">

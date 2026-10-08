@@ -82,6 +82,28 @@ class RegistrationSearchTest extends TestCase
             ->assertViewHas('list', fn ($list) => $list->total() === 12 && $list->count() === 2);
     }
 
+    public function test_category_filter_combines_with_search_edition_and_status(): void
+    {
+        $this->seedReportRecords();
+        $this->actingAs($this->admin());
+        $regular = DB::table('registrations')->value('category_id');
+        $honorific = DB::table('nominees')->value('category_id');
+        $filters = ['search' => 'Autora Principal', 'edition' => DB::table('editions')->value('id'), 'status' => 3, 'category' => $regular];
+        $response = $this->get(route('admin.registration.index', $filters))->assertOk()
+            ->assertViewHas('summary', ['people' => 1, 'total' => 1, 'regular' => 1, 'honorary' => 0])
+            ->assertSee('Todas as categorias');
+        $this->assertMatchesRegularExpression('/<option value="'.$regular.'" selected[^>]*>PROJ/', $response->getContent());
+        parse_str(parse_url($response->viewData('list')->url(2), PHP_URL_QUERY), $query);
+        $this->assertEquals($filters + ['page' => 2], $query);
+
+        $this->get(route('admin.registration.index', array_replace($filters, ['category' => $honorific])))
+            ->assertOk()->assertViewHas('summary', ['people' => 1, 'total' => 1, 'regular' => 0, 'honorary' => 1]);
+        $this->get(route('admin.registration.index', array_replace($filters, ['category' => 99999])))
+            ->assertOk()->assertViewHas('list', fn ($list) => $list->total() === 0);
+        $this->get(route('admin.registration.index', array_replace($filters, ['category' => ''])))
+            ->assertOk()->assertViewHas('list', fn ($list) => $list->total() === 2);
+    }
+
     public function test_summary_counts_distinct_responsible_people_and_filtered_types(): void
     {
         $this->seedReportRecords();

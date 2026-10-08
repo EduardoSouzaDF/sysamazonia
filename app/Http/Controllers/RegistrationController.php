@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Enum\RegistrationStatusEnum;
 use App\Http\Requests\StoreOpinionRequest;
+use App\Models\Category;
 use App\Models\Edition;
 use App\Models\Nominee;
 use App\Models\Registration;
@@ -23,6 +24,7 @@ class RegistrationController extends Controller
 
         $user = Auth::user();
         $editions = Edition::all();
+        $categories = Category::query()->orderBy('title')->get(['id', 'title', 'acronym']);
         $page = $request->input('page', 1);
         $perPage = 10;
 
@@ -77,7 +79,7 @@ class RegistrationController extends Controller
             'pageName' => 'page',
         ]);
 
-        return view('admin.registration.index', compact('list', 'editions', 'summary'));
+        return view('admin.registration.index', compact('list', 'editions', 'categories', 'summary'));
     }
 
     private function setIndexFilters($query, $request)
@@ -85,6 +87,7 @@ class RegistrationController extends Controller
         $search = trim((string) $request->input('search', ''));
         $edition = $request->input('edition');
         $status = $request->input('status');
+        $category = $request->input('category');
 
         if ($search !== '') {
             $titleColumn = $query->getModel() instanceof Nominee ? 'name' : 'title';
@@ -116,6 +119,10 @@ class RegistrationController extends Controller
                     $subq->where('id', $edition);
                 });
             });
+        }
+
+        if ($category) {
+            $query->where('category_id', $category);
         }
 
         if ($status) {
