@@ -17,6 +17,8 @@ export default defineConfig({
             input: [
                 'resources/css/app.css',
                 'resources/css/dashboard.css',
+                'resources/css/registrations.css',
+                'resources/css/pages-table.css',
                 'resources/js/dashboard.js',
                     'resources/comp_themes/keenicons/styles.bundle.css',
                     'resources/css/styles.css',

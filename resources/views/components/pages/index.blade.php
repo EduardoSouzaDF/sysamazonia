@@ -15,38 +15,9 @@
 ])
  
 
-<style>
-    nav>div {
-        justify-content: space-between !important;
-    }
-
-    .pages-table th,
-    .pages-table td {
-        padding-inline: calc(var(--spacing) * 3);
-    }
-
-    .pages-table .pages-actions-col {
-        position: sticky;
-        right: 0;
-        z-index: 1;
-        width: 1%;
-        white-space: nowrap;
-        background-color: var(--background);
-        box-shadow: inset 1px 0 0 var(--border), -8px 0 8px -8px rgb(0 0 0 / 0.25);
-    }
-
-    .pages-table .pages-actions-tint {
-        position: absolute;
-        inset: 0;
-        z-index: -1;
-        pointer-events: none;
-    }
-
-    .pages-table .pages-actions-col:focus-within,
-    .pages-table .pages-actions-col:has(.open, .show) {
-        z-index: 5;
-    }
-</style>
+@pushOnce('styles', 'pages-table-styles')
+    @vite('resources/css/pages-table.css')
+@endPushOnce
 <div class="w-full px-10">
     <div class="flex flex-wrap items-center lg:items-end justify-between gap-5 pb-7.5">
         <div class="flex flex-col justify-center gap-2">

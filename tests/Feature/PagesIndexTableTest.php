@@ -61,7 +61,9 @@ class PagesIndexTableTest extends TestCase
             ->assertDontSee('-z-10', false)
             ->getContent();
 
-        $rule = (string) str($content)->after('.pages-table .pages-actions-tint {')->before('}');
+        $this->assertStringContainsString(\Illuminate\Support\Facades\Vite::asset('resources/css/pages-table.css'), $content);
+        $styles = file_get_contents(resource_path('css/pages-table.css'));
+        $rule = (string) str($styles)->after('.pages-table .pages-actions-tint {')->before('}');
         $this->assertStringContainsString('pointer-events: none;', $rule);
         $this->assertStringContainsString('z-index: -1;', $rule);
     }

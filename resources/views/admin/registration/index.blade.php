@@ -147,7 +147,7 @@ if(!$user->isAdmin()){
         </div>
 
     @if($user->isAdmin())
-        <div style="min-width: max-content">
+        <div class="registration-filter">
             <select name="edition" id="editions" class="kt-select" aria-label="Edição">
                 @foreach ($editions as $value => $label)
                     <option value="{{ $value }}" @selected((string) request('edition', '') === (string) $value)>{{ $label }}</option>
@@ -155,7 +155,7 @@ if(!$user->isAdmin()){
             </select>
         </div>
 
-        <div style="min-width: max-content">
+        <div class="registration-filter">
             <select name="status" id="status" class="kt-select" aria-label="Status">
                 @foreach ($status as $value => $label)
                     <option value="{{ $value }}" @selected((string) request('status', '') === (string) $value)>{{ $label }}</option>
@@ -172,34 +172,5 @@ if(!$user->isAdmin()){
 @endsection
 
 @push('styles')
-<style>
-    .registration-status-not-recommended { background-color: #fee2e2; }
-    .registration-status-meritorious { background-color: #fef9c3; }
-    .registration-status-recommended { background-color: #ecfdf0; }
-    .registration-status-rejected { background-color: #f3f4f6; }
-    .registration-note { font-weight: 700; }
-    .registration-note-not-recommended { color: #b91c1c; }
-    .registration-note-meritorious { color: #92400e; }
-    .registration-note-recommended { color: #166534; }
-    .dark .registration-status-not-recommended { background-color: #451a1a; }
-    .dark .registration-status-meritorious { background-color: #422f12; }
-    .dark .registration-status-recommended { background-color: #143323; }
-    .dark .registration-status-rejected { background-color: #292d34; }
-    .dark .registration-note-not-recommended { color: #fca5a5; }
-    .dark .registration-note-meritorious { color: #fcd34d; }
-    .dark .registration-note-recommended { color: #86efac; }
-    .registration-summary { margin-bottom: 1.25rem; }
-    .registration-summary-grid { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: .75rem; }
-    .registration-summary-card { --summary-accent: #207568; padding: .875rem 1rem; border-top: 3px solid var(--summary-accent); background: color-mix(in srgb, var(--summary-accent) 8%, var(--background, white)); }
-    .registration-summary-card[data-summary="total"] { --summary-accent: #246b35; }
-    .registration-summary-card[data-summary="regular"] { --summary-accent: #246589; }
-    .registration-summary-card[data-summary="honorary"] { --summary-accent: #8a6b18; }
-    .registration-summary-card strong { display: block; margin-top: .375rem; font-size: 1.5rem; line-height: 1.3; font-variant-numeric: tabular-nums; color: var(--summary-accent); }
-    .dark .registration-summary-card { --summary-accent: #70bcac; }
-    .dark .registration-summary-card[data-summary="total"] { --summary-accent: #7cb589; }
-    .dark .registration-summary-card[data-summary="regular"] { --summary-accent: #78b8d8; }
-    .dark .registration-summary-card[data-summary="honorary"] { --summary-accent: #d7bb68; }
-    @media (max-width: 1000px) { .registration-summary-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
-    @media (max-width: 540px) { .registration-summary-grid { grid-template-columns: 1fr; } }
-</style>
+    @vite('resources/css/registrations.css')
 @endpush
