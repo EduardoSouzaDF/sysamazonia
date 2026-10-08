@@ -29,6 +29,7 @@ class Nominee extends Model
 
     protected $casts = [
         'status' => 'integer',
+        'award_position' => 'integer',
     ];
 
     protected $dates = [

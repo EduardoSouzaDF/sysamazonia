@@ -41,6 +41,7 @@ class Category extends Model
         'judging_start' => 'date',
         'judging_end' => 'date',
         'is_open_for_submissions' => 'boolean',
+        'awardees_confirmed_at' => 'datetime',
     ];
 
     public function requiredAiEvaluations(): int
@@ -161,5 +162,13 @@ class Category extends Model
         $quota = (int) ($this->recipients_count ?? 0);
 
         return $quota > 0 && $this->remainingQuotaFor($user) === 0;
+    }
+
+    /**
+     * Agraciados da categoria já confirmados pelo admin (spec 0004 / RF-12).
+     */
+    public function areAwardeesConfirmed(): bool
+    {
+        return $this->awardees_confirmed_at !== null;
     }
 }
