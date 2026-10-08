@@ -19,6 +19,26 @@
     nav>div {
         justify-content: space-between !important;
     }
+
+    .pages-table th,
+    .pages-table td {
+        padding-inline: calc(var(--spacing) * 3);
+    }
+
+    .pages-table .pages-actions-col {
+        position: sticky;
+        right: 0;
+        z-index: 1;
+        width: 1%;
+        white-space: nowrap;
+        background-color: var(--background);
+        box-shadow: inset 1px 0 0 var(--border), -8px 0 8px -8px rgb(0 0 0 / 0.25);
+    }
+
+    .pages-table .pages-actions-col:focus-within,
+    .pages-table .pages-actions-col:has(.open, .show) {
+        z-index: 5;
+    }
 </style>
 <div class="w-full px-10">
     <div class="flex flex-wrap items-center lg:items-end justify-between gap-5 pb-7.5">
@@ -43,13 +63,13 @@
     <div class="w-full">
         <div class="grid gap-5 lg:gap-7.5">
             <div class="kt-card kt-card-grid min-w-full">
-                <div class="kt-card-header min-h-16 w-full flex flex-row">
+                <div class="kt-card-header min-h-16 w-full flex flex-row flex-wrap gap-3 py-3">
 
 
-                    <div class="w-auto flex-col flex gap-x-2">
-                        <form id="search-form" class="flex-row flex gap-x-2">
-                            <input type="text" placeholder="{{ $searchPlaceholder }}" class="kt-input w-80  "
-                                id="search-input" name="search" value="{{ $searchValue }}" style="width: 40vw;"/>
+                    <div class="flex-1 min-w-0">
+                        <form id="search-form" class="flex flex-row flex-wrap items-center gap-2">
+                            <input type="text" placeholder="{{ $searchPlaceholder }}" class="kt-input grow basis-full sm:basis-64 min-w-0"
+                                id="search-input" name="search" value="{{ $searchValue }}"/>
 
 
                             {{ $searchForm ?? '' }}
@@ -82,19 +102,21 @@
                 <div class="kt-card-content">
                     <div class="grid" data-kt-datatable="true" data-kt-datatable-page-size="10">
                         <div class="kt-scrollable-x-auto">
-                            <table class="kt-table table-auto kt-table-border" data-kt-datatable-table="true"
+                            <table class="kt-table table-auto kt-table-border pages-table"data-kt-datatable-table="true"
                                 id="security_log_table">
                                 <thead>
                                     <tr>
                                         @foreach ($columns as $label => $field)
-                                            <th class="min-w-[130px] lg:min-w-[200px]">
+                                            <th class="min-w-[100px] lg:min-w-[140px]">
                                                 <span class="kt-table-col">
                                                     <span class="kt-table-col-label">{{ $label }}</span>
                                                 </span>
                                             </th>
                                         @endforeach
                                         @if (!empty($actions))
-                                            <th class="w-[60px] lg:w-[100px]">Ações</th>
+                                            <th class="pages-actions-col">
+                                                <span class="absolute inset-0 -z-10 bg-muted/40"></span>Ações
+                                            </th>
                                         @endif
                                     </tr>
                                 </thead>
@@ -103,12 +125,13 @@
                                         <tr class="{{$item['color'] ?? ''}}">
                                             @foreach ($columns as $label => $field)
                                                 <td>
-                                                    {{ $item[$field] ?? '-' }}
+                                                    <span class="line-clamp-3 max-w-64" title="{{ $item[$field] ?? '-' }}">{{ $item[$field] ?? '-' }}</span>
                                                 </td>
                                             @endforeach
                                             @if (!empty($actions))
                                                 @if(sizeof($actions) > 1)
-                                                    <td>
+                                                    <td class="pages-actions-col">
+                                                        <span class="absolute inset-0 -z-10 {{ $item['color'] ?? '' }}"></span>
                                                         <div data-kt-dropdown="true" data-kt-dropdown-trigger="click">
                                                             <button class="kt-btn" data-kt-dropdown-toggle="true">
                                                                 Gerenciar<svg xmlns="http://www.w3.org/2000/svg"
@@ -147,7 +170,8 @@
                                                         </div>
                                                     </td>
                                                 @else
-                                                <td>
+                                                <td class="pages-actions-col">
+                                                    <span class="absolute inset-0 -z-10 {{ $item['color'] ?? '' }}"></span>
                                                     @foreach ($actions as $actionName => $actionRoute)
                                                             <a href="{{ is_callable($actionRoute) ? $actionRoute($item) : $actionRoute }}"
                                                                 class="kt-btn">

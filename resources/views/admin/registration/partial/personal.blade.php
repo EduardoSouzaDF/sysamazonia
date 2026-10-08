@@ -3,7 +3,7 @@ use Carbon\Carbon;
 ?>
 
 <div class="flex w-full gap-4">
-    <div class="w-1/2  ">
+    <div class="w-full break-words">
     <b>CPF:</b>  {{ $candidate->cpf }}  <br>
     <b>Nome :</b>  {{ $candidate->nome }}  <br>
     <b>Email:</b>  {{ $candidate->email }}  <br>
