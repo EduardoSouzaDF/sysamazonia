@@ -30,3 +30,18 @@
 .registration-filter {
     min-width: max-content;
 }
+
+.details-group-example sl-details:not(:last-of-type) {
+    margin-bottom: var(--sl-spacing-2x-small);
+}
+
+.registration-detail-card {
+    --card-accent: #166534;
+    border-top: 4px solid var(--card-accent);
+    background: color-mix(in srgb, var(--card-accent) 8%, var(--background, white));
+}
+
+div.registration-detail-rejected,
+sl-details.registration-detail-rejected::part(base) {
+    box-shadow: 0 2px 8px rgb(156 163 175 / 18%);
+}

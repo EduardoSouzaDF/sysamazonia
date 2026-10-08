@@ -32,18 +32,11 @@ use Carbon\Carbon;
 @endphp
 
 @extends('admin.content')
+@push('styles')
+    @vite('resources/css/registrations.css')
+@endpush
 @section('maincontent')
-    <style>
-        .details-group-example sl-details:not(:last-of-type) {
-            margin-bottom: var(--sl-spacing-2x-small);
-        }
 
-        .registration-detail-card {
-            --card-accent: #166534;
-            border-top: 4px solid var(--card-accent);
-            background: color-mix(in srgb, var(--card-accent) 8%, var(--background, white));
-        }
-    </style>
 
     <x-pages.crud.create btnSubmit='{{ false }}'
     useForm='{{$useForm}}'
@@ -93,12 +86,14 @@ use Carbon\Carbon;
         @foreach ($registrations as $object)
             @if ($user->isAdmin())
                
-                <sl-details summary="{{ $object->category->modality->edition->title }} - {{ $object->category->modality->title }} - {{ $object->category->title }} :  {{ $object->title ?: $object->name }}">
+                <sl-details @class(['registration-detail-rejected' => (int) $object->status === 2]) summary="{{ $object->category->modality->edition->title }} - {{ $object->category->modality->title }} - {{ $object->category->title }} :  {{ $object->title ?: $object->name }}">
                      @include('admin.registration.partial.registration', $object)
                 </sl-details>
 
             @else
-                @include('admin.registration.partial.registration', $object)
+                <div @class(['registration-detail-rejected' => (int) $object->status === 2])>
+                    @include('admin.registration.partial.registration', $object)
+                </div>
 
                 @if($user->isEvaluator())
                     <div class="kt-card w-full">
