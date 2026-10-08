@@ -32,9 +32,9 @@
                 <ol class="flex flex-col gap-2">
                     @foreach ($awardees as $awardee)
                         <li class="flex items-center gap-4 rounded-lg border border-border p-3">
-                            <span class="kt-badge kt-badge-primary whitespace-nowrap">{{ $awardee->award_position ? $awardee->award_position.'º lugar' : 'Agraciado' }}</span>
+                            <span class="kt-badge kt-badge-primary shrink-0 whitespace-nowrap">{{ $awardee->award_position ? $awardee->award_position.'º lugar' : 'Agraciado' }}</span>
                             <span class="grow"><span class="font-medium text-mono">{{ $codeOf($awardee) }}</span> — {{ $labelOf($awardee) }}</span>
-                            <span class="text-sm text-secondary-foreground whitespace-nowrap">{{ $awardee->judge_selections_count }} de {{ $judgesCount }} votos</span>
+                            <span class="shrink-0 text-sm text-secondary-foreground whitespace-nowrap">{{ $awardee->judge_selections_count }} de {{ $judgesCount }} votos</span>
                         </li>
                     @endforeach
                 </ol>
@@ -59,7 +59,7 @@
                     <ol class="flex flex-col gap-2" data-ranking>
                         @for ($position = 1; $position <= $category->recipients_count; $position++)
                             <li data-slot="{{ $position }}" class="flex items-center gap-3 rounded-lg border border-dashed border-border p-3">
-                                <span class="kt-badge kt-badge-outline whitespace-nowrap">{{ $position }}º lugar</span>
+                                <span class="kt-badge kt-badge-outline shrink-0 whitespace-nowrap">{{ $position }}º lugar</span>
                                 <span class="grow text-sm text-muted-foreground" data-slot-content>Selecione uma inscrição abaixo</span>
                             </li>
                         @endfor
@@ -81,7 +81,7 @@
                         <label data-top="{{ $type }}:{{ $inscription->id }}" class="flex cursor-pointer items-center gap-3 border-b border-border py-2 last:border-b-0">
                             <input type="checkbox" class="kt-checkbox" data-mirror="{{ $inscription->id }}">
                             <span class="grow"><span class="font-medium text-mono">{{ $codeOf($inscription) }}</span> — {{ $labelOf($inscription) }}</span>
-                            <span class="text-sm text-secondary-foreground whitespace-nowrap">{{ $inscription->judge_selections_count }} de {{ $judgesCount }} votos</span>
+                            <span class="shrink-0 text-sm text-secondary-foreground whitespace-nowrap">{{ $inscription->judge_selections_count }} de {{ $judgesCount }} votos</span>
                         </label>
                     @empty
                         <p class="text-sm text-muted-foreground">Nenhuma inscrição recebeu votos nesta categoria.</p>
@@ -101,7 +101,7 @@
                             <input type="checkbox" class="kt-checkbox" value="{{ $inscription->id }}" data-pick
                                 data-code="{{ $codeOf($inscription) }}" data-label="{{ $labelOf($inscription) }}">
                             <span class="grow"><span class="font-medium text-mono">{{ $codeOf($inscription) }}</span> — {{ $labelOf($inscription) }}</span>
-                            <span class="text-sm text-secondary-foreground whitespace-nowrap">{{ $inscription->judge_selections_count }} de {{ $judgesCount }} votos</span>
+                            <span class="shrink-0 text-sm text-secondary-foreground whitespace-nowrap">{{ $inscription->judge_selections_count }} de {{ $judgesCount }} votos</span>
                         </label>
                     @endforeach
                     <p class="hidden py-4 text-center text-sm text-muted-foreground" data-search-empty>Nenhuma inscrição encontrada.</p>

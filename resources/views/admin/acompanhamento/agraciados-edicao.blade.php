@@ -38,7 +38,7 @@
                         <ol class="flex flex-col gap-2">
                             @foreach ($awardees as $awardee)
                                 <li class="flex items-center gap-3">
-                                    <span class="kt-badge kt-badge-primary whitespace-nowrap">{{ $awardee->award_position ? $awardee->award_position.'º lugar' : 'Agraciado' }}</span>
+                                    <span class="kt-badge kt-badge-primary shrink-0 whitespace-nowrap">{{ $awardee->award_position ? $awardee->award_position.'º lugar' : 'Agraciado' }}</span>
                                     <span class="text-sm">
                                         <span class="font-medium text-mono">{{ trim($category->acronym.' '.$awardee->id) }}</span>
                                         — {{ $category->is_honorific ? $awardee->name : $awardee->title }}

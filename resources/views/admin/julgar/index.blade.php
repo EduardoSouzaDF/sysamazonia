@@ -54,6 +54,15 @@
                     <button type="submit" data-confirm-btn form="julgar-form" class="kt-btn" disabled>Confirmar</button>
                 </div>
             </div>
+
+            <section class="kt-card min-w-full" aria-labelledby="votos-title">
+                <div class="kt-card-header">
+                    <h3 id="votos-title" class="kt-card-title">Acompanhamento dos votos</h3>
+                </div>
+                <div class="kt-card-content flex flex-col gap-3">
+                    <x-julgar.votes :votes="$votes" :judges-count="$judgesCount" />
+                </div>
+            </section>
         </div>
     @elseif ($summary)
         <div class="grid gap-5 lg:gap-7.5">

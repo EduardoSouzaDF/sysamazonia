@@ -8,6 +8,7 @@ use App\Models\Category;
 use App\Models\Edition;
 use App\Models\EvaluationCriterion;
 use App\Models\Indication;
+use App\Models\JudgeSelection;
 use App\Models\Modality;
 use App\Models\Nominee;
 use App\Models\Opinion;
@@ -207,6 +208,49 @@ class JudgeSelectionTest extends TestCase
     }
 
     /**
+     * DADO QUE outro julgador já votou em inscrições da categoria atual
+     * ENTÃO o `/julgar` mostra o acompanhamento dos votos da categoria
+     * (mesma barra do acompanhamento do admin), votos DESC e só com votadas.
+     */
+    public function test_julgar_mostra_acompanhamento_dos_votos_da_categoria(): void
+    {
+        $edition = $this->createJudgingEdition();
+        $category = $this->createCategoryForEdition($edition, ['acronym' => 'VOT', 'recipients_count' => 1]);
+        $otherCategory = $this->createCategoryForEdition($edition, ['acronym' => 'OUT', 'recipients_count' => 1]);
+        $voted = $this->createRegistration($category, ['title' => 'Inscricao votada']);
+        $this->createRegistration($category, ['title' => 'Inscricao sem voto']);
+        $otherVoted = $this->createRegistration($otherCategory, ['title' => 'Outra categoria votada']);
+
+        $otherJudge = User::factory()->create(['is_judge' => true]);
+        JudgeSelection::create(['user_id' => $otherJudge->id, 'inscription_type' => 'registration', 'inscription_id' => $voted->id]);
+        JudgeSelection::create(['user_id' => $otherJudge->id, 'inscription_type' => 'registration', 'inscription_id' => $otherVoted->id]);
+
+        $this->actingAs($this->judge)->get('/julgar')
+            ->assertOk()
+            ->assertSee('Acompanhamento dos votos')
+            ->assertSee('data-vote="registration:'.$voted->id.'"', false)
+            ->assertSee('VOT '.$voted->id.' — Inscricao votada')
+            ->assertSee('1 de 2 votos')
+            ->assertDontSee('data-vote="registration:'.$otherVoted->id.'"', false);
+    }
+
+    /**
+     * DADO QUE ninguém votou ainda na categoria atual
+     * ENTÃO o acompanhamento mostra "Nenhum voto registrado."
+     */
+    public function test_julgar_sem_votos_mostra_mensagem_vazia(): void
+    {
+        $edition = $this->createJudgingEdition();
+        $category = $this->createCategoryForEdition($edition, ['recipients_count' => 1]);
+        $this->createRegistration($category);
+
+        $this->actingAs($this->judge)->get('/julgar')
+            ->assertOk()
+            ->assertSee('Acompanhamento dos votos')
+            ->assertSee('Nenhum voto registrado.');
+    }
+
+    /**
      * DADO QUE a categoria tem menos elegíveis que `recipients_count`
      * ENTÃO a cota efetiva é `min(cota, elegíveis)` (RF-06) e o fluxo completa
      * com todas as inscrições disponíveis (sem dead-end).
@@ -370,7 +414,9 @@ class JudgeSelectionTest extends TestCase
         $this->actingAs($this->judge)->get('/julgar')
             ->assertOk()
             ->assertSee('Dados da Inscrição')
-            ->assertSee('PROTO-001')
+            ->assertDontSee('PROTO-001')
+            ->assertDontSee('Protocolo')
+            ->assertDontSee($registration->candidate->nome)
             ->assertSee('Avaliações e indicações')
             ->assertSee('Mérito da proposta: 8', false)
             ->assertSee('Indico pela relevância regional.')

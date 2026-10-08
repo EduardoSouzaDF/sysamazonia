@@ -68,7 +68,42 @@ class JudgingController extends Controller
             'remainingQuota' => $current['remaining'],
             'selectedIds' => $this->selectedKeysFor($category, $user),
             'summary' => null,
+            'votes' => $this->votesFor($category, $cards),
+            'judgesCount' => User::query()->where('is_judge', true)->count(),
         ]);
+    }
+
+    /**
+     * Votos de todos os julgadores nos cards da categoria atual, no mesmo
+     * formato do acompanhamento do admin (spec 0004 / RF-07): só as votadas,
+     * votos DESC e `id` ASC.
+     *
+     * @param  Collection<int, array{key: string, type: string, label: string, year: ?string, inscription: Registration|Nominee}>  $cards
+     * @return list<array{key: string, label: string, votes: int}>
+     */
+    private function votesFor(Category $category, Collection $cards): array
+    {
+        $cardsByKey = $cards->keyBy('key');
+
+        return JudgeSelection::query()
+            ->where('inscription_type', $category->is_honorific ? 'nominee' : 'registration')
+            ->whereIn('inscription_id', $cards->map(fn (array $card): int => $card['inscription']->getKey()))
+            ->get(['inscription_type', 'inscription_id'])
+            ->countBy(fn (JudgeSelection $selection): string => $selection->inscription_type.':'.$selection->inscription_id)
+            ->map(fn (int $votes, string $key): array => [
+                'key' => $key,
+                'inscription' => $cardsByKey->get($key)['inscription'],
+                'votes' => $votes,
+            ])
+            ->sortBy([['votes', 'desc'], [fn (array $a, array $b): int => $a['inscription']->getKey() <=> $b['inscription']->getKey()]])
+            ->map(fn (array $vote): array => [
+                'key' => $vote['key'],
+                'label' => trim($category->acronym.' '.$vote['inscription']->getKey()).' — '
+                    .($vote['inscription'] instanceof Nominee ? $vote['inscription']->name : $vote['inscription']->title),
+                'votes' => $vote['votes'],
+            ])
+            ->values()
+            ->all();
     }
 
     /**
