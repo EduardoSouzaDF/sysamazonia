@@ -208,46 +208,67 @@ class JudgeSelectionTest extends TestCase
     }
 
     /**
-     * DADO QUE outro julgador já votou em inscrições da categoria atual
-     * ENTÃO o `/julgar` mostra o acompanhamento dos votos da categoria
-     * (mesma barra do acompanhamento do admin), votos DESC e só com votadas.
+     * DADO QUE o julgador ainda não confirmou a categoria atual
+     * ENTÃO o `/julgar` NÃO mostra o acompanhamento dos votos (mesmo que
+     * outros julgadores já tenham votado), para não influenciar a escolha.
      */
-    public function test_julgar_mostra_acompanhamento_dos_votos_da_categoria(): void
+    public function test_julgar_esconde_acompanhamento_antes_da_confirmacao(): void
     {
         $edition = $this->createJudgingEdition();
         $category = $this->createCategoryForEdition($edition, ['acronym' => 'VOT', 'recipients_count' => 1]);
-        $otherCategory = $this->createCategoryForEdition($edition, ['acronym' => 'OUT', 'recipients_count' => 1]);
         $voted = $this->createRegistration($category, ['title' => 'Inscricao votada']);
-        $this->createRegistration($category, ['title' => 'Inscricao sem voto']);
-        $otherVoted = $this->createRegistration($otherCategory, ['title' => 'Outra categoria votada']);
 
         $otherJudge = User::factory()->create(['is_judge' => true]);
         JudgeSelection::create(['user_id' => $otherJudge->id, 'inscription_type' => 'registration', 'inscription_id' => $voted->id]);
-        JudgeSelection::create(['user_id' => $otherJudge->id, 'inscription_type' => 'registration', 'inscription_id' => $otherVoted->id]);
 
         $this->actingAs($this->judge)->get('/julgar')
             ->assertOk()
-            ->assertSee('Acompanhamento dos votos')
-            ->assertSee('data-vote="registration:'.$voted->id.'"', false)
-            ->assertSee('VOT '.$voted->id.' — Inscricao votada')
-            ->assertSee('1 de 2 votos')
-            ->assertDontSee('data-vote="registration:'.$otherVoted->id.'"', false);
+            ->assertDontSee('Acompanhamento dos votos')
+            ->assertDontSee('data-vote="registration:'.$voted->id.'"', false);
     }
 
     /**
-     * DADO QUE ninguém votou ainda na categoria atual
-     * ENTÃO o acompanhamento mostra "Nenhum voto registrado."
+     * DADO QUE o julgador confirmou a categoria A e está julgando a B
+     * ENTÃO o `/julgar` mostra o acompanhamento dos votos da A (todos os
+     * julgadores, votos DESC, só as votadas) e nada da B; ao concluir tudo,
+     * a tela de conclusão mostra o acompanhamento das duas.
      */
-    public function test_julgar_sem_votos_mostra_mensagem_vazia(): void
+    public function test_julgar_mostra_acompanhamento_das_categorias_confirmadas(): void
     {
         $edition = $this->createJudgingEdition();
-        $category = $this->createCategoryForEdition($edition, ['recipients_count' => 1]);
-        $this->createRegistration($category);
+        $categoryA = $this->createCategoryForEdition($edition, ['acronym' => 'CAA', 'recipients_count' => 1]);
+        $categoryB = $this->createCategoryForEdition($edition, ['acronym' => 'CBB', 'recipients_count' => 1]);
+        $rA1 = $this->createRegistration($categoryA, ['title' => 'Escolhida pelos dois']);
+        $rA2 = $this->createRegistration($categoryA, ['title' => 'Sem voto']);
+        $rB1 = $this->createRegistration($categoryB, ['title' => 'Votada na B']);
+
+        $otherJudge = User::factory()->create(['is_judge' => true]);
+        JudgeSelection::create(['user_id' => $otherJudge->id, 'inscription_type' => 'registration', 'inscription_id' => $rA1->id]);
+        JudgeSelection::create(['user_id' => $otherJudge->id, 'inscription_type' => 'registration', 'inscription_id' => $rB1->id]);
+
+        $this->actingAs($this->judge)
+            ->post('/julgar', $this->selectionPayload($categoryA, [['type' => 'registration', 'id' => $rA1->id]]))
+            ->assertRedirect(route('panel.julgar.index'));
 
         $this->actingAs($this->judge)->get('/julgar')
             ->assertOk()
             ->assertSee('Acompanhamento dos votos')
-            ->assertSee('Nenhum voto registrado.');
+            ->assertSee('data-vote="registration:'.$rA1->id.'"', false)
+            ->assertSee('CAA '.$rA1->id.' — Escolhida pelos dois')
+            ->assertSee('2 de 2 votos')
+            ->assertDontSee('data-vote="registration:'.$rA2->id.'"', false)
+            ->assertDontSee('data-vote="registration:'.$rB1->id.'"', false);
+
+        $this->actingAs($this->judge)
+            ->post('/julgar', $this->selectionPayload($categoryB, [['type' => 'registration', 'id' => $rB1->id]]))
+            ->assertRedirect(route('panel.julgar.index'));
+
+        $this->actingAs($this->judge)->get('/julgar')
+            ->assertOk()
+            ->assertSee('Julgamento concluído!')
+            ->assertSee('Acompanhamento dos votos')
+            ->assertSee('data-vote="registration:'.$rA1->id.'"', false)
+            ->assertSee('data-vote="registration:'.$rB1->id.'"', false);
     }
 
     /**

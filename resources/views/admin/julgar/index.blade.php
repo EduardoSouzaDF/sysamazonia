@@ -54,15 +54,6 @@
                     <button type="submit" data-confirm-btn form="julgar-form" class="kt-btn" disabled>Confirmar</button>
                 </div>
             </div>
-
-            <section class="kt-card min-w-full" aria-labelledby="votos-title">
-                <div class="kt-card-header">
-                    <h3 id="votos-title" class="kt-card-title">Acompanhamento dos votos</h3>
-                </div>
-                <div class="kt-card-content flex flex-col gap-3">
-                    <x-julgar.votes :votes="$votes" :judges-count="$judgesCount" />
-                </div>
-            </section>
         </div>
     @elseif ($summary)
         <div class="grid gap-5 lg:gap-7.5">
@@ -82,6 +73,27 @@
                 </div>
             </div>
         </div>
+    @endif
+
+    @if ($confirmedVotes->isNotEmpty())
+        <section class="flex flex-col gap-5 pt-5 lg:pt-7.5" aria-labelledby="votos-title">
+            <h2 id="votos-title" class="text-lg font-medium text-mono">Acompanhamento dos votos</h2>
+            <div class="grid gap-5 md:grid-cols-2">
+                @foreach ($confirmedVotes as $item)
+                    <div class="kt-card">
+                        <div class="kt-card-header">
+                            <h3 class="kt-card-title">
+                                <span class="text-xs text-secondary-foreground">Categoria:</span>
+                                {{ $item['category']->title }}@if ($item['category']->acronym) - {{ $item['category']->acronym }}@endif
+                            </h3>
+                        </div>
+                        <div class="kt-card-content flex flex-col gap-3">
+                            <x-julgar.votes :votes="$item['votes']" :judges-count="$judgesCount" />
+                        </div>
+                    </div>
+                @endforeach
+            </div>
+        </section>
     @endif
 
     @if ($category)

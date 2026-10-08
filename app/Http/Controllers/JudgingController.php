@@ -55,6 +55,7 @@ class JudgingController extends Controller
                 'remainingQuota' => 0,
                 'selectedIds' => [],
                 'summary' => $this->conclusionSummaryFor($user),
+                ...$this->confirmedVotesFor($user),
             ]);
         }
 
@@ -68,32 +69,58 @@ class JudgingController extends Controller
             'remainingQuota' => $current['remaining'],
             'selectedIds' => $this->selectedKeysFor($category, $user),
             'summary' => null,
-            'votes' => $this->votesFor($category, $cards),
-            'judgesCount' => User::query()->where('is_judge', true)->count(),
+            ...$this->confirmedVotesFor($user),
         ]);
     }
 
     /**
-     * Votos de todos os julgadores nos cards da categoria atual, no mesmo
-     * formato do acompanhamento do admin (spec 0004 / RF-07): só as votadas,
-     * votos DESC e `id` ASC.
+     * Acompanhamento dos votos (spec 0004 / RF-07) só das categorias que o
+     * julgador já confirmou — a categoria em julgamento fica de fora para não
+     * influenciar a escolha.
      *
-     * @param  Collection<int, array{key: string, type: string, label: string, year: ?string, inscription: Registration|Nominee}>  $cards
+     * @return array{confirmedVotes: Collection<int, array{category: Category, votes: list<array{key: string, label: string, votes: int}>}>, judgesCount: int}
+     */
+    private function confirmedVotesFor(User $user): array
+    {
+        $confirmedCategories = $user->judgeSelections()
+            ->with('inscription.category')
+            ->get()
+            ->map(fn (JudgeSelection $selection): ?Category => $selection->inscription?->category)
+            ->filter()
+            ->unique(fn (Category $category): int => $category->getKey())
+            ->sortBy([['is_honorific', 'asc'], ['id', 'asc']])
+            ->values();
+
+        return [
+            'confirmedVotes' => $confirmedCategories->map(fn (Category $category): array => [
+                'category' => $category,
+                'votes' => $this->votesFor($category),
+            ]),
+            'judgesCount' => User::query()->where('is_judge', true)->count(),
+        ];
+    }
+
+    /**
+     * Votos de todos os julgadores nas inscrições da categoria: só as
+     * votadas, votos DESC e `id` ASC.
+     *
      * @return list<array{key: string, label: string, votes: int}>
      */
-    private function votesFor(Category $category, Collection $cards): array
+    private function votesFor(Category $category): array
     {
-        $cardsByKey = $cards->keyBy('key');
-
         return JudgeSelection::query()
-            ->where('inscription_type', $category->is_honorific ? 'nominee' : 'registration')
-            ->whereIn('inscription_id', $cards->map(fn (array $card): int => $card['inscription']->getKey()))
-            ->get(['inscription_type', 'inscription_id'])
-            ->countBy(fn (JudgeSelection $selection): string => $selection->inscription_type.':'.$selection->inscription_id)
-            ->map(fn (int $votes, string $key): array => [
+            ->with('inscription')
+            ->whereHasMorph(
+                'inscription',
+                [Registration::class, Nominee::class],
+                fn (Builder $query) => $query->where('category_id', $category->getKey())
+            )
+            ->get()
+            ->groupBy(fn (JudgeSelection $selection): string => $selection->inscription_type.':'.$selection->inscription_id)
+            ->map(fn (Collection $selections, string $key): array => [
                 'key' => $key,
-                'inscription' => $cardsByKey->get($key)['inscription'],
-                'votes' => $votes,
+                'inscription' => $selections->first()->inscription,
+                'votes' => $selections->count(),
             ])
             ->sortBy([['votes', 'desc'], [fn (array $a, array $b): int => $a['inscription']->getKey() <=> $b['inscription']->getKey()]])
             ->map(fn (array $vote): array => [
