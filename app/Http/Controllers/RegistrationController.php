@@ -3,12 +3,12 @@
 namespace App\Http\Controllers;
 
 use App\Enum\RegistrationStatusEnum;
-use App\Http\Requests\StoreOpinionRequest;
 use App\Models\Edition;
 use App\Models\Nominee;
+use App\Models\Opinion;
 use App\Models\Registration;
 use App\Models\RegistrationFile;
-use App\Services\OpinionSubmissionService;
+use App\Models\Score;
 use Auth;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Http\Request;
@@ -21,23 +21,24 @@ class RegistrationController extends Controller
     public function index(Request $request)
     {
 
+
         $user = Auth::user();
         $editions = Edition::all();
         $page = $request->input('page', 1);
         $perPage = 10;
 
         // Query para Registration
-        $registrationQuery = Registration::with(['candidate', 'category.modality.edition', 'files', 'opinions']);
+        $registrationQuery = Registration::with(['candidate', 'category.modality.edition', 'files','opinions']);
         $nomineeQuery = Nominee::with(['candidate', 'category.modality.edition', 'files']);
 
         $registrationQuery = $this->setIndexFilters($registrationQuery, $request);
         $nomineeQuery = $this->setIndexFilters($nomineeQuery, $request);
 
-        if ($user->isEvaluator()) {
+        if ($user->isEvaluator() ) {
             $registrationQuery = $this->filterEvaluatorCategories($registrationQuery, $user);
         }
 
-        if ($user->isIndicator()) {
+        if($user->isIndicator()) {
             $registrationQuery = $this->filterIndicatorCategories($registrationQuery, $user);
         }
 
@@ -48,15 +49,9 @@ class RegistrationController extends Controller
             $nominees = Collection::empty();
         }
 
-        // Combinar os resultados
-        $allItems = $registrations->concat($nominees);
 
-        $summary = [
-            'people' => $allItems->pluck('candidate_id')->filter(fn ($id) => $id !== null)->unique()->count(),
-            'total' => $allItems->count(),
-            'regular' => $registrations->count(),
-            'honorary' => $nominees->count(),
-        ];
+        // Combinar os resultados
+        $allItems = $registrations->merge($nominees);
 
         // Ordenar por created_at (ou outro campo)
         $allItems = $allItems->sortByDesc('created_at');
@@ -69,36 +64,25 @@ class RegistrationController extends Controller
             'pageName' => 'page',
         ]);
 
-        return view('admin.registration.index', compact('list', 'editions', 'summary'));
+        return view('admin.registration.index', compact('list', 'editions'));
     }
 
     private function setIndexFilters($query, $request)
     {
-        $search = trim((string) $request->input('search', ''));
+        $search = $request->input('search');
         $edition = $request->input('edition');
         $status = $request->input('status');
 
-        if ($search !== '') {
-            $titleColumn = $query->getModel() instanceof Nominee ? 'name' : 'title';
-            $matchingStatuses = array_map(
-                fn (RegistrationStatusEnum $status) => $status->value,
-                array_filter(RegistrationStatusEnum::cases(), fn (RegistrationStatusEnum $status) => mb_stripos($status->label(), $search) !== false),
-            );
-
-            $query->where(function ($q) use ($search, $titleColumn, $matchingStatuses) {
-                $q->where($titleColumn, 'like', '%'.$search.'%')
+        if ($search) {
+            $query->where(function ($q) use ($search) {
+                $q->where('title', 'like', '%'.$search.'%')
                     ->orWhereHas('category', function ($subQ) use ($search) {
                         $subQ->where('title', 'like', '%'.$search.'%')
                             ->orWhere('acronym', 'like', '%'.$search.'%');
                     })
                     ->orWhereHas('candidate', function ($subQ) use ($search) {
-                        $subQ->where('cpf', 'like', '%'.$search.'%')
-                            ->orWhere('nome', 'like', '%'.$search.'%');
+                        $subQ->where('cpf', 'like', '%'.$search.'%');
                     });
-
-                if ($matchingStatuses !== []) {
-                    $q->orWhereIn('status', $matchingStatuses);
-                }
             });
         }
 
@@ -119,51 +103,45 @@ class RegistrationController extends Controller
         return $query;
     }
 
-    private function filterIndicatorCategories($query, $user)
-    {
+    private function filterIndicatorCategories($query, $user){
         $query->whereHas('category', function ($q) use ($user) {
             $q->whereIn('id', $user->indicatorCategories()->pluck('categories.id'))
                 ->where('is_honorific', false)
-                ->where(function ($cat) {
-                    $cat->whereIn('categories.indication_mode', ['human_only', 'hybrid'])
-                        ->whereRaw("(
-                            SELECT COUNT(DISTINCT indications.user_id)
+                ->where(function($cat){
+                    $cat->whereRaw('(
+                            SELECT COUNT(*)
                             FROM indications
                             WHERE indications.registration_id = registrations.id
-                              AND indications.source = 'human'
-                        ) < categories.human_indications_required");
+                        ) < categories.nominations_count');
                 });
         });
 
-        //     // somente das edições ativar para Avaliador
+    //     // somente das edições ativar para Avaliador
         $query->whereHas('category.modality.edition', function ($q) {
             $q->where('is_registration_active', true);
         });
 
-        //     // não mostra as inscrições que já avaliou
-        $query->whereDoesntHave('indications', function ($q) use ($user) {
+    //     // não mostra as inscrições que já avaliou
+       $query->whereDoesntHave('indications', function ($q) use ($user) {
             $q->where('user_id', $user->id);
         });
 
-        $query->whereIn('status', [RegistrationStatusEnum::Habilitado, RegistrationStatusEnum::Avaliado]);
-
+        $query->where('status', RegistrationStatusEnum::Habilitado)->orWhere('status', RegistrationStatusEnum::Avaliado);
         return $query;
     }
 
     private function filterEvaluatorCategories($query, $user)
     {
-        // somente das categorias do usuário logado
+        //somente das categorias do usuário logado
         $query->whereHas('category', function ($q) use ($user) {
             $q->whereIn('id', $user->evaluatorCategories()->pluck('categories.id'))
                 ->where('is_honorific', false)
-                ->where(function ($cat) {
-                    $cat->whereIn('categories.evaluation_mode', ['human_only', 'hybrid'])
-                        ->whereRaw("(
-                            SELECT COUNT(DISTINCT opinions.user_id)
+                ->where(function($cat){
+                    $cat->whereRaw('(
+                            SELECT COUNT(*)
                             FROM opinions
                             WHERE opinions.registration_id = registrations.id
-                              AND opinions.source = 'human'
-                        ) < categories.human_evaluations_required");
+                        ) < categories.evaluations_count');
                 });
         });
 
@@ -173,7 +151,7 @@ class RegistrationController extends Controller
         });
 
         // não mostra as inscrições que já avaliou
-        $query->whereDoesntHave('opinions', function ($q) use ($user) {
+       $query->whereDoesntHave('opinions', function ($q) use ($user) {
             $q->where('user_id', $user->id);
         });
 
@@ -283,29 +261,23 @@ class RegistrationController extends Controller
         return response()->json(['message' => 'Usuário sem permissão'], 419);
     }
 
+
     public function indicar($id)
     {
-
+        
         $registration = Registration::findOrFail($id);
         $user = auth()->user();
         if ($user->isIndicator()) {
-            if ($registration->category?->is_honorific) {
-                return response()->json(['message' => 'Categorias honoríficas não passam pelo processo de indicação.'], 422);
-            }
-            if ($registration->category?->indication_mode !== null && ! $registration->category->allowsHumanIndication()) {
-                return response()->json(['message' => 'A política desta categoria não permite indicação humana.'], 422);
-            }
             try {
                 $justificativa = request('justificativa');
-                DB::transaction(function () use ($user, $registration, $justificativa) {
+                DB::transaction(function () use ($user, $registration,$justificativa) {
                     $registration->indications()->create([
                         'user_id' => $user->id,
                         'descricao' => $justificativa,
-                        'source' => 'human',
                     ]);
-                });
+            });
 
-                return response()->json(['message' => 'Registro Indicado'], 200);
+            return response()->json(['message' => 'Registro Indicado'], 200);
             } catch (\Throwable $th) {
                 return response()->json(['message' => 'Erro na operação'], 400);
             }
@@ -344,26 +316,46 @@ class RegistrationController extends Controller
      * Registra um parecer (Opinion) do avaliador logado para a inscrição,
      * com seus respectivos Scores por critério de avaliação.
      */
-    public function sendOpinion(StoreOpinionRequest $request, Registration $registration, OpinionSubmissionService $submissionService)
+    public function sendOpinion(Request $request, Registration $registration)
     {
         $user = Auth::user();
 
+        $validated = $request->validate([
+            'criteria' => ['required', 'array'],
+            'justificativa' => ['required', 'array'],
+            'criteria.*' => ['required', 'integer', 'min:0'],
+        ]);
+
         try {
-            $submissionService->submit($registration, $user, $request->scores());
+            DB::transaction(function () use ($validated, $user, $registration) {
+                $opinion = Opinion::create([
+                    'user_id' => $user->id,
+                    'registration_id' => $registration->id,
+                ]);
+
+                foreach ($validated['criteria'] as $criterionId => $valor) {
+                    Score::create([
+                        'opinion_id' => $opinion->id,
+                        'evaluation_criterion_id' => (int) $criterionId,
+                        'valor' => (int) $valor,
+                        'descricao' => $validated['justificativa'][$criterionId],
+                    ]);
+                }
+            });
+
+            if($registration->category->evaluations_count  ==  sizeof($registration->opinions)){
+                $registration->updateEvaluationsAvg();
+            }
+
+
 
             return redirect()
-                ->route('admin.registration.index')
-                ->with('success', 'Avaliação enviada com sucesso!');
-        } catch (\Illuminate\Database\UniqueConstraintViolationException) {
-            return redirect()
-                ->route('admin.registration.index')
-                ->with('error', 'Esta avaliação já foi enviada.');
-        } catch (\Illuminate\Validation\ValidationException $exception) {
-            throw $exception;
+                    ->route('admin.registration.index')
+                    ->with('success', 'Avaliação enviada com sucesso!');
         } catch (\Throwable $th) {
             return redirect()
-                ->route('admin.registration.index')
-                ->with('error', 'Favor tente novamente');
+                    ->route('admin.registration.index')
+                    ->with('error', 'Favor tente novamente');
         }
     }
 }
