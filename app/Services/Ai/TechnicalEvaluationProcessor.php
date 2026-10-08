@@ -17,7 +17,9 @@ class TechnicalEvaluationProcessor
 
     public function process(int $executionId): bool
     {
-        $lock = Cache::lock('ai-technical-process-'.$executionId, $this->settings->current()->timeout + 30);
+        $identity = AiExecution::query()->findOrFail($executionId);
+        // All rounds share a lock, so an old job cannot overlap its manual replacement.
+        $lock = Cache::lock('ai-registration-process-'.$identity->registration_id.'-'.$identity->type->value, $this->settings->current()->timeout + 30);
         if (! $lock->get()) {
             return false;
         }
@@ -27,7 +29,7 @@ class TechnicalEvaluationProcessor
                 return false;
             }
             $execution = AiExecution::query()->with('registration.category.evaluationCriteria')->findOrFail($executionId);
-            if ($execution->status === AiExecutionStatus::Completed || (int) $execution->registration->status !== RegistrationStatusEnum::Habilitado->value) {
+            if ($execution->superseded_at || $execution->attempts >= $settings->tries || $execution->status === AiExecutionStatus::Completed || (int) $execution->registration->status !== RegistrationStatusEnum::Habilitado->value) {
                 return false;
             }
             $this->manager->begin($execution);

@@ -40,7 +40,7 @@ class AiExecutionManager
     {
         return DB::transaction(function () use ($execution, $request, $result, $duration): bool {
             $locked = AiExecution::query()->lockForUpdate()->findOrFail($execution->id);
-            if ($locked->status === AiExecutionStatus::Completed) {
+            if ($locked->superseded_at || $locked->status === AiExecutionStatus::Completed) {
                 return false;
             }
 
@@ -100,7 +100,7 @@ class AiExecutionManager
     {
         DB::transaction(function () use ($execution, $request, $result, $duration): void {
             $locked = AiExecution::query()->lockForUpdate()->findOrFail($execution->id);
-            if ($locked->status === AiExecutionStatus::Completed) {
+            if ($locked->superseded_at || $locked->status === AiExecutionStatus::Completed) {
                 return;
             }
 
@@ -145,9 +145,10 @@ class AiExecutionManager
 
     public function fail(AiExecution $execution, \Throwable $exception): void
     {
+        // Uma falha tardia de job antigo não pode reescrever a rodada já substituída.
         DB::transaction(function () use ($execution, $exception): void {
             $locked = AiExecution::query()->lockForUpdate()->find($execution->id);
-            if ($locked === null || $locked->status === AiExecutionStatus::Completed) {
+            if ($locked === null || $locked->superseded_at || $locked->status === AiExecutionStatus::Completed) {
                 return;
             }
 

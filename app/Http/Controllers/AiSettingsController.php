@@ -28,11 +28,12 @@ class AiSettingsController extends Controller
             $tab = 'progress';
         }
         if ($request->session()->get('errors')?->any()) {
-            $tab = 'configuration';
+            // Os erros do reenvio permanecem na Auditoria; os de Settings abrem Configuração.
+            $tab = $request->session()->get('errors')?->has('reprocessing') || $request->query('tab') === 'executions' ? 'executions' : 'configuration';
         }
         $statusFilter = in_array($request->query('status'), ['pending', 'processing', 'completed', 'failed'], true) ? $request->query('status') : '';
         $typeFilter = in_array($request->query('type'), ['technical_evaluation', 'strategic_selection'], true) ? $request->query('type') : '';
-        $recent = $tab === 'executions' ? AiExecution::query()
+        $recent = $tab === 'executions' ? AiExecution::query()->with(['settingVersion', 'requestedBy'])
             ->when($statusFilter, fn ($query) => $query->where('status', $statusFilter))
             ->when($typeFilter, fn ($query) => $query->where('type', $typeFilter))
             ->orderByDesc('updated_at')->orderByDesc('id')->paginate(15)->withQueryString() : null;

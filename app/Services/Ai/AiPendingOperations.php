@@ -55,7 +55,12 @@ class AiPendingOperations
                 }
                 $hash = $type === AiExecutionType::TechnicalEvaluation ? $this->fingerprint->forRegistration($registration) : $this->fingerprint->forSelection($registration);
 
-                $existing = AiExecution::query()
+                $manual = AiExecution::query()->where('registration_id', $registration->id)
+                    ->where('type', $type)->where('retry_round', '>', 0)->latest('id')->first();
+                if ($manual && ($manual->evaluator_id !== $evaluatorId || $manual->evaluation_configuration_hash !== $hash)) {
+                    return false;
+                }
+                $existing = $manual ?? AiExecution::query()
                     ->where([
                         'registration_id' => $registration->id,
                         'evaluator_id' => $evaluatorId,
@@ -65,6 +70,19 @@ class AiPendingOperations
                     ])
                     ->latest('id')
                     ->first();
+                // A manual child must never revive its superseded parent or open infinite rounds.
+                if ($existing?->superseded_at) {
+                    return false;
+                }
+                $other = AiExecution::query()->where('registration_id', $registration->id)
+                    ->where('type', $type)->whereIn('status', ['pending', 'processing', 'completed'])->exists();
+                if ($other) {
+                    return false;
+                }
+                if ($existing === null && AiExecution::query()->where('registration_id', $registration->id)
+                    ->where('type', $type)->where('retry_round', '>', 0)->exists()) {
+                    return false;
+                }
                 if ($existing === null) {
                     return true;
                 }

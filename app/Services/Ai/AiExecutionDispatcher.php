@@ -41,18 +41,29 @@ class AiExecutionDispatcher
         $hash = $type === AiExecutionType::TechnicalEvaluation ? $this->fingerprint->forRegistration($registration) : $this->fingerprint->forSelection($registration);
         $identity = ['registration_id' => $registration->id, 'type' => $type, 'evaluator_id' => $evaluatorId, 'prompt_version' => $promptVersion, 'evaluation_configuration_hash' => $hash];
 
-        return DB::transaction(function () use ($identity, $settings): AiExecution {
+        return DB::transaction(function () use ($identity, $settings, $registration, $type): AiExecution {
+            // Serialize creation with manual requests and always resume the latest round.
+            Registration::query()->lockForUpdate()->findOrFail($registration->id);
+            $manual = AiExecution::query()->where('registration_id', $registration->id)
+                ->where('type', $type)->where('retry_round', '>', 0)->latest('id')->first();
+            if ($manual) {
+                return $manual;
+            }
+            $existing = AiExecution::query()->where($identity)->latest('id')->first();
+            if ($existing) {
+                return $existing;
+            }
             try {
                 return AiExecution::query()->create($identity + ['ai_setting_version_id' => $settings->versionId, 'correlation_id' => (string) str()->uuid(), 'status' => AiExecutionStatus::Pending, 'knowledge_version' => $settings->knowledgeVersion]);
             } catch (UniqueConstraintViolationException) {
-                return AiExecution::query()->where($identity)->firstOrFail();
+                return AiExecution::query()->where($identity)->latest('id')->firstOrFail();
             }
         }, 3);
     }
 
     public function dispatch(AiExecution $execution): void
     {
-        if (! in_array($execution->status, [AiExecutionStatus::Pending, AiExecutionStatus::Failed], true)) {
+        if ($execution->superseded_at || $execution->attempts >= $this->settings->current()->tries || ! in_array($execution->status, [AiExecutionStatus::Pending, AiExecutionStatus::Failed], true)) {
             return;
         }
         $job = $execution->type === AiExecutionType::TechnicalEvaluation ? new EvaluateRegistrationWithAi($execution->id) : new SelectRegistrationWithAi($execution->id);

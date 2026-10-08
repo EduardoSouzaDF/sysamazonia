@@ -125,6 +125,7 @@ Route::middleware('auth')->group(function () {
         Route::get('/admin/users/{user}/login-as', [UserController::class, 'loginAs'])->middleware($middleware)->name('admin.users.login-as');
         Route::get('/admin/users/return-to-admin', [UserController::class, 'returnToAdmin'])->name('admin.users.return-to-admin');
 
+        Route::post('/ai-settings/reprocess', [\App\Http\Controllers\AiReprocessingController::class, 'store'])->middleware([...$middleware, 'throttle:5,1'])->name('admin.ai-settings.reprocess');
         Route::get('/ai-settings', [AiSettingsController::class, 'index'])->middleware($middleware)->name('admin.ai-settings.index');
         Route::put('/ai-settings', [AiSettingsController::class, 'update'])->middleware($middleware)->name('admin.ai-settings.update');
         Route::post('/ai-settings/models', [AiSettingsController::class, 'refreshModels'])->middleware([...$middleware, 'throttle:5,1'])->name('admin.ai-settings.models');
