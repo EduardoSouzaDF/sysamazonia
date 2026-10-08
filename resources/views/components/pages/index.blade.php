@@ -100,7 +100,7 @@
                 </div>
 
                 <div class="kt-card-content">
-                    <div class="grid" data-kt-datatable="true" data-kt-datatable-page-size="10">
+                    <div class="grid" data-kt-datatable="true" data-kt-datatable-state-save="false" data-kt-datatable-page-size="10">
                         <div class="kt-scrollable-x-auto">
                             <table class="kt-table table-auto kt-table-border pages-table"data-kt-datatable-table="true"
                                 id="security_log_table">

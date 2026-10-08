@@ -27,4 +27,20 @@ class PagesIndexTableTest extends TestCase
             ->assertDontSee('title="<span', false)
             ->assertSee('<span class="kt-badge kt-badge-outline kt-badge-warning">admin</span>', false);
     }
+
+    /**
+     * DADO QUE todas as listagens compartilham o mesmo id de tabela
+     * ENTÃO o datatable do KTUI não guarda estado no navegador, para uma
+     * listagem nunca exibir as linhas em cache de outra.
+     */
+    public function test_datatable_nao_guarda_estado_no_navegador(): void
+    {
+        $admin = User::factory()->create();
+        $roleId = DB::table('roles')->insertGetId(['name' => 'admin', 'active' => true, 'created_at' => now(), 'updated_at' => now()]);
+        DB::table('user_role')->insert(['user_id' => $admin->id, 'role_id' => $roleId, 'created_at' => now(), 'updated_at' => now()]);
+
+        $this->actingAs($admin->fresh())->get(route('admin.users.index'))
+            ->assertOk()
+            ->assertSee('data-kt-datatable="true" data-kt-datatable-state-save="false"', false);
+    }
 }
