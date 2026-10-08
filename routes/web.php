@@ -7,6 +7,7 @@ use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\EditionController;
 use App\Http\Controllers\EvaluationCriterionController;
 use App\Http\Controllers\JudgingController;
+use App\Http\Controllers\JudgingFollowUpController;
 use App\Http\Controllers\ModalityController;
 use App\Http\Controllers\RegistrationController;
 use App\Http\Controllers\RegistrationReportController;
@@ -132,6 +133,16 @@ Route::middleware('auth')->group(function () {
 
         Route::get('/registration-reports', [RegistrationReportController::class, 'index'])->middleware($middleware)->name('admin.registration-reports.index');
         Route::post('/registration-reports', [RegistrationReportController::class, 'generate'])->middleware($middleware)->name('admin.registration-reports.generate');
+
+        // Acompanhamento do julgamento (spec 0004) — somente admin.
+        Route::middleware($middleware)->prefix('acompanhamento')->name('admin.acompanhamento.')->group(function (): void {
+            Route::get('/', [JudgingFollowUpController::class, 'index'])->name('index');
+            Route::post('/{edition}/julgadores/{user}/resetar', [JudgingFollowUpController::class, 'reset'])->name('reset');
+            Route::post('/{edition}/finalizar', [JudgingFollowUpController::class, 'close'])->name('close');
+            Route::get('/{edition}/agraciados', [JudgingFollowUpController::class, 'editionAwardees'])->name('edition-awardees');
+            Route::get('/categorias/{category}/agraciados', [JudgingFollowUpController::class, 'awardees'])->name('awardees');
+            Route::post('/categorias/{category}/agraciados', [JudgingFollowUpController::class, 'confirmAwardees'])->name('awardees.store');
+        });
 
     });
 

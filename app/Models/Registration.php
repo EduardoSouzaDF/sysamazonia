@@ -60,6 +60,7 @@ class Registration extends Model
      */
     protected $casts = [
         'evaluation_avg' => 'integer',
+        'award_position' => 'integer',
     ];
 
     /**

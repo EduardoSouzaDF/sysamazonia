@@ -398,13 +398,15 @@ class JudgingController extends Controller
 
     /**
      * Filtro de edições ativas (RDD-01) e em julgamento (RDD-03):
-     * `is_registration_active = true` e data atual > `judgment_date`.
+     * `is_registration_active = true`, data atual > `judgment_date` e votação
+     * não finalizada pelo admin (spec 0004 / RF-09).
      */
     private function judgingEditionFilter(): Closure
     {
         return function (Builder $query): void {
             $query->where('is_registration_active', true)
-                ->whereDate('judgment_date', '<', today()->toDateString());
+                ->whereDate('judgment_date', '<', today()->toDateString())
+                ->whereNull('voting_closed_at');
         };
     }
 }

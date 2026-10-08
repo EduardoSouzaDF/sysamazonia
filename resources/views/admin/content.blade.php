@@ -12,9 +12,9 @@
     'antialiased flex h-full text-base text-foreground bg-background demo1 kt-sidebar-fixed
     kt-header-fixed')
 @section('content')
-    <div class="flex grow">
+    <div class="flex min-w-0 grow">
         @include('admin.sidebar')
-        <div class="kt-wrapper flex grow flex-col">
+        <div class="kt-wrapper flex min-w-0 grow flex-col">
 
 
 

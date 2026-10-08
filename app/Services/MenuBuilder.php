@@ -36,12 +36,11 @@ class MenuBuilder
                 $menus = array_merge($menus, self::getAvaliadorMenu());
             }
 
-            if($user->isIndicator()) {
+            if ($user->isIndicator()) {
                 $menus = array_merge($menus, self::getIndicadorMenu());
             }
 
         }
-
 
         if ($user->isJudge()) {
             $menus = array_merge($menus, self::getJulgadorMenu());
@@ -106,6 +105,11 @@ class MenuBuilder
                 'route' => 'admin.registration.index',
             ],
             [
+                'title' => 'Acompanhamento',
+                'icon' => 'ki-chart-simple',
+                'route' => 'admin.acompanhamento.index',
+            ],
+            [
                 'heading' => 'Tarefas Sincronizadas',
             ],
             [
@@ -139,26 +143,25 @@ class MenuBuilder
         ];
     }
 
-
     public static function getIndicadorMenu(): array
     {
-    return [
-                [
-                    'heading' => 'Indicadores',
-                ],
+        return [
+            [
+                'heading' => 'Indicadores',
+            ],
 
-                [
-                    'title' => 'Indicar Inscrições',
-                    // 'icon' => 'ki-abstract-26',
-                    'icon' => 'ki-scroll',
-                    'route' => 'admin.registration.index',
-                ],
+            [
+                'title' => 'Indicar Inscrições',
+                // 'icon' => 'ki-abstract-26',
+                'icon' => 'ki-scroll',
+                'route' => 'admin.registration.index',
+            ],
 
-            ];
+        ];
     }
+
     public static function getAvaliadorMenu(): array
     {
-
 
         return [
             [
