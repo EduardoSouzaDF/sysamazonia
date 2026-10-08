@@ -21,7 +21,7 @@ use Carbon\Carbon;
                     };
 
                 @endphp
-                <div class="registration-detail-card flex flex-col w-1/6 p-4 min-h-16 rounded-xl text-center" style="--card-accent: {{ $evaluationAccent }}">
+                <div class="registration-detail-card flex flex-col w-full sm:w-auto sm:min-w-48 p-4 min-h-16 mb-4 rounded-xl text-center" style="--card-accent: {{ $evaluationAccent }}">
                     <div>Nota Avaliação</div>
                     <div class="place-self-center"> {{ $object->getEvaluationAvgPercentage() }}</div>
                     <div class="place-self-center"> {{ $object->getTextEvaluationAvg() }}</div>

@@ -1,5 +1,5 @@
 <div class="flex w-full gap-4">
-    <div class="w-1/2  ">
+    <div class="w-full break-words">
     <b>CEP:</b>  {{ $candidate->cep }}  <br>
     <b>Estado:</b>  {{ $candidate->ufendereco }}  <br>
     <b>Cidade:</b>  {{ $candidate->cidade }}  <br>
