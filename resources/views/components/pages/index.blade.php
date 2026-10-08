@@ -35,6 +35,13 @@
         box-shadow: inset 1px 0 0 var(--border), -8px 0 8px -8px rgb(0 0 0 / 0.25);
     }
 
+    .pages-table .pages-actions-tint {
+        position: absolute;
+        inset: 0;
+        z-index: -1;
+        pointer-events: none;
+    }
+
     .pages-table .pages-actions-col:focus-within,
     .pages-table .pages-actions-col:has(.open, .show) {
         z-index: 5;
@@ -115,7 +122,7 @@
                                         @endforeach
                                         @if (!empty($actions))
                                             <th class="pages-actions-col">
-                                                <span class="absolute inset-0 -z-10 bg-muted/40"></span>Ações
+                                                <span class="pages-actions-tint bg-muted/40"></span>Ações
                                             </th>
                                         @endif
                                     </tr>
@@ -131,7 +138,7 @@
                                             @if (!empty($actions))
                                                 @if(sizeof($actions) > 1)
                                                     <td class="pages-actions-col">
-                                                        <span class="absolute inset-0 -z-10 {{ $item['color'] ?? '' }}"></span>
+                                                        <span class="pages-actions-tint {{ $item['color'] ?? '' }}"></span>
                                                         <div data-kt-dropdown="true" data-kt-dropdown-trigger="click">
                                                             <button class="kt-btn" data-kt-dropdown-toggle="true">
                                                                 Gerenciar<svg xmlns="http://www.w3.org/2000/svg"
@@ -171,7 +178,7 @@
                                                     </td>
                                                 @else
                                                 <td class="pages-actions-col">
-                                                    <span class="absolute inset-0 -z-10 {{ $item['color'] ?? '' }}"></span>
+                                                    <span class="pages-actions-tint {{ $item['color'] ?? '' }}"></span>
                                                     @foreach ($actions as $actionName => $actionRoute)
                                                             <a href="{{ is_callable($actionRoute) ? $actionRoute($item) : $actionRoute }}"
                                                                 class="kt-btn">

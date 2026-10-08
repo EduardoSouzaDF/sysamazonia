@@ -43,4 +43,26 @@ class PagesIndexTableTest extends TestCase
             ->assertOk()
             ->assertSee('data-kt-datatable="true" data-kt-datatable-state-save="false"', false);
     }
+
+    /**
+     * DADO QUE a coluna de Ações é fixa e pinta o fundo com a cor da linha
+     * ENTÃO a camada de cor fica atrás do botão e não intercepta cliques,
+     * sem depender de classes do build do Tailwind.
+     */
+    public function test_camada_de_cor_da_coluna_acoes_nao_bloqueia_clique(): void
+    {
+        $admin = User::factory()->create();
+        $roleId = DB::table('roles')->insertGetId(['name' => 'admin', 'active' => true, 'created_at' => now(), 'updated_at' => now()]);
+        DB::table('user_role')->insert(['user_id' => $admin->id, 'role_id' => $roleId, 'created_at' => now(), 'updated_at' => now()]);
+
+        $content = $this->actingAs($admin->fresh())->get(route('admin.users.index'))
+            ->assertOk()
+            ->assertSee('<span class="pages-actions-tint ', false)
+            ->assertDontSee('-z-10', false)
+            ->getContent();
+
+        $rule = (string) str($content)->after('.pages-table .pages-actions-tint {')->before('}');
+        $this->assertStringContainsString('pointer-events: none;', $rule);
+        $this->assertStringContainsString('z-index: -1;', $rule);
+    }
 }
