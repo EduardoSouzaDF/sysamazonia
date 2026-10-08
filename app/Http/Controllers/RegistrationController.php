@@ -33,12 +33,20 @@ class RegistrationController extends Controller
         $registrationQuery = $this->setIndexFilters($registrationQuery, $request);
         $nomineeQuery = $this->setIndexFilters($nomineeQuery, $request);
 
-        if ($user->isEvaluator()) {
-            $registrationQuery = $this->filterEvaluatorCategories($registrationQuery, $user);
-        }
+        $isEvaluator = $user->isEvaluator();
+        $isIndicator = $user->isIndicator();
 
-        if ($user->isIndicator()) {
-            $registrationQuery = $this->filterIndicatorCategories($registrationQuery, $user);
+        if ($isEvaluator || $isIndicator) {
+            // Quem avalia e indica vê as pendentes de avaliação OU de indicação.
+            $registrationQuery->where(function ($query) use ($user, $isEvaluator, $isIndicator) {
+                if ($isEvaluator) {
+                    $query->orWhere(fn ($pending) => $this->filterEvaluatorCategories($pending, $user));
+                }
+
+                if ($isIndicator) {
+                    $query->orWhere(fn ($pending) => $this->filterIndicatorCategories($pending, $user));
+                }
+            });
         }
 
         // Obter todos os resultados (ou limitar conforme necessário)
