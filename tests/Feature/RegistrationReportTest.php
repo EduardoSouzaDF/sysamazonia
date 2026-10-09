@@ -61,6 +61,32 @@ class RegistrationReportTest extends TestCase
         ])->assertSessionHasErrors('status');
     }
 
+    public function test_report_status_filters_include_evaluated_with_enabled_and_keep_other_groups_separate(): void
+    {
+        $this->seedReportRecords();
+        foreach (['registrations', 'nominees'] as $table) {
+            $record = (array) DB::table($table)->first();
+            unset($record['id']);
+            foreach ([1, 2, 4, 5] as $status) {
+                DB::table($table)->insert(array_replace($record, ['status' => $status]));
+            }
+        }
+        $service = app(RegistrationReportService::class);
+        $this->assertSame(4, $service->generate(3)['total']);
+        $this->assertSame(2, $service->generate(2)['total']);
+        $this->assertSame(2, $service->generate(5)['total']);
+        $this->assertSame('relatorio-agraciados.md', $service->generate(5)['filename']);
+
+        $token = 'rejected-report-token';
+        $this->actingAs($this->admin())->withSession(['_token' => $token])
+            ->post(route('admin.registration-reports.generate'), ['status' => 2, 'action' => 'preview', '_token' => $token])
+            ->assertOk()->assertSee('Relatório de Rejeitados')
+            ->assertSee('name="status" value="2"', false)
+            ->assertViewHas('report', fn ($report) => $report['total'] === 2);
+        $this->post(route('admin.registration-reports.generate'), ['status' => 2, 'action' => 'download', '_token' => $token])
+            ->assertOk()->assertHeader('content-disposition', 'attachment; filename="relatorio-rejeitados.md"');
+    }
+
     private function seedReportRecords(): void
     {
         $candidateId = DB::table('candidates')->insertGetId([

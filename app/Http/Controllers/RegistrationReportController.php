@@ -17,7 +17,7 @@ class RegistrationReportController extends Controller
     public function generate(Request $request, RegistrationReportService $service): View|Response
     {
         $validated = $request->validate([
-            'status' => ['required', 'integer', 'in:3,5'],
+            'status' => ['required', 'integer', 'in:2,3,5'],
             'action' => ['required', 'in:preview,download'],
         ]);
         $report = $service->generate((int) $validated['status']);

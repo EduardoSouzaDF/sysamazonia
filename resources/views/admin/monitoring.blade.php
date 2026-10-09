@@ -3,7 +3,7 @@
 @section('maincontent')
 <div id="monitoring" class="w-full px-10 space-y-6">
     <header class="monitoring-heading">
-        <div><h1 class="text-xl font-medium leading-none text-mono">Monitoramento das inscrições</h1><p class="text-secondary-foreground mt-2">As 20 melhores inscrições avaliadas por categoria não honorífica.</p></div>
+        <div><h1 class="text-xl font-medium leading-none text-mono">Monitoramento das inscrições</h1><p class="text-secondary-foreground mt-2">Monitoramento da qualidade das inscrições apresentadas.</p></div>
         <form method="GET" action="{{ route('monitoring') }}" class="monitoring-filter">
             <label for="monitoring-edition">Edição</label>
             <select id="monitoring-edition" name="edition" class="kt-select">
@@ -19,7 +19,12 @@
         <div class="kt-card-header"><h2 class="kt-card-title">Panorama geral — todas as edições</h2></div>
         <div class="kt-card-content p-5">
             <p class="text-sm text-secondary-foreground mb-3">{{ array_sum($generalDistribution) }} inscrições avaliadas em todas as edições. Este gráfico independe do filtro de edição.</p>
-            @include('admin.partials.monitoring-chart', ['distribution' => $generalDistribution])
+            <p class="text-sm text-secondary-foreground mb-3">Qualidade das inscrições em todas as edições dos Prêmios: nota média das inscrições avaliadas, de 0 a 50. A linha tracejada mostra a tendência de aumento ou diminuição da qualidade (regressão linear), disponível a partir de duas edições avaliadas. Edições sem avaliações ficam sem nota.</p>
+            @if ($hasQualityData)
+                <div class="monitoring-line" data-monitoring-line data-editions="{{ json_encode($qualityLabels) }}" data-series="{{ json_encode($qualitySeries) }}" role="img" aria-label="Qualidade das inscrições por edição e linha de tendência"></div>
+            @else
+                <p class="monitoring-empty text-secondary-foreground">O gráfico estará disponível após as avaliações.</p>
+            @endif
         </div>
     </div>
     @if (!$edition)
@@ -38,6 +43,7 @@
             @endforeach
         </div>
         <p class="text-xs text-secondary-foreground">Faixas da nota exibida: não recomendada até 30; meritória acima de 30 até 40; recomendada acima de 40 até 50.</p>
+        <p class="text-lg font-semibold">Lista de inscrições enviadas ao julgamento.</p>
         <h2 class="text-lg font-semibold">20 melhores projetos por categoria</h2>
         @forelse ($categories as $category)
             @php($distribution = $distributions[$category->id])

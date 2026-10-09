@@ -35,8 +35,8 @@
                             {{ $category->is_honorific ? 'Indicação para esta categoria' : 'Iniciativas selecionadas para esta categoria' }}
                         </h3>
                     </div>
-                    <p class="text-sm text-muted-foreground">
-                        Selecionados: <span data-selected-count class="font-medium text-mono">0</span>
+                    <p class="judging-selection-count text-muted-foreground">
+                        Selecionados: <span data-selected-count class="font-bold text-mono">0</span>
                         de {{ $effectiveQuota }}
                         · Restam: <span data-remaining class="font-medium text-mono">{{ $remainingQuota }}</span>
                     </p>
@@ -56,7 +56,7 @@
         </div>
     @elseif ($summary)
         <div class="grid gap-5 lg:gap-7.5">
-            <div class="kt-card min-w-full">
+            <div class="kt-card min-w-full judging-completed">
                 <div class="kt-card-content">
                     <x-julgar.summary :summary="$summary" />
                 </div>
@@ -122,6 +122,9 @@
 
 @push('styles')
 <style>
+    [data-julgar] .judging-completed { background: #dcfce7; color: #14532d; }
+    [data-julgar] .judging-completed .text-mono { color: #14532d; }
+    [data-julgar] .judging-summary-name { display: block; font-size: calc(.875rem + 2pt); overflow-wrap: anywhere; }
     [data-julgar] .judging-current-category { font-size: calc(.875rem + 2pt); font-weight: 700; color: #166534; }
     [data-julgar] .judging-options-grid { display: grid; grid-template-columns: minmax(0, 1fr); gap: 1rem; }
     [data-julgar] .judging-option { min-width: 0; border-top: 6px solid #166534; background: linear-gradient(135deg, rgb(22 101 52 / 7%), rgb(22 101 52 / 3%)), var(--background, white); box-shadow: inset 0 0 20px rgb(22 101 52 / 5%); }
@@ -129,14 +132,16 @@
     [data-julgar] .judging-option[aria-pressed="true"] { border-color: #166534; box-shadow: inset 0 0 24px rgb(22 101 52 / 15%), 0 0 0 2px #166534; }
     [data-julgar] .judging-note { margin-top: .75rem; font-size: .875rem; font-weight: 600; color: #166534; }
     .dark [data-julgar] .judging-note { color: #86efac; }
-    [data-julgar] .judging-data-grid { display: grid; grid-template-columns: minmax(0, 1fr); gap: 1rem; font-size: 1rem; line-height: 1.65; }
+    [data-julgar] .judging-selection-count { font-size: calc(.875rem + 2pt); }
+    [data-julgar] .judging-data-grid { display: grid; grid-template-columns: minmax(0, 1fr); gap: 1rem; font-size: calc(1rem + 2pt); line-height: 1.65; }
     [data-julgar] .judging-data-full { grid-column: 1 / -1; }
-    [data-julgar] .judging-data-title { font-size: 1.5rem; font-weight: 600; overflow-wrap: anywhere; }
-    [data-julgar] [data-drawer-body] { font-size: 1rem; line-height: 1.65; }
-    [data-julgar] [data-drawer-body] .text-sm { font-size: 1rem; }
-    [data-julgar] [data-drawer-body] .text-xs { font-size: .9375rem; }
-    [data-julgar] [data-drawer-body] sl-details::part(summary) { font-size: 1.0625rem; font-weight: 600; }
-    [data-julgar] [data-drawer-label] { font-size: 1.25rem; }
+    [data-julgar] .judging-data-title { font-size: calc(1.5rem + 2pt); font-weight: 600; overflow-wrap: anywhere; }
+    [data-julgar] [data-drawer-body] { font-size: calc(1rem + 2pt); line-height: 1.65; }
+    [data-julgar] [data-drawer-body] .text-sm { font-size: calc(1rem + 2pt); }
+    [data-julgar] [data-drawer-body] .text-xs { font-size: calc(.9375rem + 2pt); }
+    [data-julgar] [data-drawer-body] sl-details::part(summary) { font-size: calc(1.0625rem + 2pt); font-weight: 600; }
+    [data-julgar] [data-drawer-body] .judging-content { color: #000; }
+    [data-julgar] [data-drawer-label] { font-size: calc(1.25rem + 2pt); }
     @media (min-width: 640px) {
         [data-julgar] .judging-options-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
         [data-julgar] .judging-data-grid { grid-template-columns: repeat(3, minmax(0, 1fr)); }

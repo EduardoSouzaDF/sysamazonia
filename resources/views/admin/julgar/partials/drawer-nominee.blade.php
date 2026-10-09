@@ -1,7 +1,11 @@
 <template data-drawer-template data-for-key="{{ $card['key'] }}">
     <div class="space-y-4">
         <sl-details summary="Dados da Indicação" open>
-            <dl class="grid grid-cols-3 gap-3 text-sm  ">
+            <dl class="judging-data-grid">
+                <div class="judging-data-full">
+                    <dt class="text-muted-foreground">Indicado</dt>
+                    <dd class="judging-data-title">{{ $inscription->name }}</dd>
+                </div>
                 <div>
                     <dt class="text-muted-foreground">Categoria</dt>
                     <dd>{{ $inscription->category?->title }}</dd>
@@ -15,10 +19,6 @@
                     <dd>{{ $inscription->category?->modality?->edition?->title }}</dd>
                 </div>
                 <div>
-                    <dt class="text-muted-foreground">Indicado</dt>
-                    <dd>{{ $inscription->candidate?->nome ?? $inscription->name }}</dd>
-                </div>
-                <div>
                     <dt class="text-muted-foreground">Estado</dt>
                     <dd>{{ $inscription->state ?? '—' }}</dd>
                 </div>
@@ -27,15 +27,15 @@
         </sl-details>
 
         <sl-details summary="Apresentação" open>
-            <p class="whitespace-pre-line text-sm text-muted-foreground"><x-julgar.plain-text :text="$inscription->presentation" /></p>
+            <p class="whitespace-pre-line text-sm judging-content"><x-julgar.plain-text :text="$inscription->presentation" /></p>
         </sl-details>
 
         <sl-details summary="Atividades">
-            <p class="whitespace-pre-line text-sm text-muted-foreground"><x-julgar.plain-text :text="$inscription->activities" /></p>
+            <p class="whitespace-pre-line text-sm judging-content"><x-julgar.plain-text :text="$inscription->activities" /></p>
         </sl-details>
 
         <sl-details summary="Justificativa">
-            <p class="whitespace-pre-line text-sm text-muted-foreground"><x-julgar.plain-text :text="$inscription->justification" /></p>
+            <p class="whitespace-pre-line text-sm judging-content"><x-julgar.plain-text :text="$inscription->justification" /></p>
         </sl-details>
 
         <sl-details summary="Anexos ({{ $inscription->files->count() }})">

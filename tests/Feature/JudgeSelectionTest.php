@@ -224,6 +224,9 @@ class JudgeSelectionTest extends TestCase
         $this->actingAs($this->judge)->get('/julgar')
             ->assertOk()
             ->assertSee('Julgamento concluído!')
+            ->assertSee($rA1->title)
+            ->assertSee($rB1->title)
+            ->assertSee('judging-completed', false)
             ->assertSee('CAA '.$rA1->id.' - '.$edition->judgment_date->format('Y'))
             ->assertSee('CBB '.$rB1->id.' - '.$edition->judgment_date->format('Y'));
 
@@ -488,7 +491,8 @@ class JudgeSelectionTest extends TestCase
         $this->actingAs($this->judge)->get('/julgar')
             ->assertOk()
             ->assertSee('Dados da Indicação')
-            ->assertSee($candidate->nome)
+            ->assertSee($nominee->name)
+            ->assertDontSee($candidate->nome)
             ->assertSee('Trajetória exemplar.')
             ->assertDontSee('Avaliações e indicações');
     }

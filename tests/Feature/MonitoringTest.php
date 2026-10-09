@@ -135,9 +135,10 @@ class MonitoringTest extends TestCase
         $this->seedReportRecords();
         DB::table('registrations')->update(['status' => 4, 'evaluation_avg' => 100]);
         $firstEdition = DB::table('editions')->value('id');
+        DB::table('editions')->where('id', $firstEdition)->update(['registration_start' => '2025-01-01']);
         $editionRecord = (array) DB::table('editions')->first();
         unset($editionRecord['id']);
-        $otherEdition = DB::table('editions')->insertGetId(array_replace($editionRecord, ['title' => 'Edição anterior']));
+        $otherEdition = DB::table('editions')->insertGetId(array_replace($editionRecord, ['title' => 'Edição anterior', 'registration_start' => '2024-01-01']));
         $modality = DB::table('modalities')->insertGetId(['title' => 'Outra modalidade', 'edition_id' => $otherEdition, 'is_active' => true]);
         $category = DB::table('categories')->insertGetId(['title' => 'Outra categoria', 'acronym' => 'OUT', 'modality_id' => $modality, 'is_honorific' => false]);
         $record = (array) DB::table('registrations')->first();
@@ -150,6 +151,9 @@ class MonitoringTest extends TestCase
                 ->assertSee('monitoring-charts-grid', false)
                 ->assertSee('<details class="kt-card kt-card-grid monitoring-category">', false);
             $this->assertSame(['Recomendada' => 1, 'Meritória' => 1, 'Não recomendada' => 0], $response->viewData('generalDistribution'));
+            $this->assertSame(['Edição anterior (2024)', 'Edição (2025)'], $response->viewData('qualityLabels'));
+            $this->assertSame([35.0, 50.0], $response->viewData('qualitySeries')[0]['data']);
+            $this->assertSame([35.0, 50.0], $response->viewData('qualitySeries')[1]['data']);
             $this->assertCount(1, $response->viewData('categories'));
             $this->assertSame(1, array_sum($response->viewData('distributions')[$response->viewData('categories')->first()->id]));
         }
@@ -171,6 +175,27 @@ class MonitoringTest extends TestCase
             ->assertSee('Indicações (1)')->assertSee('Avaliador do projeto')
             ->assertSee('Impacto social: 9')->assertSee('Parecer favorável.')
             ->assertSee('Indicação pelo impacto.')->assertDontSee('&lt;p&gt;Parecer');
+    }
+
+    public function test_quality_trend_uses_edition_year_and_excludes_ineligible_entries(): void
+    {
+        $this->seedReportRecords();
+        DB::table('editions')->update(['registration_start' => '2024-01-01']);
+        DB::table('registrations')->update(['status' => 4, 'evaluation_avg' => 100]);
+        $record = (array) DB::table('registrations')->first();
+        unset($record['id']);
+        foreach ([[4, 70], [4, 20], [2, 100], [4, null]] as [$status, $score]) {
+            DB::table('registrations')->insert(array_replace($record, ['status' => $status, 'evaluation_avg' => $score]));
+        }
+        $response = $this->actingAs($this->admin())->get(route('monitoring'))->assertOk()
+            ->assertSee('data-monitoring-line', false)
+            ->assertSee('Monitoramento da qualidade das inscrições apresentadas.')
+            ->assertSee('Lista de inscrições enviadas ao julgamento.');
+        $this->assertSame(['Edição (2024)'], $response->viewData('qualityLabels'));
+        $this->assertSame([
+            ['name' => 'Qualidade — nota média', 'data' => [31.67]],
+            ['name' => 'Tendência da qualidade', 'data' => [null]],
+        ], $response->viewData('qualitySeries'));
     }
 
     private function seedReportRecords(): void

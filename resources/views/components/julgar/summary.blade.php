@@ -17,7 +17,10 @@
             </p>
             <ul class="mt-3 grid list-disc grid-cols-1 gap-1 pl-5 text-sm sm:grid-cols-2">
                 @foreach ($group['inscriptions'] as $item)
-                    <li>{{ $item['label'] }} - {{ $item['year'] }}</li>
+                    <li>
+                        <span>{{ $item['label'] }} - {{ $item['year'] }}</span>
+                        <span class="judging-summary-name">{{ $item['type'] === 'nominee' ? $item['inscription']->name : $item['inscription']->title }}</span>
+                    </li>
                 @endforeach
             </ul>
         </div>

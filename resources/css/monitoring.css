@@ -31,3 +31,7 @@
 #monitoring .monitoring-project-meta dt { font-size: .875rem; font-weight: 600; color: var(--muted-foreground); }
 #monitoring .monitoring-project-meta dd { overflow-wrap: anywhere; }
 #monitoring .monitoring-summary-text { white-space: pre-line; overflow-wrap: anywhere; margin-top: .75rem; line-height: 1.65; }
+
+#monitoring .monitoring-distribution, #monitoring .monitoring-line { padding: 1rem; border-radius: .75rem; background: #1e293b; color: #ffffff; }
+#monitoring .monitoring-line { min-height: 360px; }
+#monitoring .monitoring-distribution .monitoring-empty { color: #ffffff; }

@@ -9,12 +9,12 @@ use InvalidArgumentException;
 
 class RegistrationReportService
 {
-    /** @return array{markdown:string,filename:string,title:string,total:int,by_modality:array<string,int>,by_category:array<string,int>,missing:int} */
+    /** @return array{markdown:string,filename:string,title:string,total:int,by_modality:array<string,int>,by_category:array<string,int>,missing:int,status:int} */
     public function generate(int $status): array
     {
         $statusEnum = RegistrationStatusEnum::tryFrom($status);
 
-        if (! in_array($statusEnum, [RegistrationStatusEnum::Habilitado, RegistrationStatusEnum::Agraciado], true)) {
+        if (! in_array($statusEnum, [RegistrationStatusEnum::Habilitado, RegistrationStatusEnum::Agraciado, RegistrationStatusEnum::Rejeitado], true)) {
             throw new InvalidArgumentException('Status indisponível para este relatório.');
         }
 
@@ -24,8 +24,12 @@ class RegistrationReportService
             ['modality', 'asc'], ['category', 'asc'], ['name', 'asc'],
         ], SORT_NATURAL | SORT_FLAG_CASE)->values();
 
-        $slug = $statusEnum === RegistrationStatusEnum::Habilitado ? 'habilitados' : 'agraciados';
-        $title = 'Relatório de '.($slug === 'habilitados' ? 'Habilitados' : 'Agraciados');
+        $slug = match ($statusEnum) {
+            RegistrationStatusEnum::Habilitado => 'habilitados',
+            RegistrationStatusEnum::Rejeitado => 'rejeitados',
+            default => 'agraciados',
+        };
+        $title = 'Relatório de '.ucfirst($slug);
         $byModality = $records->countBy('modality')->sortKeys(SORT_NATURAL | SORT_FLAG_CASE)->all();
         $byCategory = $records->countBy(fn (object $record): string => $record->modality.' — '.$record->category)
             ->sortKeys(SORT_NATURAL | SORT_FLAG_CASE)->all();
@@ -35,11 +39,19 @@ class RegistrationReportService
             'markdown' => $this->renderMarkdown($title, $statusEnum, $records, $byModality, $byCategory, $missing),
             'filename' => "relatorio-{$slug}.md",
             'title' => $title,
+            'status' => $status,
             'total' => $records->count(),
             'by_modality' => $byModality,
             'by_category' => $byCategory,
             'missing' => $missing,
         ];
+    }
+
+    private function includedStatuses(int $status): array
+    {
+        return $status === RegistrationStatusEnum::Habilitado->value
+            ? [RegistrationStatusEnum::Habilitado->value, RegistrationStatusEnum::Avaliado->value]
+            : [$status];
     }
 
     private function regularRecords(int $status): Collection
@@ -48,7 +60,7 @@ class RegistrationReportService
             ->join('candidates as author', 'author.id', '=', 'r.candidate_id')
             ->join('categories as c', 'c.id', '=', 'r.category_id')
             ->join('modalities as m', 'm.id', '=', 'c.modality_id')
-            ->where('r.status', $status)
+            ->whereIn('r.status', $this->includedStatuses($status))
             ->where('c.is_honorific', false)
             ->where('m.is_active', true)
             ->select([
@@ -64,7 +76,7 @@ class RegistrationReportService
             ->join('candidates as indicator', 'indicator.id', '=', 'n.candidate_id')
             ->join('categories as c', 'c.id', '=', 'n.category_id')
             ->join('modalities as m', 'm.id', '=', 'c.modality_id')
-            ->where('n.status', $status)
+            ->whereIn('n.status', $this->includedStatuses($status))
             ->where('c.is_honorific', true)
             ->where('m.is_active', true)
             ->select([
@@ -125,6 +137,9 @@ class RegistrationReportService
         $lines[] = '## Validação';
         $lines[] = '';
         $lines[] = '- Status validado pelo código interno do sistema: `'.$status->value.'` (`'.$status->label().'`).';
+        if ($status === RegistrationStatusEnum::Habilitado) {
+            $lines[] = '- Este relatório inclui inscrições habilitadas (3) e avaliadas (4).';
+        }
         $lines[] = '- Inscrições comuns consultadas em `registrations`, limitadas a categorias não honoríficas e modalidades ativas.';
         $lines[] = '- Indicações consultadas em `nominees`, limitadas a categorias honoríficas e modalidades ativas.';
         $lines[] = '- As consultas selecionam uma linha por ID; coautores são lidos do campo textual da inscrição, sem `join` multiplicador.';

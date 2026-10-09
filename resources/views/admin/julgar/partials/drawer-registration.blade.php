@@ -38,19 +38,19 @@
             <div class="space-y-3 text-sm">
                 <div>
                     <p class="font-medium">Resumo</p>
-                    <p class="whitespace-pre-line text-muted-foreground"><x-julgar.plain-text :text="$inscription->resumo" /></p>
+                    <p class="whitespace-pre-line judging-content"><x-julgar.plain-text :text="$inscription->resumo" /></p>
                 </div>
                 <div>
                     <p class="font-medium">Objetivos</p>
-                    <p class="whitespace-pre-line text-muted-foreground"><x-julgar.plain-text :text="$inscription->objetivo" /></p>
+                    <p class="whitespace-pre-line judging-content"><x-julgar.plain-text :text="$inscription->objetivo" /></p>
                 </div>
                 <div>
                     <p class="font-medium">Desenvolvimento</p>
-                    <p class="max-h-40 overflow-y-auto whitespace-pre-line text-muted-foreground"><x-julgar.plain-text :text="$inscription->desenvolvimento" /></p>
+                    <p class="max-h-40 overflow-y-auto whitespace-pre-line judging-content"><x-julgar.plain-text :text="$inscription->desenvolvimento" /></p>
                 </div>
                 <div>
                     <p class="font-medium">Conclusão</p>
-                    <p class="whitespace-pre-line text-muted-foreground"><x-julgar.plain-text :text="$inscription->conclusao" /></p>
+                    <p class="whitespace-pre-line judging-content"><x-julgar.plain-text :text="$inscription->conclusao" /></p>
                 </div>
             </div>
         </sl-details>
@@ -87,7 +87,7 @@
                                     <p>
                                         <b>{{ $score->evaluationCriterion?->name }}: {{ (int) $score->valor }}</b>
                                         @if ($score->descricao)
-                                            <span class="block text-xs text-muted-foreground"><x-julgar.plain-text :text="$score->descricao" /></span>
+                                            <span class="block text-xs judging-content"><x-julgar.plain-text :text="$score->descricao" /></span>
                                         @endif
                                     </p>
                                 @endforeach
@@ -96,7 +96,7 @@
                     @endforeach
                     @foreach ($inscription->indications as $indication)
                         <sl-details summary="Indicado em {{ $indication->created_at?->format('d/m/Y') }} por: {{ $indication->user?->name }}">
-                            <p class="text-xs text-muted-foreground"><x-julgar.plain-text :text="$indication->descricao" /></p>
+                            <p class="text-xs judging-content"><x-julgar.plain-text :text="$indication->descricao" /></p>
                         </sl-details>
                     @endforeach
                 </div>
