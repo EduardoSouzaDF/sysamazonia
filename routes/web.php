@@ -9,6 +9,7 @@ use App\Http\Controllers\EvaluationCriterionController;
 use App\Http\Controllers\JudgingController;
 use App\Http\Controllers\JudgingFollowUpController;
 use App\Http\Controllers\ModalityController;
+use App\Http\Controllers\MonitoringController;
 use App\Http\Controllers\RegistrationController;
 use App\Http\Controllers\RegistrationReportController;
 use App\Http\Controllers\UserController;
@@ -56,6 +57,7 @@ Route::middleware('guest')->group(function () {
 Route::middleware('auth')->group(function () {
     Route::view('/', 'home')->name('home');
     Route::get('/dashboard', [DashboardController::class, 'index'])->middleware(CheckAdmin::class.':admin,leitor')->name('dashboard');
+    Route::get('/monitoramento', [MonitoringController::class, 'index'])->middleware(CheckAdmin::class.':admin')->name('monitoring');
     Route::get('/logout', [AuthController::class, 'logout'])->name('sair');
 
     Route::prefix('admin')->group(function () {

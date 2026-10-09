@@ -1,0 +1,33 @@
+#monitoring .monitoring-heading { display: flex; flex-wrap: wrap; justify-content: space-between; gap: 1.5rem; align-items: end; }
+#monitoring .monitoring-filter { display: flex; flex-wrap: wrap; align-items: center; gap: .75rem; }
+#monitoring .monitoring-filter select { width: auto; max-width: 100%; }
+#monitoring .monitoring-table-scroll { overflow-x: auto; }
+#monitoring .kt-table th, #monitoring .kt-table td { padding: .75rem; }
+#monitoring .kt-table td { vertical-align: top; }
+#monitoring .kt-table a { color: var(--primary); text-decoration: underline; }
+#monitoring .monitoring-pie { min-height: 300px; }
+#monitoring .monitoring-empty { padding-block: 2rem; }
+#monitoring .monitoring-legend { display: grid; gap: .75rem; margin-top: 1rem; }
+#monitoring .monitoring-legend li { display: flex; align-items: center; gap: .5rem; }
+#monitoring .monitoring-legend strong { margin-left: auto; font-variant-numeric: tabular-nums; }
+#monitoring .monitoring-swatch { width: .875rem; height: .875rem; border-radius: 50%; flex-shrink: 0; }
+#monitoring .monitoring-swatch-0 { background-color: #166534; }
+#monitoring .monitoring-swatch-1 { background-color: #ca8a04; }
+#monitoring .monitoring-swatch-2 { background-color: #b91c1c; }
+
+#monitoring .monitoring-distribution { width: 100%; max-width: 480px; margin-inline: auto; }
+#monitoring .monitoring-charts-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 1.5rem; }
+#monitoring .monitoring-category-title { cursor: pointer; padding: 1.25rem; font-weight: 600; }
+#monitoring .monitoring-category-title::marker { color: var(--primary); }
+#monitoring .monitoring-category[open] .monitoring-category-title { border-bottom: 1px solid var(--border); }
+@media (max-width: 767px) { #monitoring .monitoring-charts-grid { grid-template-columns: minmax(0, 1fr); } }
+#monitoring .monitoring-category-title { font-size: 1.125rem; font-weight: 700; color: var(--primary); background: color-mix(in srgb, var(--primary) 9%, var(--background)); border-left: 4px solid var(--primary); border-radius: .75rem; }
+#monitoring .monitoring-category-title:hover { background: color-mix(in srgb, var(--primary) 14%, var(--background)); }
+#monitoring .monitoring-dialog { width: min(760px, calc(100vw - 2rem)); max-height: 85vh; margin: auto; padding: 1.5rem; border: 1px solid var(--border); border-radius: .75rem; background: var(--background, white); color: var(--foreground, #111827); overflow-y: auto; box-shadow: 0 20px 60px rgb(0 0 0 / 25%); }
+#monitoring .monitoring-dialog::backdrop { background: rgb(0 0 0 / 55%); }
+#monitoring .monitoring-dialog-header { display: flex; align-items: center; justify-content: space-between; gap: 1rem; margin-bottom: 1rem; }
+#monitoring .monitoring-dialog-title { font-size: 1.5rem; font-weight: 700; overflow-wrap: anywhere; }
+#monitoring .monitoring-project-meta { display: grid; gap: .75rem; margin-top: 1.25rem; }
+#monitoring .monitoring-project-meta dt { font-size: .875rem; font-weight: 600; color: var(--muted-foreground); }
+#monitoring .monitoring-project-meta dd { overflow-wrap: anywhere; }
+#monitoring .monitoring-summary-text { white-space: pre-line; overflow-wrap: anywhere; margin-top: .75rem; line-height: 1.65; }

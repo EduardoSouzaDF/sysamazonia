@@ -128,7 +128,7 @@ class MenuBuilder
             [
                 'title' => 'Monitoramento',
                 'icon' => 'ki-abstract-45',
-                'route' => 'dashboard',
+                'route' => 'monitoring',
             ],
             [
                 'heading' => 'Administração Sitema',
