@@ -1,10 +1,14 @@
 <template data-drawer-template data-for-key="{{ $card['key'] }}">
     <div class="space-y-4">
         <sl-details summary="Dados da Inscrição" open>
-            <dl class="grid grid-cols-3 gap-3 text-sm sm:grid-cols-3">
-                 <div>
-                    <dt class="text-muted-foreground">Edição</dt> 
+            <dl class="judging-data-grid">
+                <div class="judging-data-full">
+                    <dt class="text-muted-foreground">Edição</dt>
                     <dd>{{ $inscription->category?->modality?->edition?->title }}</dd>
+                </div>
+                <div class="judging-data-full">
+                    <dt class="text-muted-foreground">Título</dt>
+                    <dd class="judging-data-title">{{ $inscription->title }}</dd>
                 </div>
                 <div>
                     <dt class="text-muted-foreground">Categoria</dt>
@@ -14,23 +18,19 @@
                     <dt class="text-muted-foreground">Modalidade</dt>
                     <dd>{{ $inscription->category?->modality?->title }}</dd>
                 </div>
-                <div class=" ">
-                    <dt class="text-muted-foreground">Título</dt>
-                    <dd class="text-xl">{{ $inscription->title }}</dd>
+                <div>
+                    <dt class="text-muted-foreground">Estado</dt>
+                    <dd>{{ strtoupper(trim($inscription->candidate?->ufendereco ?? '')) ?: 'Não informado' }}</dd>
                 </div>
-
-                <div class=" ">
-                    <dt class="text-muted-foreground">Avaliação Final:</dt>
-                    <dd class="text-xl">{{ $inscription->evaluation_avg }}</dd>
+                <div>
+                    <dt class="text-muted-foreground">Nota final</dt>
+                    <dd class="text-xl font-semibold">{{ $inscription->getEvaluationAvgPercentage() !== null ? number_format($inscription->getEvaluationAvgPercentage(), 0, ',', '.') . ' / 50' : 'Sem avaliação' }}</dd>
+                    <dd class="text-muted-foreground">{{ $inscription->getTextEvaluationAvg() }}</dd>
                 </div>
-                 <div class=" ">
-                    <dt class="text-muted-foreground">Indicações:</dt>
-                    <dd class="text-xl">{{ $inscription->indications()->count() }}</dd>
+                <div>
+                    <dt class="text-muted-foreground">Indicações</dt>
+                    <dd class="text-xl">{{ $inscription->indications->count() }}</dd>
                 </div>
-                
-                
-                
-                
             </dl>
         </sl-details>
 
@@ -38,19 +38,19 @@
             <div class="space-y-3 text-sm">
                 <div>
                     <p class="font-medium">Resumo</p>
-                    <p class="whitespace-pre-line text-muted-foreground">{{ $inscription->resumo }}</p>
+                    <p class="whitespace-pre-line text-muted-foreground"><x-julgar.plain-text :text="$inscription->resumo" /></p>
                 </div>
                 <div>
                     <p class="font-medium">Objetivos</p>
-                    <p class="whitespace-pre-line text-muted-foreground">{{ $inscription->objetivo }}</p>
+                    <p class="whitespace-pre-line text-muted-foreground"><x-julgar.plain-text :text="$inscription->objetivo" /></p>
                 </div>
                 <div>
                     <p class="font-medium">Desenvolvimento</p>
-                    <p class="max-h-40 overflow-y-auto whitespace-pre-line text-muted-foreground">{{ $inscription->desenvolvimento }}</p>
+                    <p class="max-h-40 overflow-y-auto whitespace-pre-line text-muted-foreground"><x-julgar.plain-text :text="$inscription->desenvolvimento" /></p>
                 </div>
                 <div>
                     <p class="font-medium">Conclusão</p>
-                    <p class="whitespace-pre-line text-muted-foreground">{{ $inscription->conclusao }}</p>
+                    <p class="whitespace-pre-line text-muted-foreground"><x-julgar.plain-text :text="$inscription->conclusao" /></p>
                 </div>
             </div>
         </sl-details>
@@ -87,7 +87,7 @@
                                     <p>
                                         <b>{{ $score->evaluationCriterion?->name }}: {{ (int) $score->valor }}</b>
                                         @if ($score->descricao)
-                                            <span class="block text-xs text-muted-foreground">{{ $score->descricao }}</span>
+                                            <span class="block text-xs text-muted-foreground"><x-julgar.plain-text :text="$score->descricao" /></span>
                                         @endif
                                     </p>
                                 @endforeach
@@ -96,7 +96,7 @@
                     @endforeach
                     @foreach ($inscription->indications as $indication)
                         <sl-details summary="Indicado em {{ $indication->created_at?->format('d/m/Y') }} por: {{ $indication->user?->name }}">
-                            <p class="text-xs text-muted-foreground">{{ $indication->descricao }}</p>
+                            <p class="text-xs text-muted-foreground"><x-julgar.plain-text :text="$indication->descricao" /></p>
                         </sl-details>
                     @endforeach
                 </div>

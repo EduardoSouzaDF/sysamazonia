@@ -33,6 +33,29 @@ class JudgeSelectionTest extends TestCase
      * "Limpar"; inscrições de outras categorias (inclusive honoríficas) não
      * aparecem.
      */
+    public function test_julgadores_distintos_gravam_escolhas_independentes(): void
+    {
+        $edition = $this->createJudgingEdition();
+        $category = $this->createCategoryForEdition($edition, ['recipients_count' => 1]);
+        $first = $this->createRegistration($category);
+        $second = $this->createRegistration($category);
+        $otherJudge = User::factory()->judge()->create();
+
+        $this->actingAs($this->judge)->post('/julgar', $this->selectionPayload($category, [
+            ['type' => 'registration', 'id' => $first->id],
+        ]))->assertRedirect(route('panel.julgar.index'));
+        $this->actingAs($otherJudge)->get('/julgar')->assertOk()
+            ->assertSee('data-judge-id="'.$otherJudge->id.'"', false)
+            ->assertViewHas('selectedIds', []);
+        $this->post('/julgar', $this->selectionPayload($category, [
+            ['type' => 'registration', 'id' => $second->id],
+        ]))->assertRedirect(route('panel.julgar.index'));
+
+        $this->assertDatabaseHas('judge_selections', ['user_id' => $this->judge->id, 'inscription_id' => $first->id, 'inscription_type' => $first->getMorphClass()]);
+        $this->assertDatabaseHas('judge_selections', ['user_id' => $otherJudge->id, 'inscription_id' => $second->id, 'inscription_type' => $first->getMorphClass()]);
+        $this->assertDatabaseMissing('judge_selections', ['user_id' => $otherJudge->id, 'inscription_id' => $first->id, 'inscription_type' => $first->getMorphClass()]);
+    }
+
     public function test_julgador_ve_primeira_categoria_regular_com_top20_ordenado(): void
     {
         $edition = $this->createJudgingEdition();

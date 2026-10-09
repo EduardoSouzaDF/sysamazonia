@@ -17,7 +17,9 @@
 
         var categoryId = root.dataset.categoryId;
         var effectiveQuota = parseInt(root.dataset.effectiveQuota || '0', 10);
-        var storageKey = 'julgar-preselects-' + categoryId;
+        var judgeId = root.dataset.judgeId;
+        if (!categoryId || !judgeId) { return; }
+        var storageKey = 'julgar-preselects-' + judgeId + '-' + categoryId;
         var cards = Array.prototype.slice.call(root.querySelectorAll('[data-card]'));
         var validKeys = {};
         cards.forEach(function (card) { validKeys[card.dataset.key] = true; });
@@ -27,8 +29,10 @@
             if (validKeys[key] && selected.indexOf(key) === -1) { selected.push(key); }
         });
 
-        // Pré-seleções salvas no navegador (RF-06: voláteis, só na sessão do dispositivo).
+        // Cada julgador possui seu próprio rascunho por categoria.
+        // A chave antiga compartilhada não tem autoria confiável e deve ser descartada.
         try {
+            window.localStorage.removeItem('julgar-preselects-' + categoryId);
             (JSON.parse(window.localStorage.getItem(storageKey) || '[]') || []).forEach(function (key) {
                 if (validKeys[key] && selected.indexOf(key) === -1) { selected.push(key); }
             });

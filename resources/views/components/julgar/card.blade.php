@@ -5,7 +5,7 @@
         data-key="{{ $card['key'] }}"
         data-label="{{ $card['label'] }} - {{ $card['year'] }}"
         aria-pressed="false"
-        class="kt-card w-full border p-4 text-left transition-colors hover:border-primary/60 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary">
+        class="judging-option kt-card w-full border p-4 text-left transition-colors hover:border-primary/60 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary">
     <div class="flex items-start justify-between gap-3">
         <div class="min-w-0">
             <p class="truncate font-medium text-mono">
@@ -25,6 +25,9 @@
             </svg>
         </span>
     </div>
+    @if ($card['type'] === 'registration')
+        <p class="judging-note">Nota: {{ $inscription->getEvaluationAvgPercentage() !== null ? number_format($inscription->getEvaluationAvgPercentage(), 0, ',', '.') . ' / 50' : 'Sem avaliação' }}</p>
+    @endif
     <div class="mt-3 flex flex-wrap items-center gap-2">
         <span class="rounded-full bg-secondary px-2 py-0.5 text-xs text-secondary-foreground">
             {{ $card['type'] === 'nominee' ? 'Inscrição honorífica' : 'Inscrição' }}

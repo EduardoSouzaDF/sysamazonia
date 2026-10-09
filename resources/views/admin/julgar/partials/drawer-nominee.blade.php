@@ -27,15 +27,15 @@
         </sl-details>
 
         <sl-details summary="Apresentação" open>
-            <p class="whitespace-pre-line text-sm text-muted-foreground">{{ $inscription->presentation ?? '—' }}</p>
+            <p class="whitespace-pre-line text-sm text-muted-foreground"><x-julgar.plain-text :text="$inscription->presentation" /></p>
         </sl-details>
 
         <sl-details summary="Atividades">
-            <p class="whitespace-pre-line text-sm text-muted-foreground">{{ $inscription->activities ?? '—' }}</p>
+            <p class="whitespace-pre-line text-sm text-muted-foreground"><x-julgar.plain-text :text="$inscription->activities" /></p>
         </sl-details>
 
         <sl-details summary="Justificativa">
-            <p class="whitespace-pre-line text-sm text-muted-foreground">{{ $inscription->justification ?? '—' }}</p>
+            <p class="whitespace-pre-line text-sm text-muted-foreground"><x-julgar.plain-text :text="$inscription->justification" /></p>
         </sl-details>
 
         <sl-details summary="Anexos ({{ $inscription->files->count() }})">
