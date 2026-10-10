@@ -18,6 +18,9 @@ body:has(#statistics-dashboard) > .flex.grow,
 #statistics-dashboard [data-dimension="sex"] { --dashboard-accent: var(--brand-teal); }
 #statistics-dashboard [data-dimension="ages"] { --dashboard-accent: var(--brand-olive); }
 #statistics-dashboard .dashboard-heading { display: flex; justify-content: space-between; align-items: center; gap: 1rem; flex-wrap: wrap; }
+#statistics-dashboard .dashboard-export-controls { display: flex; align-items: center; justify-content: flex-end; gap: .75rem; flex-wrap: wrap; }
+#statistics-dashboard [data-dashboard-pdf-status]:empty { display: none; }
+#statistics-dashboard [data-dashboard-pdf-status] { flex-basis: 100%; text-align: right; }
 #statistics-dashboard .kt-tabs { overflow-x: auto; flex-wrap: nowrap; }
 #statistics-dashboard .kt-tab-toggle { white-space: nowrap; padding: 1rem .75rem; }
 #statistics-dashboard [role="tab"]:focus-visible { outline: 2px solid var(--primary); outline-offset: -3px; }

@@ -4,6 +4,26 @@ async function initializeDashboard() {
     const root = document.getElementById('statistics-dashboard');
     const data = window.dashboardStatistics;
     if (!root || !data) return;
+    const exportButton = root.querySelector('[data-dashboard-pdf]');
+    exportButton?.addEventListener('click', async () => {
+        if (exportButton.disabled) return;
+        const status = root.querySelector('[data-dashboard-pdf-status]');
+        exportButton.disabled = true;
+        exportButton.setAttribute('aria-busy', 'true');
+        exportButton.textContent = 'Gerando PDF…';
+        status.textContent = '';
+        try {
+            const { downloadDashboardPdf } = await import('./dashboard-pdf');
+            await downloadDashboardPdf(data, root.querySelector('#dashboard-brazil-map'));
+            status.textContent = 'PDF gerado. Confira os downloads do navegador.';
+        } catch {
+            status.textContent = 'Não foi possível gerar o PDF. Tente novamente.';
+        } finally {
+            exportButton.disabled = false;
+            exportButton.removeAttribute('aria-busy');
+            exportButton.textContent = 'Gerar PDF';
+        }
+    });
     const tabs = [...root.querySelectorAll('[data-kt-tab-toggle]')];
     const panels = tabs.map(tab => root.querySelector(tab.dataset.ktTabToggle));
     root.querySelector('[data-kt-tabs]').setAttribute('role', 'tablist');

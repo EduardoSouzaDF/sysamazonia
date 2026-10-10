@@ -29,7 +29,8 @@ class DashboardStatisticsTest extends TestCase
         $this->actingAs(User::factory()->create())->get(route('dashboard'))->assertForbidden();
         foreach (['admin', 'leitor'] as $role) {
             $this->actingAs($this->userWithRole($role))->get(route('dashboard'))->assertOk()
-                ->assertSee('Estatísticas Globais')->assertSee('Edição Atual')->assertSee('Nenhuma edição disponível');
+                ->assertSee('Estatísticas Globais')->assertSee('Edição Atual')->assertSee('Nenhuma edição disponível')
+                ->assertDontSee('data-dashboard-pdf', false);
         }
     }
 
@@ -50,7 +51,7 @@ class DashboardStatisticsTest extends TestCase
         $this->assertSame($latest, $stats['edition']['id']);
         $this->assertTrue($stats['fallback']);
         $this->actingAs($this->userWithRole('leitor'))->get(route('dashboard'))->assertOk()
-            ->assertSee('Nenhuma edição está com inscrições ativas');
+            ->assertSee('Nenhuma edição está com inscrições ativas')->assertSee('data-dashboard-pdf', false)->assertSee('Gerar PDF');
     }
 
     public function test_multiple_active_editions_select_latest_and_log_warning(): void
