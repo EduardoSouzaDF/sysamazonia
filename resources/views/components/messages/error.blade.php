@@ -16,7 +16,7 @@
             <div class="kt-alert-title flex items-center gap-1.5" id="alert_heading">
                 <span class="font-semibold">{{ $error }}</span>
             </div>
-            <button class="kt-alert-close" data-kt-dismiss="#alert" aria-label="Close alert">
+            <button type="button" class="kt-alert-close" data-kt-dismiss="#alert" aria-label="Close alert">
                 <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
                     stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
                     class="lucide lucide-x" aria-hidden="true">
@@ -41,7 +41,7 @@
         <div class="kt-alert-title flex items-center gap-1.5" id="alert_heading">
             <span class="font-semibold">{{ $message }}</span>
         </div>
-        <button class="kt-alert-close" data-kt-dismiss="#alert" aria-label="Close alert">
+        <button type="button" class="kt-alert-close" data-kt-dismiss="#alert" aria-label="Close alert">
             <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
                 stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
                 class="lucide lucide-x" aria-hidden="true">

@@ -15,7 +15,7 @@ class TranslationLocaleTest extends TestCase
     {
         app()->setLocale('pt_BR');
 
-        $this->assertSame('O token de reset de senha é inválido.', __('passwords.token'));
+        $this->assertSame('Este link de redefinição de senha é inválido ou expirou. Solicite um novo link.', __('passwords.token'));
         $this->assertNotSame('auth.failed', __('auth.failed'));
         $this->assertNotSame('validation.required', __('validation.required'));
     }

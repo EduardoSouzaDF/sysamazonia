@@ -63,7 +63,9 @@
                 </button>
                 <x-messages.error :iterator="'login'" />
 
-                <x-messages.error :iterator="'xxx'" :message="session('status')" />
+                @if (session('status'))
+                    <x-messages.alert :message="session('status')" type="success" />
+                @endif
 
                 @if (session('error'))
                     <div class="kt-alert" role="alert" aria-labelledby="alert_heading" aria-describedby="alert_message"

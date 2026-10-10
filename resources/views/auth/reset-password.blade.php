@@ -16,7 +16,7 @@
     <div class="flex items-center justify-center grow bg-center bg-no-repeat page-bg">
         <div class="kt-card max-w-[370px] w-full">
             <form action="{{ route('password.resetpost', $token) }}" class="kt-card-content flex flex-col gap-5 p-10"
-                method="post">
+                method="post" id="reset-password-form">
                 @csrf
                 <input type="hidden" name="token" value="{{ $token }}">
                 <input type="hidden" name="email" value="{{ $email }}">
@@ -75,7 +75,7 @@
                     <x-messages.error :iterator="'email'" />
 
                 </div>
-                <button class="kt-btn kt-btn-primary flex justify-center grow">
+                <button type="submit" class="kt-btn kt-btn-primary flex justify-center grow">
                     Resetar
                 </button>
             </form>
@@ -83,5 +83,20 @@
     </div>
 @endsection
 @push('scripts')
-    <script></script>
+    <script>
+        const resetPasswordForm = document.getElementById('reset-password-form');
+        let resetPasswordSubmitting = false;
+        resetPasswordForm.addEventListener('submit', (event) => {
+            if (resetPasswordSubmitting) {
+                event.preventDefault();
+                return;
+            }
+            resetPasswordSubmitting = true;
+            resetPasswordForm.querySelector('button[type="submit"]').disabled = true;
+        });
+        window.addEventListener('pageshow', () => {
+            resetPasswordSubmitting = false;
+            resetPasswordForm.querySelector('button[type="submit"]').disabled = false;
+        });
+    </script>
 @endpush
