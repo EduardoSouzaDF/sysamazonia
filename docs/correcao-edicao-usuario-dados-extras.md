@@ -88,4 +88,4 @@ Se necessário, restaure a cópia de segurança do controller e recarregue os se
 
 ## Situação desta entrega
 
-A correção do controller e o teste estão no workspace local. Este documento não executa mudanças no servidor de produção e não representa um commit ou envio desses arquivos ao Git.
+A correção do controller e o teste integram a branch `production-evolucao`. Ao publicar a branch, não é necessário editar o controller manualmente. Consulte `docs/implantacao-production-evolucao.md` para os comandos completos. Este documento não executa mudanças no servidor.
