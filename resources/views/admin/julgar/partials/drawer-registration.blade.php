@@ -1,6 +1,6 @@
 <template data-drawer-template data-for-key="{{ $card['key'] }}">
     <div class="space-y-4">
-        <sl-details summary="Dados da Inscrição" open>
+        <sl-details data-guide-nominee-data summary="Dados da Inscrição" open>
             <dl class="judging-data-grid">
                 <div class="judging-data-full">
                     <dt class="text-muted-foreground">Edição</dt>
@@ -55,7 +55,7 @@
             </div>
         </sl-details>
 
-        <sl-details summary="Anexos ({{ $inscription->files->count() }})">
+        <sl-details @if ($inscription->files->isNotEmpty()) data-guide-files @endif summary="Anexos ({{ $inscription->files->count() }})">
             @if ($inscription->files->isEmpty())
                 <p class="text-sm text-muted-foreground">Nenhum anexo.</p>
             @else
@@ -74,7 +74,7 @@
             @endif
         </sl-details>
 
-        <sl-details summary="Avaliações e indicações" open>
+        <sl-details data-guide-opinions summary="Avaliações e indicações" open>
             @php($opinions = $inscription->opinions->sortByDesc('created_at'))
             @if ($opinions->isEmpty() && $inscription->indications->isEmpty())
                 <p class="text-sm text-muted-foreground">Nenhuma avaliação ou indicação registrada.</p>
@@ -103,6 +103,6 @@
             @endif
         </sl-details>
 
-        <sl-button variant="primary" data-drawer-confirm class="w-full">Confirmar</sl-button>
+        <sl-button variant="primary" data-drawer-confirm class="w-full">Escolher esta</sl-button>
     </div>
 </template>

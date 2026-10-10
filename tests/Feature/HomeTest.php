@@ -40,7 +40,9 @@ class HomeTest extends TestCase
 
         $this->assertAuthenticatedAs($user);
         $this->get(route('home'))->assertOk()
-            ->assertSee('Boas-vindas ao Sistema de Inscrições, Avaliação e Julgamento do Prêmios.')
+            ->assertSee($judge
+                ? 'Boas-vindas ao Sistema de Julgamento do Prêmios.'
+                : 'Boas-vindas ao Sistema de Inscrições, Avaliação e Julgamento do Prêmios.')
             ->assertSee($user->name)
             ->assertSee(asset('images/lg_Premios_alt.webp'))
             ->assertSee('Início');

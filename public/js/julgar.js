@@ -1,6 +1,6 @@
 /*
  * Tela de Julgamento (spec 0003) — wizard categoria a categoria.
- * Pré-seleção client-side (volátil, por design): grid + drawer Shoelace + submit da categoria.
+ * Pré-seleção client-side (volátil, por design): grid + modal Shoelace + submit da categoria.
  */
 (function () {
     'use strict';
@@ -44,7 +44,7 @@
         var clearBtn = root.querySelector('[data-clear-btn]');
         var countEl = root.querySelector('[data-selected-count]');
         var remainingEl = root.querySelector('[data-remaining]');
-        var drawer = root.querySelector('sl-drawer[data-drawer]');
+        var drawer = root.querySelector('[data-drawer]');
         var drawerBody = drawer ? drawer.querySelector('[data-drawer-body]') : null;
         var drawerLabel = drawer ? drawer.querySelector('[data-drawer-label]') : null;
 
@@ -101,7 +101,7 @@
                 confirmBtn.disabled = !complete;
                 confirmBtn.title = complete
                     ? ''
-                    : 'Selecione ' + Math.max(0, effectiveQuota - selected.length) + ' inscrição(ões) para confirmar.';
+                    : 'Selecione ' + Math.max(0, effectiveQuota - selected.length) + ' inscrição(ões) para confirmar os votos.';
             }
             persist();
         }

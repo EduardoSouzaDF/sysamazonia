@@ -99,7 +99,7 @@ use Carbon\Carbon;
                     <div class="kt-card w-full">
                         <div class="kt-card-content  ">
                             <form
-                            method="POST"
+                            method="POST" data-guide-evaluation-form
                             action="{{ route('admin.registration.send.opinion', $object->id) }}"
                             >
                                 @csrf
@@ -118,11 +118,11 @@ use Carbon\Carbon;
                                                 <p class="text-xs text-muted-foreground">
                                                     {{ $criteria->description }}
                                                 </p>
-                                                <sl-range label="Pontuação: Mínimo: {{(int) $criteria->min_score}}
+                                                <sl-range data-guide-score label="Pontuação: Mínimo: {{(int) $criteria->min_score}}
                                                         &nbsp;&nbsp; Máximo: {{(int) $criteria->max_score}}
                                                          &nbsp;&nbsp; Peso: {{(int) $criteria->weight}}" tooltip="top"   name="criteria[{{ $criteria->id }}]"  min="{{(int) $criteria->min_score}}"  max="{{(int) $criteria->max_score}}"  step="1"></sl-range>
                                                  
-                                                <sl-textarea label="Justificativa" name="justificativa[{{  $criteria->id }}]"></sl-textarea>
+                                                <sl-textarea data-guide-justification label="Justificativa" name="justificativa[{{  $criteria->id }}]"></sl-textarea>
                                                
                                             </div>
                                             <br><br>

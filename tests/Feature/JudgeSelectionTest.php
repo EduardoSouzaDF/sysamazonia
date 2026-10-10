@@ -61,6 +61,7 @@ class JudgeSelectionTest extends TestCase
         $edition = $this->createJudgingEdition();
         $category = $this->createCategoryForEdition($edition, [
             'acronym' => 'PSD',
+            'description' => '<p>Descrição cadastrada da categoria.</p>',
             'recipients_count' => 20,
         ]);
 
@@ -107,11 +108,17 @@ class JudgeSelectionTest extends TestCase
         $response->assertDontSee('data-key="nominee:'.$honorificNominee->id.'"', false);
 
         // NM-05: listagem regular + ações. Cota EFETIVA = min(20, 4 cards) = 4 (RF-06).
+        $response->assertSee('Iniciar julgamento')
+            ->assertSee('Categoria: '.$category->title)
+            ->assertSee('Descrição:')
+            ->assertSee('<p>Descrição cadastrada da categoria.</p>', false);
         $response->assertSee('Iniciativas selecionadas para esta categoria');
         $response->assertSee('de 4', false);
         $response->assertSee('Restam:', false);
         $response->assertSee('Limpar', false);
-        $response->assertSee('disabled>Confirmar', false);
+        $response->assertSee('disabled>Confirmar votos', false)
+            ->assertSee('<sl-dialog data-drawer', false)
+            ->assertSee('Escolher esta');
     }
 
     /**
@@ -202,7 +209,8 @@ class JudgeSelectionTest extends TestCase
         $this->actingAs($this->judge)
             ->post('/julgar', $this->selectionPayload($categoryA, [['type' => 'registration', 'id' => $rA1->id]]))
             ->assertRedirect(route('panel.julgar.index'))
-            ->assertSessionHas('success', 'Seleções registradas com sucesso.');
+            ->assertSessionHas('success', 'Seleções registradas com sucesso.')
+            ->assertSessionHas('commission_guides.'.$this->judge->id.'.completed', ['judge']);
 
         $this->assertDatabaseHas('judge_selections', [
             'user_id' => $this->judge->id,
@@ -223,7 +231,11 @@ class JudgeSelectionTest extends TestCase
 
         $this->actingAs($this->judge)->get('/julgar')
             ->assertOk()
-            ->assertSee('Julgamento concluído!')
+            ->assertSee('Seu julgamento foi concluído com sucesso')
+            ->assertSee('Obrigado por fazer parte desta história!')
+            ->assertSee('Sua participação faz a diferença para o futuro da Amazônia!')
+            ->assertSee('Sair do sistema')
+            ->assertSee('href="'.route('sair').'"', false)
             ->assertSee($rA1->title)
             ->assertSee($rB1->title)
             ->assertSee('judging-completed', false)
@@ -291,7 +303,7 @@ class JudgeSelectionTest extends TestCase
 
         $this->actingAs($this->judge)->get('/julgar')
             ->assertOk()
-            ->assertSee('Julgamento concluído!')
+            ->assertSee('Seu julgamento foi concluído com sucesso')
             ->assertSee('Acompanhamento dos votos')
             ->assertSee('data-vote="registration:'.$rA1->id.'"', false)
             ->assertSee('data-vote="registration:'.$rB1->id.'"', false);
@@ -324,7 +336,7 @@ class JudgeSelectionTest extends TestCase
 
         $this->actingAs($this->judge)->get('/julgar')
             ->assertOk()
-            ->assertSee('Julgamento concluído!');
+            ->assertSee('Seu julgamento foi concluído com sucesso');
 
         $this->assertDatabaseCount('judge_selections', 2);
     }
