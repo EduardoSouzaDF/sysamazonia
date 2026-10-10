@@ -7,7 +7,12 @@
                 <path d="M20 6 9 17l-5-5"></path>
             </svg>
         </span>
-        <h2 class="text-lg font-medium text-mono">Julgamento concluído!</h2>
+        <h2 class="judging-completed-title text-lg font-semibold text-mono">Seu julgamento foi concluído com sucesso</h2>
+        <div class="space-y-3 leading-relaxed">
+            <p class="font-medium">Obrigado por fazer parte desta história!</p>
+            <p>Sua dedicação e seu conhecimento contribuem para reconhecer iniciativas que transformam a Amazônia e promovem um futuro mais sustentável, inovador e socialmente justo.</p>
+            <p>Sua participação faz a diferença para o futuro da Amazônia!</p>
+        </div>
     </div>
 
     @foreach ($summary as $group)

@@ -1,6 +1,6 @@
 <template data-drawer-template data-for-key="{{ $card['key'] }}">
     <div class="space-y-4">
-        <sl-details summary="Dados da Indicação" open>
+        <sl-details data-guide-nominee-data summary="Dados da Indicação" open>
             <dl class="judging-data-grid">
                 <div class="judging-data-full">
                     <dt class="text-muted-foreground">Indicado</dt>
@@ -38,7 +38,7 @@
             <p class="whitespace-pre-line text-sm judging-content"><x-julgar.plain-text :text="$inscription->justification" /></p>
         </sl-details>
 
-        <sl-details summary="Anexos ({{ $inscription->files->count() }})">
+        <sl-details @if ($inscription->files->isNotEmpty()) data-guide-files @endif summary="Anexos ({{ $inscription->files->count() }})">
             @if ($inscription->files->isEmpty())
                 <p class="text-sm text-muted-foreground">Nenhum anexo.</p>
             @else
@@ -57,6 +57,6 @@
             @endif
         </sl-details>
 
-        <sl-button variant="primary" data-drawer-confirm class="w-full">Confirmar</sl-button>
+        <sl-button variant="primary" data-drawer-confirm class="w-full">Escolher esta</sl-button>
     </div>
 </template>

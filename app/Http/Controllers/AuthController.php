@@ -35,6 +35,7 @@ class AuthController extends Controller
             $request->session()->regenerate();
 
             $request->session()->forget('url.intended');
+            $request->session()->forget('commission_guides');
 
             return redirect()->route('home')->with('success', 'Login realizado com sucesso!');
         }
@@ -114,6 +115,10 @@ class AuthController extends Controller
 
     public function showReset($token, Request $request)
     {
+        if ($this->resetCompletedInSession($request, $token, (string) $request->email)) {
+            return redirect()->route('login')->with('status', __('passwords.reset', [], 'pt_BR'));
+        }
+
         return view('auth.reset-password', ['token' => $token, 'email' => $request->email]);
     }
 
@@ -124,6 +129,10 @@ class AuthController extends Controller
             'email' => 'required|email',
             'password' => 'required|confirmed',
         ]);
+        if ($this->resetCompletedInSession($request, $request->string('token')->toString(), $request->string('email')->toString())) {
+            return redirect()->route('login')->with('status', __('passwords.reset', [], 'pt_BR'));
+        }
+
         $status = Password::reset(
             $request->only('email', 'password', 'password_confirmation', 'token'),
             function (User $user, string $password) {
@@ -137,8 +146,25 @@ class AuthController extends Controller
             }
         );
 
-        return $status === Password::PasswordReset
-            ? redirect()->route('login')->with('status', 'Senha Atualizada')
-            : back()->withErrors(['email' => [__($status)]]);
+        if ($status === Password::PASSWORD_RESET) {
+            // Remember only a fingerprint, never the password or the reset token.
+            $request->session()->put('password_reset_completed', [
+                'fingerprint' => hash('sha256', $request->input('email').'|'.$request->input('token')),
+                'completed_at' => now()->timestamp,
+            ]);
+
+            return redirect()->route('login')->with('status', __('passwords.reset', [], 'pt_BR'));
+        }
+
+        return back()->withErrors(['email' => __($status, [], 'pt_BR')]);
+    }
+
+    private function resetCompletedInSession(Request $request, string $token, string $email): bool
+    {
+        $completed = $request->session()->get('password_reset_completed');
+
+        return is_array($completed)
+            && ($completed['completed_at'] ?? 0) >= now()->subMinutes(10)->timestamp
+            && hash_equals($completed['fingerprint'] ?? '', hash('sha256', $email.'|'.$token));
     }
 }

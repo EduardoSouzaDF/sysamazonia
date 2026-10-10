@@ -1,0 +1,17 @@
+.commission-guide-balloon { position: fixed; z-index: 10000; box-sizing: border-box; width: min(300px, calc(100vw - 24px)); max-height: calc(100dvh - 24px); overflow-y: auto; padding: 12px; border: 1px solid #2563eb; border-radius: 10px; background: #2563eb; color: #fff; box-shadow: 0 6px 20px rgb(0 0 0 / 16%); font-size: 11px; line-height: 1.45; }
+.commission-guide-balloon::before { content: ''; display: block; width: 24px; height: 3px; border-radius: 3px; background: #1d4ed8; margin-bottom: 8px; }
+.commission-guide-balloon h2 { margin: 0 22px 6px 0; font-size: 13px; font-weight: 700; color: #fff; }
+.commission-guide-balloon p { margin: 6px 0; }
+.commission-guide-balloon .guide-progress { font-size: 10px; color: #fff; }
+.commission-guide-balloon .guide-controls { display: flex; flex-wrap: wrap; gap: 5px; margin-top: 10px; }
+.commission-guide-balloon button { cursor: pointer; border: 1px solid #fff; padding: 3px 7px; border-radius: 5px; background: #2563eb; color: #fff; font: inherit; font-size: 11px; line-height: 1.4; }
+.commission-guide-balloon button.guide-primary { background: #1d4ed8; border-color: #fff; color: #fff; }
+.commission-guide-balloon button:disabled { opacity: .6; cursor: wait; }
+.commission-guide-balloon button:focus-visible { outline: 3px solid #fff; outline-offset: 2px; }
+.commission-guide-balloon .guide-close { position: absolute; right: 8px; top: 8px; border: 0; padding: 3px 8px; font-size: 17px; }
+.commission-guide-balloon .guide-error { color: #fff; }
+.commission-guide-highlight { outline: 2px solid #2563eb !important; outline-offset: 3px; }
+[data-guide-help], [data-guide-drawer-help] { white-space: normal; background: #2563eb; border-color: #2563eb; color: #fff; padding: 3px 7px; font-size: 11px; min-height: 0; height: auto; }
+.commission-guide-balloon button:hover, [data-guide-help]:hover, [data-guide-drawer-help]:hover { background: #1d4ed8; color: #fff; }
+@media (max-width: 640px) { .commission-guide-balloon { font-size: 12px; padding: 12px; } [data-guide-help] { max-width: 125px; font-size: 11px; } }
+@media print { .commission-guide-balloon, [data-commission-guides] { display: none !important; } .commission-guide-highlight { outline: none !important; } }

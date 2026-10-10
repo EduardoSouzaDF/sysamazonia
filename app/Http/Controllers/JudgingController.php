@@ -163,6 +163,8 @@ class JudgingController extends Controller
             }
         });
 
+        app(\App\Services\CommissionGuides::class)->completeTask('judge');
+
         return redirect()
             ->route('panel.julgar.index')
             ->with('success', 'Seleções registradas com sucesso.');

@@ -55,6 +55,8 @@ Route::middleware('guest')->group(function () {
 
 // Rotas autenticadas
 Route::middleware('auth')->group(function () {
+    Route::put('/commission-guides/progress', [\App\Http\Controllers\CommissionGuideController::class, 'update'])
+        ->middleware('throttle:120,1')->name('commission-guides.update');
     Route::view('/', 'home')->name('home');
     Route::get('/dashboard', [DashboardController::class, 'index'])->middleware(CheckAdmin::class.':admin,leitor')->name('dashboard');
     Route::get('/monitoramento', [MonitoringController::class, 'index'])->middleware(CheckAdmin::class.':admin')->name('monitoring');

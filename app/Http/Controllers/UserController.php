@@ -250,7 +250,7 @@ class UserController extends Controller
         $user->roles()->sync($request->roles);
 
         // Atualiza dados extras
-        $user->extraData->updateOrCreate(
+        $user->extraData()->updateOrCreate(
             ['user_id' => $user->id],
             [
                 'whatsapp' => $validated['whatsapp'] ?? null,

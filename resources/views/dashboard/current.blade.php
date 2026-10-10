@@ -4,7 +4,10 @@
     @else
         <div class="dashboard-heading"><div><h2 class="text-xl font-semibold">{{ $statistics['edition']['title'] }}</h2>
             @if($statistics['fallback'])<p class="dashboard-footnote">Nenhuma edição está com inscrições ativas. Exibindo a edição mais recente pela data de início das inscrições.</p>@endif
-        </div><p class="dashboard-footnote">Atualizado em {{ $statistics['current']['generatedAt'] }}</p></div>
+        </div><div class="dashboard-export-controls"><p class="dashboard-footnote">Atualizado em {{ $statistics['current']['generatedAt'] }}</p>
+            <button type="button" class="kt-btn kt-btn-primary" data-dashboard-pdf>Gerar PDF</button>
+            <p class="dashboard-footnote" data-dashboard-pdf-status role="status" aria-live="polite"></p>
+        </div></div>
         @include('dashboard.indicators', ['data' => $statistics['current']])
         @if($statistics['current']['total'] === 0)<p class="dashboard-empty" role="status">Esta edição ainda não possui inscrições.</p>@endif
         <section aria-labelledby="edition-summary-title">

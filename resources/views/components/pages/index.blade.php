@@ -111,7 +111,7 @@
                                                     <td class="pages-actions-col">
                                                         <span class="pages-actions-tint {{ $item['color'] ?? '' }}"></span>
                                                         <div data-kt-dropdown="true" data-kt-dropdown-trigger="click">
-                                                            <button class="kt-btn" data-kt-dropdown-toggle="true">
+                                                            <button class="kt-btn" data-guide-actions-toggle data-kt-dropdown-toggle="true">
                                                                 Gerenciar<svg xmlns="http://www.w3.org/2000/svg"
                                                                     width="24" height="24" viewBox="0 0 24 24"
                                                                     fill="none" stroke="currentColor" stroke-width="2"
@@ -124,7 +124,7 @@
                                                                 <ul class="kt-dropdown-menu-sub">
                                                                     @foreach ($actions as $actionName => $actionRoute)
                                                                         <li>
-                                                                            <a href="{{ is_callable($actionRoute) ? $actionRoute($item) : $actionRoute }}"
+                                                                            <a data-guide-action="{{ $actionName }}" href="{{ is_callable($actionRoute) ? $actionRoute($item) : $actionRoute }}"
                                                                                 class="kt-dropdown-menu-link">
                                                                                 @switch($actionName)
                                                                                     @case('Logar Como')
@@ -151,7 +151,7 @@
                                                 <td class="pages-actions-col">
                                                     <span class="pages-actions-tint {{ $item['color'] ?? '' }}"></span>
                                                     @foreach ($actions as $actionName => $actionRoute)
-                                                            <a href="{{ is_callable($actionRoute) ? $actionRoute($item) : $actionRoute }}"
+                                                            <a data-guide-action="{{ $actionName }}" href="{{ is_callable($actionRoute) ? $actionRoute($item) : $actionRoute }}"
                                                                 class="kt-btn">
                                                                 @switch($actionName)
                                                                     @case('Logar Como')
@@ -177,7 +177,7 @@
                                         </tr>
                                     @empty
                                         <tr>
-                                            <td colspan="{{ count($columns) + (!empty($actions) ? 1 : 0) }}"
+                                            <td data-guide-empty colspan="{{ count($columns) + (!empty($actions) ? 1 : 0) }}"
                                                 class="py-4 text-center">
                                                 Nenhum registro encontrado.
                                             </td>

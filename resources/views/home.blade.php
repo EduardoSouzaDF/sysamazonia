@@ -5,11 +5,18 @@
     <section class="kt-card welcome-card" aria-labelledby="welcome-title">
         <img class="welcome-logo" src="{{ asset('images/lg_Premios_alt.webp') }}" alt="Premiação Amazônia" />
         <p class="welcome-greeting">Olá, {{ auth()->user()->name }}!</p>
+        @if (auth()->user()->isJudge())
+        <h1 id="welcome-title">Boas-vindas ao Sistema de Julgamento do Prêmios.</h1>
+        <p class="welcome-description">
+            Sua participação é essencial para identificar e reconhecer personalidades, empresas e iniciativas que promovem o desenvolvimento sustentável, a inovação e a valorização da Amazônia.
+        </p>
+        @else
         <h1 id="welcome-title">Boas-vindas ao Sistema de Inscrições, Avaliação e Julgamento do Prêmios.</h1>
         <p class="welcome-description">
             Um espaço para reconhecer iniciativas e pessoas que contribuem para o desenvolvimento da Amazônia.
             Sua participação faz parte dessa história.
         </p>
+        @endif
         <p class="welcome-guidance">Utilize o menu para acessar as funcionalidades disponíveis para o seu perfil.</p>
     </section>
 </div>

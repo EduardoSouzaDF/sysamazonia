@@ -56,7 +56,7 @@ class MenuBuilder
                 'heading' => 'Julgamento',
             ],
             [
-                'title' => 'Julgar',
+                'title' => 'Iniciar julgamento',
                 'icon' => 'ki-profile-circle',
                 'route' => 'panel.julgar.index',
             ],

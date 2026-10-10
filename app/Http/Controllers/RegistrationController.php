@@ -320,6 +320,8 @@ class RegistrationController extends Controller
                     ]);
                 });
 
+                app(\App\Services\CommissionGuides::class)->completeTask('indicator');
+
                 return response()->json(['message' => 'Registro Indicado'], 200);
             } catch (\Throwable $th) {
                 return response()->json(['message' => 'Erro na operação'], 400);
@@ -365,6 +367,7 @@ class RegistrationController extends Controller
 
         try {
             $submissionService->submit($registration, $user, $request->scores());
+            app(\App\Services\CommissionGuides::class)->completeTask('evaluator');
 
             return redirect()
                 ->route('admin.registration.index')

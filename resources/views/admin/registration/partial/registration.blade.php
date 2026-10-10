@@ -8,7 +8,7 @@ use Carbon\Carbon;
 
 
 
-    <div class="w-full  ">
+    <div class="w-full" data-guide-registration-content>
 
         @if(get_class($object) == "App\Models\Registration")
             <div class="  flex flex-row justify-end">
@@ -77,7 +77,7 @@ use Carbon\Carbon;
     @endif
 
     @if(sizeof($object->files))
-    <sl-details summary="Arquivos">
+    <sl-details summary="Arquivos" data-guide-files>
         @if ($object->files)
             @foreach ($object->files as $file)
                 @php
@@ -158,9 +158,9 @@ use Carbon\Carbon;
     @if(auth()->user()->isIndicator())
         <meta name="csrf-token" content="{{ csrf_token() }}">
         <div class="flex flex-col justify-end gap-4 mt-4 w-full">
-         <sl-textarea class="w-full" label="Justificativa da Indicação" name="justificativa"></sl-textarea>
+         <sl-textarea data-guide-indication-justification class="w-full" label="Justificativa da Indicação" name="justificativa"></sl-textarea>
          <button type="button" class="kt-btn habilitaInscricao"
-          onclick="IndicarInscricao('{{ $object->id }}')"
+          data-guide-indication-submit onclick="IndicarInscricao('{{ $object->id }}')"
           >Indicar Inscrição</button>
 
           <sl-alert class=" hidden w-full alter-danger-form" variant="danger" open>
@@ -195,6 +195,7 @@ use Carbon\Carbon;
                             },
                             type: 'POST',
                             success: function(result) {
+                                document.dispatchEvent(new CustomEvent('commission-guide-task-completed', { detail: { profile: 'indicator' } }));
                                 $('.alter-success').removeClass('hidden');
                             setTimeout(function() {
                                 window.location = "{{ route('admin.registration.index') }}";

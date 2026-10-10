@@ -21,7 +21,7 @@ class JudgingAccessTest extends TestCase
     /**
      * DADO um usuário autenticado com is_judge = true
      * QUANDO monta o menu
-     * ENTÃO getMenuStructure() contém heading "Julgamento" + item "Julgar" → panel.julgar.index,
+     * ENTÃO getMenuStructure() contém heading "Julgamento" + item "Iniciar julgamento" → panel.julgar.index,
      * e não contém itens admin.
      */
     public function test_julgador_ve_menu_julgar_e_nao_ve_itens_admin(): void
@@ -31,9 +31,9 @@ class JudgingAccessTest extends TestCase
 
         $menus = MenuBuilder::getMenuStructure();
 
-        $julgarItems = array_filter($menus, fn (array $item) => ($item['title'] ?? null) === 'Julgar');
+        $julgarItems = array_filter($menus, fn (array $item) => ($item['title'] ?? null) === 'Iniciar julgamento');
 
-        $this->assertNotEmpty($julgarItems, 'Menu "Julgar" não encontrado para o julgador.');
+        $this->assertNotEmpty($julgarItems, 'Menu "Iniciar julgamento" não encontrado para o julgador.');
         $this->assertContains('Julgamento', array_map(
             fn (array $item) => $item['heading'] ?? null,
             $menus
@@ -50,7 +50,7 @@ class JudgingAccessTest extends TestCase
     /**
      * DADO um usuário autenticado com is_judge = false
      * QUANDO monta o menu
-     * ENTÃO não inclui a entrada "Julgar".
+     * ENTÃO não inclui a entrada "Iniciar julgamento".
      */
     public function test_nao_julgador_nao_ve_menu_julgar(): void
     {
@@ -59,8 +59,8 @@ class JudgingAccessTest extends TestCase
 
         $menus = MenuBuilder::getMenuStructure();
 
-        $julgarItems = array_filter($menus, fn (array $item) => ($item['title'] ?? null) === 'Julgar');
-        $this->assertEmpty($julgarItems, 'Não-julgador não deveria ver o menu "Julgar".');
+        $julgarItems = array_filter($menus, fn (array $item) => ($item['title'] ?? null) === 'Iniciar julgamento');
+        $this->assertEmpty($julgarItems, 'Não-julgador não deveria ver o menu "Iniciar julgamento".');
     }
 
     /**
